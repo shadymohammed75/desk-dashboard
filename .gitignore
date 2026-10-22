@@ -17,3 +17,9 @@ __pycache__/
 .vscode/
 .idea/
 .DS_Store
+
+# Key material
+*.pem
+*.key
+*.p12
+credentials.json

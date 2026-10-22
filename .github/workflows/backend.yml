@@ -1,0 +1,29 @@
+name: backend
+
+on:
+  push:
+    paths: ["backend/**", "mock/**", ".github/workflows/backend.yml"]
+  pull_request:
+    paths: ["backend/**", "mock/**", ".github/workflows/backend.yml"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: python3 ../mock/validate.py
+      - run: npx wrangler deploy --dry-run --outdir /tmp/worker-build

@@ -1,0 +1,12 @@
+{
+  "timezone": "Europe/Berlin",
+  "schedule": { "mon": "push", "tue": "pull", "wed": "rest", "thu": "push",
+                "fri": "pull", "sat": "rest", "sun": "rest" },
+  "splits": {
+    "push": { "label": "PUSH", "muscles": ["chest", "front_delts", "side_delts", "triceps"] },
+    "pull": { "label": "PULL", "muscles": ["lats", "upper_back", "traps", "rear_delts", "biceps", "forearms"] },
+    "legs": { "label": "LEGS", "muscles": ["quads", "hamstrings", "glutes", "calves"] },
+    "rest": { "label": "REST DAY", "muscles": [] }
+  },
+  "goals": { "steps": 10000, "active_kcal": 600, "kcal": 2600, "protein_g": 160, "sleep_min": 450, "gym_per_week": 4 }
+}

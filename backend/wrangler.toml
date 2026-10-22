@@ -1,0 +1,27 @@
+name = "desk-dashboard"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+
+# /app and /flash are plain static files from public/. Anything that isn't a file (incl. /api/*) runs the Worker.
+[assets]
+directory = "./public"
+binding = "ASSETS"
+not_found_handling = "none"
+html_handling = "auto-trailing-slash"
+
+# KV for all data. No id needed: wrangler creates the namespace on the first deploy and remembers it.
+[[kv_namespaces]]
+binding = "DASH"
+
+# Throttles wrong-token attempts (20 per minute per IP). namespace_id is any number unique in the account.
+[[ratelimits]]
+name = "AUTH_LIMITER"
+namespace_id = "4201"
+simple = { limit = 20, period = 60 }
+
+[observability]
+enabled = true
+
+# Secrets (never in this file): INGEST_TOKEN, DEVICE_TOKEN
+#   Cloudflare dashboard -> Workers & Pages -> desk-dashboard -> Settings -> Variables and Secrets
+#   Locally: backend/.dev.vars (gitignored)

@@ -1,0 +1,4 @@
+# Copy to .dev.vars for `wrangler dev` (gitignored). Tokens must be at least 24 characters.
+# Generate real ones with:  openssl rand -hex 24
+INGEST_TOKEN=dev-ingest-token-0123456789abcdef
+DEVICE_TOKEN=dev-device-token-0123456789abcdef
