@@ -256,9 +256,12 @@ describe("dashboard", () => {
     await call("POST", "/api/gym", { body: { action: "done", duration_min: 50, note: "felt strong" }, now: berlin("2026-10-22T18:00") });
     await call("POST", "/api/bp", { body: { sys: 125, dia: 81 }, now: berlin("2026-10-22T18:30") });
     const h = (await call("GET", "/api/history?days=3", { now: berlin("2026-10-22T20:00") })).body;
-    expect(h.days.map((x: any) => [x.date, x.status])).toEqual([["2026-10-22", "done"], ["2026-10-21", "rest"], ["2026-10-20", "missed"]]);
+    expect(h.days.map((x: any) => [x.date, x.status])).toEqual([["2026-10-22", "done"], ["2026-10-21", "rest"], ["2026-10-20", "no_data"]]);
     expect(h.days[0]).toMatchObject({ note: "felt strong", duration_min: 50, bp: [{ sys: 125, dia: 81 }] });
     expect((await call("GET", "/api/history?days=99", { now: new Date() })).status).toBe(400);
+    // once tracking has started, an unlogged planned day is "missed"
+    const later = (await call("GET", "/api/history?days=7", { now: berlin("2026-10-27T20:00") })).body;
+    expect(later.days.find((x: any) => x.date === "2026-10-26").status).toBe("missed");
   });
 
   it("produces output that passes the mock contract in every state", async () => {

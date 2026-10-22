@@ -1,5 +1,5 @@
 # Desk Health Dashboard — Architecture Notes
-Last updated: 2026-10-22 (Phase 1)
+Last updated: 2026-10-22 (Phase 2)
 
 ## Architecture
 - Monorepo: backend/ (Cloudflare Worker, TS), app/ (PWA source), firmware/ (ESP32-S3 + LVGL), tools/ (body map, snapshot renderer), mock/ (contract fixtures)
@@ -15,6 +15,12 @@ Last updated: 2026-10-22 (Phase 1)
 - best_streak derived from history on read (meta:best_streak is only a floor), so rest-day growth counts without a write
 - Celebrations generated on write by diffing before/after snapshots; ids are unique, active 30 min, priority level > streak > gym > goal
 - Static Assets serve /app and /flash; Worker only runs for /api/* and the / -> /app/ redirect
+- Phone app (backend/public/app): plain HTML/CSS/JS PWA, no build step, no framework; manifest + apple-touch-icon for Home Screen
+- App state is one object S re-rendered wholesale (render()); form drafts (BP, plan) live in S so re-renders never wipe input
+- Optimistic UI — apply locally, POST, replace with server's /api/today payload; on failure restore snapshot + toast
+- Body map: tools/body_map/make_body.py generates body.svg (rounded, mirrored geometric shapes; one <path id> per muscle);
+  writes the app's copy too; a vitest test asserts both copies are identical and every muscle id exists exactly once
+- App icons generated from an SVG (score-ring motif + bolt) by tools/app_icons/make_icons.py
 
 ## Pipelines
 - Health sync: iOS Shortcut -> POST /api/ingest (validated, day overwrite) -> KV day:DATE + meta:last_ingest -> recompute(DATE)
@@ -23,6 +29,7 @@ Last updated: 2026-10-22 (Phase 1)
 - Display: ESP32 -> GET /api/dashboard -> buildDashboard(state, now) computed live (mode, staleness, coach depend on the clock)
 - Deploy: push to main -> Cloudflare Workers Builds (root backend/) -> wrangler deploy; KV namespace auto-provisioned on first deploy
 - CI: .github/workflows/backend.yml -> typecheck, vitest, mock contract check, wrangler dry-run
+- App E2E: backend/e2e/app.e2e.mjs (Playwright, iPhone 390×844) against wrangler dev — login, I trained, BP, plan, rollback, CSP
 - Firmware build: push -> GitHub Actions (PlatformIO) -> merged .bin -> /flash page (ESP Web Tools, Web Serial) (planned)
 
 ## Security
@@ -30,6 +37,8 @@ Last updated: 2026-10-22 (Phase 1)
 - Tokens < 24 chars refused (503); failed auth throttled by Workers Rate Limiting binding AUTH_LIMITER (20/min/IP -> 429)
 - Input validation: hand-rolled validators (validate.ts), allowlisted fields + muscle ids, 1 MB body cap, 400 with clear message
 - Headers: HSTS, CSP default-src 'none', X-Frame-Options DENY, nosniff, no-referrer, no-store on API; _headers for static
+- App CSP (_headers /app/*): self-only scripts/styles/connect, no inline; DOM built with createElement/textContent (no innerHTML for data)
+- App token: entered once, kept in localStorage (try/catch for Safari private mode); any 401 logs out; Log out button on Plan tab
 - No CORS headers on purpose — app is same-origin, Shortcut/device don't need CORS
 - Secrets handling: Cloudflare Worker secrets, GitHub Actions secrets, gitignored secrets.h / .dev.vars / .env* / *.pem
 - Known risks / open items: token in phone localStorage (single-user trade-off); no KV backups yet (export endpoint later);
@@ -48,3 +57,5 @@ Last updated: 2026-10-22 (Phase 1)
 - 2026-10-22: Phase 1 — Worker API (ingest, gym, bp, config, today, history, dashboard), motivation engine, 63 tests, smoke script
 - 2026-10-22: Phase 1 — pre-deployment audit: min token length, auth throttling, security headers, vitest 5; backend CI workflow
 - 2026-10-22: Fix — workerd rejects non-function exports from the entry module (caught only by wrangler dev, not vitest)
+- 2026-10-22: Phase 2 — phone PWA (Today/BP/Plan/History), body.svg drawn early (needed by the app), app icons, Playwright E2E
+- 2026-10-22: Fix — history shows "no_data" (not "missed") for days before tracking started

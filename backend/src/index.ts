@@ -3,6 +3,7 @@
 import { buildDashboard, type State } from "./logic/dashboard";
 import { addReading, latest } from "./logic/bp";
 import { gymStatus, plannedSplit, splitInfo } from "./logic/gym";
+import { firstTrackedDay } from "./logic/motivation";
 import { addDays, localDate, toLocalIso, weekdayOf } from "./logic/time";
 import { Store, type KVLike } from "./store";
 import { HttpError, parseBp, parseConfig, parseGym, parseIngest } from "./validate";
@@ -97,9 +98,12 @@ async function todayView(store: Store, now: Date) {
 }
 
 async function historyView(store: Store, now: Date, days: number) {
-  const [config, bp] = await Promise.all([store.config(), store.bp()]);
+  const [config, bp, index] = await Promise.all([store.config(), store.bp(), store.index()]);
   const tz = config.timezone;
   const today = localDate(now, tz);
+  const first = firstTrackedDay(index);
+  // A planned day nobody logged is "missed" only once tracking had started; before that there's just no data.
+  const pastStatus = (date: string) => (first && date >= first ? "missed" : "no_data");
   const dates = Array.from({ length: days }, (_, i) => addDays(today, -i));
   const records = await Promise.all(dates.map((d) => store.day(d)));
   return {
@@ -113,7 +117,7 @@ async function historyView(store: Store, now: Date, days: number) {
         plan: planKey,
         plan_label: splitInfo(config, planKey).label,
         split: gym.day_type,
-        status: gym.status === "pending" && date < today ? "missed" : gym.status,
+        status: gym.status === "pending" && date < today ? pastStatus(date) : gym.status,
         source: gym.source,
         muscles: gym.status === "done" ? gym.muscles : [],
         duration_min: gym.done_min,
