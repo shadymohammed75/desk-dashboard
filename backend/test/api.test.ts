@@ -312,13 +312,14 @@ describe("dashboard", () => {
     expect(d.celebrate).toBeNull();
   });
 
-  it("logs BP and shows a 7-day trend", async () => {
+  it("logs BP and shows the latest reading", async () => {
     const { call } = makeApi();
     await call("POST", "/api/bp", { body: { sys: 126, dia: 80, pulse: 66, ts: "2026-10-21T08:00:00+02:00" }, now: berlin("2026-10-22T08:00") });
     await call("POST", "/api/bp", { body: { sys: 128, dia: 82, pulse: 64, ts: "2026-10-22T08:10:00+02:00" }, now: berlin("2026-10-22T08:11") });
     await call("POST", "/api/bp", { body: { sys: 132, dia: 84, pulse: 70 }, now: berlin("2026-10-22T20:00") });
     const d = (await call("GET", "/api/dashboard", { now: berlin("2026-10-22T20:01") })).body;
-    expect(d.bp).toMatchObject({ sys: 132, dia: 84, pulse: 70, ts: "2026-10-22T20:00:00+02:00", trend7: [[126, 80], [130, 83]] });
+    expect(d.bp).toMatchObject({ sys: 132, dia: 84, pulse: 70, ts: "2026-10-22T20:00:00+02:00" });
+    expect(d.bp).not.toHaveProperty("trend7");
     expect(d.progress.xp).toBe(20); // "BP logged" once per day (21st + 22nd), not per reading
   });
 

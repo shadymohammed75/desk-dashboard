@@ -35,8 +35,6 @@ typedef struct {
     bool has_bp;
     int32_t bp_sys, bp_dia, bp_pulse;
     char bp_ts[32];
-    uint8_t bp_trend_n;
-    int16_t bp_trend[7][2];
 
     /* from Apple Health (DD_NONE = no data) */
     int32_t resting_hr, heart_rate, spo2;

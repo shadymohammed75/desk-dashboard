@@ -265,7 +265,6 @@ svg.ms { width: 24px; height: 24px; fill: currentColor; flex: none; display: blo
 .bp-fields { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s1); }
 .bp-fields .input { font-size: 28px; font-weight: 750; text-align: center; min-height: 64px; }
 .input::placeholder { color: var(--faint); opacity: 1; }
-.chart { width: 100%; height: 120px; display: block; }
 .reading { display: flex; align-items: center; justify-content: space-between; min-height: 52px; }
 .reading + .reading { border-top: 1px solid var(--hairline); }
 .err { color: var(--danger); font-size: 14px; }

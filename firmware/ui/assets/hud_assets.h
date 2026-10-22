@@ -32,6 +32,7 @@ extern const lv_image_dsc_t icon_close_14;   /* 14x14 A8 */
 extern const lv_image_dsc_t icon_bolt_20;   /* 20x20 A8 */
 extern const lv_image_dsc_t icon_ecg_heart_16;   /* 16x16 A8 */
 extern const lv_image_dsc_t icon_spo2_16;   /* 16x16 A8 */
+extern const lv_image_dsc_t icon_blood_pressure_16;   /* 16x16 A8 */
 extern const lv_image_dsc_t glow_ring;   /* 232x232 A8 */
 extern const lv_image_dsc_t glow_banner;   /* 640x140 A8 */
 extern const lv_image_dsc_t steam_wisp;   /* 14x44 A8 */

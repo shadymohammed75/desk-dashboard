@@ -12,7 +12,7 @@
 | `rest_day.png` | Wednesday: "REST DAY" with a big moon | ✓ |
 | `morning_short_sleep.png` | Sleep row highlighted, FUEL "—", sleepy Pip, calm coach | ✓ |
 | `streak_milestone*.png` | Lime flame "14", hype coach, STREAK 14 card | ✓ |
-| all main states | VITALS card: BP 128/82 mmHg with time, then resting HR, heart rate and SpO₂ with icons, BP sparkline below; "—" when Health has no reading | ✓ |
+| all main states | VITALS card as a 2×2 grid: BP (with time), resting HR, heart rate, SpO₂, each with an icon and a big value; no trend chart; "—" when there's no reading | ✓ |
 | `no_data.png`, `stale.png` | "—" everywhere and "no sync yet"; amber "data 4h old" | ✓ |
 
 **Fixed during review**

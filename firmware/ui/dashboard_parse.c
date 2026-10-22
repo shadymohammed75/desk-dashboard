@@ -85,13 +85,6 @@ bool dashboard_parse(const char *json, DashboardData *d)
     d->bp_dia = num(bp, "dia");
     d->bp_pulse = num(bp, "pulse");
     str(bp, "ts", d->bp_ts, sizeof d->bp_ts);
-    const cJSON *pair;
-    cJSON_ArrayForEach(pair, get(bp, "trend7")) {
-        if(d->bp_trend_n >= 7 || cJSON_GetArraySize(pair) != 2) break;
-        d->bp_trend[d->bp_trend_n][0] = (int16_t)cJSON_GetArrayItem(pair, 0)->valuedouble;
-        d->bp_trend[d->bp_trend_n][1] = (int16_t)cJSON_GetArrayItem(pair, 1)->valuedouble;
-        d->bp_trend_n++;
-    }
 
     const cJSON *vit = get(root, "vitals");
     d->resting_hr = num(vit, "resting_hr");

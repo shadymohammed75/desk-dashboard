@@ -55,8 +55,7 @@ def check(d):
     bp = d.get("bp")
     if bp is not None:
         need(all(is_num_or_null(bp.get(k)) for k in ("sys", "dia", "pulse")), "bp numbers")
-        need(all(isinstance(p, list) and len(p) == 2 for p in bp.get("trend7", [])), "bp.trend7 pairs")
-        need(len(bp.get("trend7", [])) <= 7, "bp.trend7 has more than 7 days")
+        need("trend7" not in bp, "bp.trend7 was removed (the trend lives in Apple Health)")
 
     v = d.get("vitals") or {}
     need(set(v) == {"resting_hr", "heart_rate", "spo2"}, "vitals keys")

@@ -118,3 +118,4 @@ Last updated: 2026-10-22 (redesign)
   new phone app (hero, habits, tiles, heat-map, celebration card), desk screen with new body/icons/Inter/habit ring
 - 2026-10-22: Vitals — BP card became a compact VITALS card (BP + resting HR, HR, SpO2 from Apple Health); app tab "Vitals";
   Shortcut steps, contract/mocks/validator, tests
+- 2026-10-22: Dropped BP trend (bp.trend7, desk sparkline, app chart): trends live in Apple Health; vitals card is a 2x2 glance grid

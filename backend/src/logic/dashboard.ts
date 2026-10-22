@@ -2,7 +2,7 @@
 import type {
   BpReading, Celebration, Config, Dashboard, DayRecord, DaysIndex, DaySummary, GymResult, Score,
 } from "../types";
-import { latest, loggedOn, trend7 } from "./bp";
+import { latest, loggedOn } from "./bp";
 import { gymStatus, plannedSplit } from "./gym";
 import {
   activeCelebration, coach, levelFor, longestStreak, mascot, modeFor, pointsFor, streak, totalXp, week, weekDone,
@@ -110,10 +110,7 @@ export function buildDashboard(s: State): Dashboard {
     steps: { value: m.steps, goal: g.steps },
     active: { kcal: m.active_kcal, goal: g.active_kcal },
     food: { kcal: m.kcal, kcal_goal: g.kcal, protein_g: m.protein_g, protein_goal: g.protein_g },
-    bp: last && {
-      sys: last.sys, dia: last.dia, pulse: last.pulse, ts: toLocalIso(new Date(last.ts), tz),
-      trend7: trend7(s.bp, today, tz),
-    },
+    bp: last && { sys: last.sys, dia: last.dia, pulse: last.pulse, ts: toLocalIso(new Date(last.ts), tz) },
     // older stored ingests have no vitals
     vitals: s.day?.ingest?.vitals ?? { resting_hr: null, heart_rate: null, spo2: null },
     gym: {

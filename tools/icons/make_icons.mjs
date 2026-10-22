@@ -21,7 +21,7 @@ export const ICONS = [
   "home", "monitor_heart", "calendar_month", "history", "check", "close", "local_fire_department",
   "bolt", "add", "remove", "undo", "favorite", "trophy", "water_drop",
   // vitals
-  "ecg_heart", "spo2",
+  "ecg_heart", "spo2", "blood_pressure",
 ];
 
 mkdirSync(join(here, "svg"), { recursive: true });

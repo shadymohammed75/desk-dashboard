@@ -68,8 +68,7 @@ def dash(now, updated, mode, *, sleep, stages, avg7, steps, active, kcal, protei
     }
 
 
-TREND = [[126, 80], [130, 84], [124, 79], [128, 82], [127, 81], [131, 83], [128, 82]]
-BP = {"sys": 128, "dia": 82, "pulse": 64, "ts": "2026-10-22T08:10:00+02:00", "trend7": TREND}
+BP = {"sys": 128, "dia": 82, "pulse": 64, "ts": "2026-10-22T08:10:00+02:00"}
 STAGES = {"deep": 72, "core": 250, "rem": 95, "awake": 15}
 THU = ["done", "done", "rest", "today", "planned", "rest", "rest"]
 THU_DONE = ["done", "done", "rest", "done", "planned", "rest", "rest"]
@@ -107,7 +106,7 @@ m["rest_day"] = dash(
     "2026-10-21T15:00:00+02:00", "2026-10-21T14:40:00+02:00", "day",
     sleep=465, stages={"deep": 80, "core": 268, "rem": 105, "awake": 12}, avg7=412, steps=6400, active=310,
     kcal=1600, protein=95,
-    bp={**BP, "sys": 127, "dia": 81, "pulse": 62, "ts": "2026-10-21T08:05:00+02:00", "trend7": TREND[:6]},
+    bp={**BP, "sys": 127, "dia": 81, "pulse": 62, "ts": "2026-10-21T08:05:00+02:00"},
     gym=gym("rest", "rest", icon="bedtime"), done={"gym", "apple", "morning", "sleep_early"},
     progress={"level": 7, "xp": 290, "xp_next": 450, "streak_days": 11, "best_streak": 21},
     week=week(["done", "done", "today", "planned", "planned", "rest", "rest"]),
@@ -150,7 +149,7 @@ m["spa_day"] = dash(
     "2026-10-25T11:00:00+01:00", "2026-10-25T10:40:00+01:00", "day",
     sleep=480, stages={"deep": 90, "core": 280, "rem": 100, "awake": 10}, avg7=440, steps=4200, active=210,
     kcal=1400, protein=90,
-    bp={**BP, "sys": 124, "dia": 79, "pulse": 60, "ts": "2026-10-25T09:00:00+01:00", "trend7": TREND[2:]},
+    bp={**BP, "sys": 124, "dia": 79, "pulse": 60, "ts": "2026-10-25T09:00:00+01:00"},
     gym=gym("rest", "rest", label="SPA DAY", icon="hot_tub", week_done=3),
     done={"gym", "apple", "morning", "sleep_early", "read"},
     progress={"level": 8, "xp": 190, "xp_next": 500, "streak_days": 16, "best_streak": 21},

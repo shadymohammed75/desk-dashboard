@@ -142,7 +142,7 @@ All writes send the header `Authorization: Bearer <INGEST_TOKEN>`.
   "steps":  { "value": 8432, "goal": 10000 },
   "active": { "kcal": 512, "goal": 600 },
   "food":   { "kcal": 1850, "kcal_goal": 2600, "protein_g": 120, "protein_goal": 160 },
-  "bp":     { "sys": 128, "dia": 82, "pulse": 64, "ts": "…", "trend7": [[126,80],[130,84]] },
+  "bp":     { "sys": 128, "dia": 82, "pulse": 64, "ts": "…" },
   "vitals": { "resting_hr": 58, "heart_rate": 72, "spo2": 97 },
   "gym":    { "day_type": "push", "label": "PUSH", "color": "#FF6A1A", "icon": "fitness_center",
               "muscles": ["chest","front_delts","side_delts","triceps"],
@@ -338,9 +338,9 @@ It feels like a game HUD or a sci-fi cockpit that is *about me*. It's dark and n
 │  4 colour arc segments: sleep·move·food·gym          │   │ map │     │ map │       │
 │                                                      │   │glow │     │glow │       │
 │  ┌ VITALS ─────────────────────┐ ┌ THIS WEEK ───────┐│   ╰─────╯     ╰─────╯       │
-│  │ 128/82 mmHg · 08:10         │ │ M T W T F S S    ││  chest · delts · triceps    │
-│  │ ♥58 rest  ♥72  ◆97% SpO2    │ │ ● ● ☾ ◎ ○ ☾ ☾    ││                             │
-│  │ ╱╲_╱╲_ 7-day BP sparkline   │ │                  ││  [ ◉ LET'S GO — not done ]  │
+│  │ ▣ BP · 08:10   ♥ RESTING    │ │ M T W T F S S    ││  chest · delts · triceps    │
+│  │ 128/82         58 bpm       │ │ ● ● ☾ ◎ ○ ☾ ☾    ││                             │
+│  │ ♥ HEART  72    ◆ SPO2  97 % │ │                  ││  [ ◉ LET'S GO — not done ]  │
 │  └─────────────────────────────┘ └──────────────────┘│                             │
 ├─────────────────────────────────────────────────────┴─────────────────────────────┤
 │ ▸ Still time. 45 minutes is enough.                                    2/4 this wk │ 40px coach bar
@@ -363,11 +363,11 @@ It feels like a game HUD or a sci-fi cockpit that is *about me*. It's dark and n
    - When a goal is hit, the bar turns lime, a small trophy icon appears, and the % becomes "GOAL ✓".
    - **Sleep** also shows a thin **stage bar**: deep in deep blue, core in cyan, REM in violet, awake in faint.
 4. **Vitals card:**
-   - The latest BP reading big, with "mmHg" and its time, and a 7-day BP sparkline.
-   - A compact row of three readings from Apple Health (`vitals`): resting heart rate, latest heart rate and blood
-     oxygen (SpO₂), each with its icon. Missing values show "—".
+   - A compact 2×2 grid: the latest BP reading (with its time) and three readings from Apple Health (`vitals`):
+     resting heart rate, latest heart rate and blood oxygen (SpO₂). Each has an icon, a small label and a big value.
+   - No trend chart: trends live in Apple Health; this screen is a glance at today. Missing values show "—".
    - **Neutral colours only** (white and cyan), with no judgement or medical colouring.
-   - When no BP reading exists, it shows a dim "Log BP in the app".
+   - When no BP reading exists, its label reads "BP · log in app".
 5. **This week:**
    - Seven day dots:
      - **done:** filled lime;
@@ -454,7 +454,7 @@ It feels like a game HUD or a sci-fi cockpit that is *about me*. It's dark and n
 **Vitals tab**
 - At the top, three tiles from the last Health sync: resting heart rate, heart rate and SpO₂, with the sync time.
 - Then the blood pressure form: three large number fields (SYS, DIA, pulse), with the time defaulting to now. Save.
-- Below: the last 14 readings as a list and a small trend chart.
+- Below: the last 5 readings as a list (no chart; trends live in Apple Health).
 
 **Plan tab**
 - Edit the weekly schedule (each weekday → split).
@@ -512,7 +512,7 @@ It feels like a game HUD or a sci-fi cockpit that is *about me*. It's dark and n
 - [ ] Implement the logic as pure, unit-tested functions:
   - **Sleep:** the night ending today. Sum the samples whose value is in {Asleep, Core, Deep, REM} and merge overlaps. Also compute a 7-day average.
   - **Gym:** the rules in §4.3.
-  - **Blood pressure:** the latest reading, plus a 7-day trend of daily means.
+  - **Blood pressure:** the latest reading.
   - **Staleness:** more than 3 hours since the last Health sync.
   - **Motivation engine (§4.3b):** score, XP and levels, streak, coach line, mascot mood and celebrate events. Award XP idempotently, so re-ingesting can't double it.
   - **Time:** everything in Europe/Berlin.

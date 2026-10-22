@@ -397,13 +397,12 @@ function viewBp() {
     err,
     h("button", { class: "btn primary", type: "submit", c: "#22D3EE" }, "Save reading"));
 
-  const readings = (S.history?.days || []).flatMap((day) => day.bp).sort((a, b) => b.ts.localeCompare(a.ts)).slice(0, 14);
+  const readings = (S.history?.days || []).flatMap((day) => day.bp).sort((a, b) => b.ts.localeCompare(a.ts)).slice(0, 5);
   return h("div", { class: "stack" },
     titlebar("Vitals"),
     vitalsCard(S.today.dashboard),
     h("h2", { class: "t-h2" }, "Blood pressure"),
     form,
-    readings.length > 1 ? bpChart(readings) : null,
     h("section", { class: "card" }, h("h2", { class: "t-h2" }, "Recent readings"),
       readings.length ? readings.map((r) => h("div", { class: "reading" },
         h("b", { class: "t-h2 num" }, `${r.sys}/${r.dia}`),
@@ -425,22 +424,6 @@ function vitalsCard(d) {
       tile("SpO₂", "spo2", v.spo2, " %", "#22D3EE")),
     h("div", { class: `sync${d.stale ? " stale" : ""}` },
       d.updated ? `From Apple Health · ${timeOf(d.updated)}` : "Heart rate and blood oxygen arrive with the Health sync"));
-}
-
-function bpChart(readings) {
-  const pts = [...readings].reverse();
-  const W = 340, H = 120, pad = 16;
-  const vals = pts.flatMap((r) => [r.sys, r.dia]);
-  const lo = Math.min(...vals) - 6, hi = Math.max(...vals) + 6;
-  const x = (i) => pad + (i * (W - 2 * pad)) / (pts.length - 1);
-  const y = (v) => H - pad - ((v - lo) / (hi - lo)) * (H - 2 * pad);
-  const svg = s("svg", { class: "chart", viewBox: `0 0 ${W} ${H}`, preserveAspectRatio: "none", role: "img", "aria-label": "Blood pressure trend" });
-  for (const [k, c] of [["sys", "#F4F5F8"], ["dia", "#22D3EE"]]) {
-    svg.append(s("path", { d: pts.map((r, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(r[k]).toFixed(1)}`).join(" "), fill: "none", stroke: c, "stroke-width": 2.5, "stroke-linejoin": "round", "stroke-linecap": "round" }));
-    pts.forEach((r, i) => svg.append(s("circle", { cx: x(i).toFixed(1), cy: y(r[k]).toFixed(1), r: 3, fill: c })));
-  }
-  return h("section", { class: "card" }, h("div", { class: "card-head" }, h("h2", { class: "t-h2" }, "Trend"),
-    h("span", { class: "t-caption" }, "systolic · diastolic")), svg);
 }
 
 // ---------------------------------------------------------------- Plan

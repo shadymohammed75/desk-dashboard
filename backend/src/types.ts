@@ -178,7 +178,7 @@ export interface Dashboard {
   steps: { value: number | null; goal: number };
   active: { kcal: number | null; goal: number };
   food: { kcal: number | null; kcal_goal: number; protein_g: number | null; protein_goal: number };
-  bp: { sys: number; dia: number; pulse: number | null; ts: string; trend7: [number, number][] } | null;
+  bp: { sys: number; dia: number; pulse: number | null; ts: string } | null;
   vitals: Vitals;
   gym: { day_type: string; label: string; color: string; icon: string; muscles: string[]; status: GymStatus;
          done_min: number | null; week_done: number; week_target: number };
