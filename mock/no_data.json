@@ -24,6 +24,11 @@
     "protein_goal": 160
   },
   "bp": null,
+  "vitals": {
+    "resting_hr": null,
+    "heart_rate": null,
+    "spo2": null
+  },
   "gym": {
     "day_type": "push",
     "label": "PUSH",

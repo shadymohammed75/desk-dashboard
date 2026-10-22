@@ -40,6 +40,7 @@ async function morning(date: string, early: boolean, steps: number) {
     date, steps, active_kcal: Math.round(steps / 18), nutrition: { kcal: 1700 + Math.round(rnd() * 900), protein_g: 90 + Math.round(rnd() * 80) },
     sleep_samples: [{ start: `${prev}T${fell}:00+02:00`, end: `${date}T06:50:00${date >= "2026-10-25" ? "+01:00" : "+02:00"}`, value: "Core" }],
     workouts: [],
+    vitals: { resting_hr: 54 + Math.round(rnd() * 8), heart_rate: 62 + Math.round(rnd() * 20), spo2: 0.95 + Math.round(rnd() * 4) / 100 },
   });
 }
 

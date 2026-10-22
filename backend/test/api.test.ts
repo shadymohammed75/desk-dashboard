@@ -155,6 +155,32 @@ describe("validation", () => {
   });
 });
 
+describe("vitals from Apple Health", () => {
+  const now = berlin("2026-10-22T09:00");
+  it("shows resting/latest heart rate and blood oxygen, accepting Health's 0.97 fraction", async () => {
+    const { call } = makeApi();
+    let d = (await call("GET", "/api/dashboard", { now })).body;
+    expect(d.vitals).toEqual({ resting_hr: null, heart_rate: null, spo2: null });
+    await call("POST", "/api/ingest", { body: { date: "2026-10-22", vitals: { resting_hr: "58", heart_rate: 71.6, spo2: 0.97 } }, now });
+    d = (await call("GET", "/api/dashboard", { now })).body;
+    expect(d.vitals).toEqual({ resting_hr: 58, heart_rate: 72, spo2: 97 });
+    await call("POST", "/api/ingest", { body: { date: "2026-10-22", vitals: { spo2: "96,4" } }, now });
+    d = (await call("GET", "/api/dashboard", { now })).body;
+    expect(d.vitals).toEqual({ resting_hr: null, heart_rate: null, spo2: 96 });
+    await call("POST", "/api/ingest", { body: { date: "2026-10-22", vitals: { resting_hr: "", spo2: "98 %" } }, now });
+    d = (await call("GET", "/api/dashboard", { now })).body;
+    expect(d.vitals).toEqual({ resting_hr: null, heart_rate: null, spo2: 98 });
+  });
+
+  it("rejects impossible values", async () => {
+    const { call } = makeApi();
+    const r = await call("POST", "/api/ingest", { body: { date: "2026-10-22", vitals: { spo2: 30 } }, now });
+    expect(r.status).toBe(400);
+    expect(r.body.error).toMatch(/spo2/);
+    expect((await call("POST", "/api/ingest", { body: { date: "2026-10-22", vitals: { heart_rate: 900 } }, now })).status).toBe(400);
+  });
+});
+
 describe("habits", () => {
   it("ticks a habit from the app, scores it and reaches a perfect day", async () => {
     const { call } = makeApi();

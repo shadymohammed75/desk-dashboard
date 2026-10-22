@@ -78,6 +78,14 @@ export interface Ingest {
   nutrition: { kcal: number | null; protein_g: number | null };
   sleep_samples: SleepSample[];
   workouts: Workout[];
+  vitals?: Vitals;   // absent on ingests stored before vitals existed
+}
+
+/** Heart and blood-oxygen readings from Apple Health (latest of the day). null = no data. */
+export interface Vitals {
+  resting_hr: number | null;   // bpm
+  heart_rate: number | null;   // bpm, most recent sample
+  spo2: number | null;         // %, most recent sample
 }
 
 export interface GymEntry {
@@ -171,6 +179,7 @@ export interface Dashboard {
   active: { kcal: number | null; goal: number };
   food: { kcal: number | null; kcal_goal: number; protein_g: number | null; protein_goal: number };
   bp: { sys: number; dia: number; pulse: number | null; ts: string; trend7: [number, number][] } | null;
+  vitals: Vitals;
   gym: { day_type: string; label: string; color: string; icon: string; muscles: string[]; status: GymStatus;
          done_min: number | null; week_done: number; week_target: number };
   score: Score;

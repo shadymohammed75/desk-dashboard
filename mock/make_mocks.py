@@ -56,14 +56,14 @@ def gym(status, day_type="push", muscles=None, done_min=None, week_done=2, label
 
 
 def dash(now, updated, mode, *, sleep, stages, avg7, steps, active, kcal, protein, bp, gym, done, progress, week,
-         coach, mascot, celebrate=None, stale=False):
+         coach, mascot, celebrate=None, stale=False, vitals=(58, 72, 97)):
     return {
         "now": now, "updated": updated, "stale": stale, "mode": mode,
         "sleep": {"asleep_min": sleep, "avg7_min": avg7, "goal_min": GOALS["sleep_min"], "stages": stages},
         "steps": {"value": steps, "goal": GOALS["steps"]},
         "active": {"kcal": active, "goal": GOALS["active_kcal"]},
         "food": {"kcal": kcal, "kcal_goal": GOALS["kcal"], "protein_g": protein, "protein_goal": GOALS["protein_g"]},
-        "bp": bp, "gym": gym, "score": score(done), "progress": progress, "week": week,
+        "bp": bp, "vitals": dict(zip(("resting_hr", "heart_rate", "spo2"), vitals)), "gym": gym, "score": score(done), "progress": progress, "week": week,
         "coach": coach, "mascot": mascot, "celebrate": celebrate,
     }
 
@@ -80,7 +80,7 @@ m["morning_short_sleep"] = dash(
     "2026-10-22T07:15:00+02:00", "2026-10-22T07:05:00+02:00", "morning",
     sleep=340, stages={"deep": 41, "core": 214, "rem": 58, "awake": 27}, avg7=405, steps=900, active=40,
     kcal=None, protein=None, bp=BP, gym=gym("pending"), done={"morning"}, progress=PROG, week=week(THU),
-    coach={"text": "Short night. Train smart, not heavy.", "tone": "calm"}, mascot="sleepy")
+    coach={"text": "Short night. Train smart, not heavy.", "tone": "calm"}, mascot="sleepy", vitals=(63, 66, None))
 
 m["push_pending_day"] = dash(
     "2026-10-22T13:30:00+02:00", "2026-10-22T13:12:00+02:00", "day",
@@ -136,7 +136,8 @@ m["no_data"] = dash(
     gym=gym("pending", week_done=0), done=set(),
     progress={"level": 1, "xp": 0, "xp_next": 150, "streak_days": 0, "best_streak": 0},
     week=week(["planned", "planned", "rest", "today", "planned", "rest", "rest"]),
-    coach={"text": "PUSH day loaded. You know the drill.", "tone": "nudge"}, mascot="pumped", stale=True)
+    coach={"text": "PUSH day loaded. You know the drill.", "tone": "nudge"}, mascot="pumped", stale=True,
+    vitals=(None, None, None))
 
 m["stale"] = dash(
     "2026-10-22T16:20:00+02:00", "2026-10-22T11:55:00+02:00", "day",

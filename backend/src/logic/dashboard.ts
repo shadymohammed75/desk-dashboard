@@ -114,6 +114,8 @@ export function buildDashboard(s: State): Dashboard {
       sys: last.sys, dia: last.dia, pulse: last.pulse, ts: toLocalIso(new Date(last.ts), tz),
       trend7: trend7(s.bp, today, tz),
     },
+    // older stored ingests have no vitals
+    vitals: s.day?.ingest?.vitals ?? { resting_hr: null, heart_rate: null, spo2: null },
     gym: {
       day_type: gym.day_type, label: gym.label, color: gym.color, icon: gym.icon, muscles: gym.muscles,
       status: gym.status, done_min: gym.done_min,

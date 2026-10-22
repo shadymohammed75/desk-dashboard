@@ -20,6 +20,8 @@ export const ICONS = [
   // UI
   "home", "monitor_heart", "calendar_month", "history", "check", "close", "local_fire_department",
   "bolt", "add", "remove", "undo", "favorite", "trophy", "water_drop",
+  // vitals
+  "ecg_heart", "spo2",
 ];
 
 mkdirSync(join(here, "svg"), { recursive: true });

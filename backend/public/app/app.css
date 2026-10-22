@@ -335,3 +335,8 @@ svg.ms { width: 24px; height: 24px; fill: currentColor; flex: none; display: blo
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition: none !important; }
 }
 .chips.expanded { margin-top: var(--s2); }
+
+/* vitals tiles (Vitals tab) */
+.metric.vital .row { gap: 6px; color: var(--c); }
+.metric.vital svg.ms { width: 18px; height: 18px; }
+.metric.vital .v small { font-size: 13px; font-weight: 600; color: var(--label); margin-left: 2px; }

@@ -1,7 +1,7 @@
 // Input validation for every write. Hand-rolled to stay dependency-free; errors become 400s with a clear message.
 import {
-  MUSCLES, WEEKDAYS, type BpReading, type Config, type GymEntry, type Ingest, type SleepSample, type Task, type Weekday,
-  type Workout,
+  MUSCLES, WEEKDAYS, type BpReading, type Config, type GymEntry, type Ingest, type SleepSample, type Task, type Vitals,
+  type Weekday, type Workout,
 } from "./types";
 import { isDate } from "./logic/time";
 
@@ -25,7 +25,7 @@ function obj(v: unknown, path: string): Record<string, unknown> {
 const GROUPED_INT = /^\d{1,3}([.,\u00a0\u202f ]\d{3})+$/;
 
 /** Numbers may arrive as strings from iOS Shortcuts ("8432", "1850,5", "8.432"); null/absent means "no data". */
-function num(v: unknown, path: string, min: number, max: number, opts: { int?: boolean } = {}): number | null {
+function num(v: unknown, path: string, min: number, max: number, opts: { int?: boolean; raw?: boolean } = {}): number | null {
   if (v === null || v === undefined || v === "") return null;
   let n: unknown = v;
   if (typeof v === "string") {
@@ -34,7 +34,7 @@ function num(v: unknown, path: string, min: number, max: number, opts: { int?: b
   }
   if (typeof n !== "number" || !Number.isFinite(n)) return bad(`${path} must be a number`);
   if (n < min || n > max) return bad(`${path} must be between ${min} and ${max}`);
-  return opts.int ? Math.round(n) : Math.round(n * 10) / 10;
+  return opts.int ? Math.round(n) : opts.raw ? n : Math.round(n * 10) / 10;
 }
 
 function reqNum(v: unknown, path: string, min: number, max: number, opts: { int?: boolean } = {}): number {
@@ -74,6 +74,21 @@ function muscles(v: unknown, path: string): string[] {
 
 // ---------------------------------------------------------------- POST /api/ingest
 
+/** Heart rate and blood oxygen from Apple Health. Health stores SpO₂ as a fraction (0.97); accept that or 97. */
+function parseVitals(v: unknown): Vitals {
+  if (v === undefined || v === null) return { resting_hr: null, heart_rate: null, spo2: null };
+  const o = obj(v, "vitals");
+  const rawSpo2 = typeof o.spo2 === "string" ? o.spo2.replace("%", "") : o.spo2;   // Shortcuts may show "97 %"
+  let spo2 = num(rawSpo2, "vitals.spo2", 0, 100, { raw: true });   // unrounded: 0.97 must not become 1.0
+  if (spo2 !== null && spo2 <= 1) spo2 = Math.round(spo2 * 1000) / 10;
+  if (spo2 !== null && spo2 < 50) bad("vitals.spo2 must be a percentage (50–100) or a fraction (0.5–1)");
+  return {
+    resting_hr: num(o.resting_hr, "vitals.resting_hr", 20, 250, { int: true }),
+    heart_rate: num(o.heart_rate, "vitals.heart_rate", 20, 250, { int: true }),
+    spo2: spo2 === null ? null : Math.round(spo2),
+  };
+}
+
 export function parseIngest(body: unknown, receivedAt: string): { date: string; ingest: Ingest } {
   const b = obj(body, "body");
   if (!isDate(b.date)) bad("date must be YYYY-MM-DD");
@@ -106,6 +121,7 @@ export function parseIngest(body: unknown, receivedAt: string): { date: string; 
       },
       sleep_samples,
       workouts,
+      vitals: parseVitals(b.vitals),
     },
   };
 }

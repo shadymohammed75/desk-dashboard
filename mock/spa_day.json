@@ -56,6 +56,11 @@
       ]
     ]
   },
+  "vitals": {
+    "resting_hr": 58,
+    "heart_rate": 72,
+    "spo2": 97
+  },
   "gym": {
     "day_type": "rest",
     "label": "SPA DAY",

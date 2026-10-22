@@ -246,6 +246,7 @@ export async function handle(req: Request, env: Env, now: Date): Promise<Respons
           asleep_min: computeSleep(samples, date, tz)?.asleep_min ?? null,
         },
         workouts: ing.workouts,
+        vitals: ing.vitals ?? null,
       });
     }
 

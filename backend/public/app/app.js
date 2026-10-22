@@ -399,7 +399,9 @@ function viewBp() {
 
   const readings = (S.history?.days || []).flatMap((day) => day.bp).sort((a, b) => b.ts.localeCompare(a.ts)).slice(0, 14);
   return h("div", { class: "stack" },
-    titlebar("Blood pressure"),
+    titlebar("Vitals"),
+    vitalsCard(S.today.dashboard),
+    h("h2", { class: "t-h2" }, "Blood pressure"),
     form,
     readings.length > 1 ? bpChart(readings) : null,
     h("section", { class: "card" }, h("h2", { class: "t-h2" }, "Recent readings"),
@@ -408,6 +410,21 @@ function viewBp() {
         h("span", { class: "dim num" }, r.pulse ? `${r.pulse} bpm` : ""),
         h("span", { class: "dim num" }, `${dayLabel(r.ts)} · ${timeOf(r.ts)}`)))
         : h("p", { class: "dim" }, S.history ? "No readings in the last weeks." : "Loading…")));
+}
+
+/** Heart rate and blood oxygen, read from Apple Health by the Shortcut (no manual entry). */
+function vitalsCard(d) {
+  const v = d.vitals || {};
+  const tile = (label, iconName, value, unit, color) => h("div", { class: "metric vital", c: color },
+    h("div", { class: "row" }, icon(iconName), h("span", { class: "t-label" }, label)),
+    h("div", { class: `v num${value == null ? " faint" : ""}` }, value == null ? dash : String(value), value == null ? null : h("small", {}, unit)));
+  return h("section", { class: "stack" },
+    h("div", { class: "metrics" },
+      tile("Resting", "ecg_heart", v.resting_hr, " bpm", "#FF5A7A"),
+      tile("Heart", "favorite", v.heart_rate, " bpm", "#FF8A5B"),
+      tile("SpO₂", "spo2", v.spo2, " %", "#22D3EE")),
+    h("div", { class: `sync${d.stale ? " stale" : ""}` },
+      d.updated ? `From Apple Health · ${timeOf(d.updated)}` : "Heart rate and blood oxygen arrive with the Health sync"));
 }
 
 function bpChart(readings) {
@@ -809,7 +826,7 @@ async function savePlan(err) {
 
 // ---------------------------------------------------------------- render + navigation
 
-const TABS = [["today", "Today", "home"], ["bp", "BP", "monitor_heart"], ["plan", "Plan", "calendar_month"], ["history", "History", "history"]];
+const TABS = [["today", "Today", "home"], ["bp", "Vitals", "monitor_heart"], ["plan", "Plan", "calendar_month"], ["history", "History", "history"]];
 
 function nav() {
   return h("nav", { class: "nav" }, TABS.map(([id, label, ic]) =>

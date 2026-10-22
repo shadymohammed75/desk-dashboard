@@ -27,9 +27,9 @@
       "ts": "2026-10-22T17:40:00.000Z"
     },
     "bp_latest": {
-      "sys": 130,
-      "dia": 80,
-      "pulse": 66,
+      "sys": 126,
+      "dia": 79,
+      "pulse": 65,
       "ts": "2026-10-21T06:00:00.000Z"
     },
     "dashboard": {
@@ -57,42 +57,47 @@
         "goal": 600
       },
       "food": {
-        "kcal": 1972,
+        "kcal": 1754,
         "kcal_goal": 2600,
-        "protein_g": 137,
+        "protein_g": 102,
         "protein_goal": 160
       },
       "bp": {
-        "sys": 130,
-        "dia": 80,
-        "pulse": 66,
+        "sys": 126,
+        "dia": 79,
+        "pulse": 65,
         "ts": "2026-10-21T08:00:00+02:00",
         "trend7": [
           [
-            120,
-            78
-          ],
-          [
-            129,
-            83
+            127,
+            77
           ],
           [
             128,
             81
           ],
           [
-            128,
-            77
-          ],
-          [
-            128,
+            132,
             82
           ],
           [
             130,
-            80
+            77
+          ],
+          [
+            122,
+            83
+          ],
+          [
+            126,
+            79
           ]
         ]
+      },
+      "vitals": {
+        "resting_hr": 60,
+        "heart_rate": 65,
+        "spo2": 96
       },
       "gym": {
         "day_type": "push",
@@ -182,7 +187,7 @@
       },
       "progress": {
         "level": 9,
-        "xp": 200,
+        "xp": 40,
         "xp_next": 550,
         "streak_days": 9,
         "best_streak": 14
@@ -237,9 +242,9 @@
       },
       "mascot": "proud",
       "celebrate": {
-        "id": "gym_done_2026-10-22",
-        "title": "PUSH DAY COMPLETE",
-        "sub": "+50 XP · streak 9"
+        "id": "level_9",
+        "title": "LEVEL UP · 9",
+        "sub": "Next level at 550 XP"
       }
     }
   },
@@ -401,7 +406,7 @@
         "label": "REST DAY",
         "color": "#2DD4BF",
         "icon": "bedtime",
-        "score": 67,
+        "score": 44,
         "status": "rest",
         "source": "plan",
         "muscles": [],
@@ -409,9 +414,9 @@
         "note": null,
         "bp": [
           {
-            "sys": 130,
-            "dia": 80,
-            "pulse": 66,
+            "sys": 126,
+            "dia": 79,
+            "pulse": 65,
             "ts": "2026-10-21T08:00:00+02:00"
           }
         ]
@@ -425,7 +430,7 @@
         "label": "PULL",
         "color": "#22D3EE",
         "icon": "rowing",
-        "score": 67,
+        "score": 56,
         "status": "done",
         "source": "app",
         "muscles": [
@@ -436,13 +441,13 @@
           "biceps",
           "forearms"
         ],
-        "duration_min": 62,
+        "duration_min": 55,
         "note": "New grip on rows",
         "bp": [
           {
-            "sys": 128,
-            "dia": 82,
-            "pulse": 59,
+            "sys": 122,
+            "dia": 83,
+            "pulse": 62,
             "ts": "2026-10-20T08:00:00+02:00"
           }
         ]
@@ -465,13 +470,13 @@
           "side_delts",
           "triceps"
         ],
-        "duration_min": 53,
+        "duration_min": 74,
         "note": null,
         "bp": [
           {
-            "sys": 128,
+            "sys": 130,
             "dia": 77,
-            "pulse": 65,
+            "pulse": 62,
             "ts": "2026-10-19T08:00:00+02:00"
           }
         ]
@@ -485,7 +490,7 @@
         "label": "SPA DAY",
         "color": "#2DD4BF",
         "icon": "hot_tub",
-        "score": 67,
+        "score": 56,
         "status": "rest",
         "source": "plan",
         "muscles": [],
@@ -493,9 +498,9 @@
         "note": null,
         "bp": [
           {
-            "sys": 128,
-            "dia": 81,
-            "pulse": 64,
+            "sys": 132,
+            "dia": 82,
+            "pulse": 58,
             "ts": "2026-10-18T08:00:00+02:00"
           }
         ]
@@ -509,7 +514,7 @@
         "label": "REST DAY",
         "color": "#2DD4BF",
         "icon": "bedtime",
-        "score": 56,
+        "score": 33,
         "status": "rest",
         "source": "plan",
         "muscles": [],
@@ -517,8 +522,8 @@
         "note": null,
         "bp": [
           {
-            "sys": 129,
-            "dia": 83,
+            "sys": 128,
+            "dia": 81,
             "pulse": 59,
             "ts": "2026-10-17T08:00:00+02:00"
           }
@@ -533,7 +538,7 @@
         "label": "PULL",
         "color": "#22D3EE",
         "icon": "rowing",
-        "score": 56,
+        "score": 78,
         "status": "done",
         "source": "app",
         "muscles": [
@@ -544,13 +549,13 @@
           "biceps",
           "forearms"
         ],
-        "duration_min": 66,
+        "duration_min": 58,
         "note": "Felt strong",
         "bp": [
           {
-            "sys": 120,
-            "dia": 78,
-            "pulse": 65,
+            "sys": 127,
+            "dia": 77,
+            "pulse": 59,
             "ts": "2026-10-16T08:00:00+02:00"
           }
         ]
@@ -573,13 +578,13 @@
           "side_delts",
           "triceps"
         ],
-        "duration_min": 68,
+        "duration_min": 70,
         "note": "PR bench 80kg",
         "bp": [
           {
-            "sys": 128,
-            "dia": 76,
-            "pulse": 60,
+            "sys": 121,
+            "dia": 83,
+            "pulse": 63,
             "ts": "2026-10-15T08:00:00+02:00"
           }
         ]
@@ -593,7 +598,7 @@
         "label": "REST DAY",
         "color": "#2DD4BF",
         "icon": "bedtime",
-        "score": 56,
+        "score": 67,
         "status": "rest",
         "source": "plan",
         "muscles": [],
@@ -601,9 +606,9 @@
         "note": null,
         "bp": [
           {
-            "sys": 126,
-            "dia": 81,
-            "pulse": 67,
+            "sys": 124,
+            "dia": 82,
+            "pulse": 66,
             "ts": "2026-10-14T08:00:00+02:00"
           }
         ]
@@ -617,7 +622,7 @@
         "label": "PULL",
         "color": "#22D3EE",
         "icon": "rowing",
-        "score": 44,
+        "score": 56,
         "status": "skipped",
         "source": "app",
         "muscles": [],
@@ -625,9 +630,9 @@
         "note": null,
         "bp": [
           {
-            "sys": 127,
-            "dia": 80,
-            "pulse": 59,
+            "sys": 132,
+            "dia": 83,
+            "pulse": 68,
             "ts": "2026-10-13T08:00:00+02:00"
           }
         ]
@@ -641,7 +646,7 @@
         "label": "PUSH",
         "color": "#FF6A1A",
         "icon": "fitness_center",
-        "score": 56,
+        "score": 89,
         "status": "done",
         "source": "app",
         "muscles": [
@@ -650,13 +655,13 @@
           "side_delts",
           "triceps"
         ],
-        "duration_min": 48,
+        "duration_min": 52,
         "note": "Short on time, still did it",
         "bp": [
           {
-            "sys": 130,
-            "dia": 76,
-            "pulse": 62,
+            "sys": 124,
+            "dia": 80,
+            "pulse": 68,
             "ts": "2026-10-12T08:00:00+02:00"
           }
         ]
@@ -678,9 +683,9 @@
         "note": null,
         "bp": [
           {
-            "sys": 131,
-            "dia": 84,
-            "pulse": 67,
+            "sys": 125,
+            "dia": 81,
+            "pulse": 60,
             "ts": "2026-10-11T08:00:00+02:00"
           }
         ]
@@ -694,7 +699,7 @@
         "label": "LEGS",
         "color": "#8B7CFF",
         "icon": "directions_run",
-        "score": 100,
+        "score": 67,
         "status": "done",
         "source": "app",
         "muscles": [
@@ -707,9 +712,9 @@
         "note": "Bonus legs",
         "bp": [
           {
-            "sys": 126,
+            "sys": 121,
             "dia": 77,
-            "pulse": 64,
+            "pulse": 63,
             "ts": "2026-10-10T08:00:00+02:00"
           }
         ]
@@ -723,7 +728,7 @@
         "label": "PULL",
         "color": "#22D3EE",
         "icon": "rowing",
-        "score": 22,
+        "score": 33,
         "status": "missed",
         "source": "plan",
         "muscles": [],
@@ -731,9 +736,9 @@
         "note": null,
         "bp": [
           {
-            "sys": 121,
-            "dia": 82,
-            "pulse": 65,
+            "sys": 126,
+            "dia": 77,
+            "pulse": 61,
             "ts": "2026-10-09T08:00:00+02:00"
           }
         ]
@@ -747,7 +752,7 @@
         "label": "PUSH",
         "color": "#FF6A1A",
         "icon": "fitness_center",
-        "score": 67,
+        "score": 44,
         "status": "done",
         "source": "app",
         "muscles": [
@@ -756,13 +761,13 @@
           "side_delts",
           "triceps"
         ],
-        "duration_min": 55,
+        "duration_min": 60,
         "note": "New grip on rows",
         "bp": [
           {
-            "sys": 124,
-            "dia": 77,
-            "pulse": 60,
+            "sys": 121,
+            "dia": 80,
+            "pulse": 59,
             "ts": "2026-10-08T08:00:00+02:00"
           }
         ]
@@ -776,7 +781,7 @@
         "label": "REST DAY",
         "color": "#2DD4BF",
         "icon": "bedtime",
-        "score": 56,
+        "score": 89,
         "status": "rest",
         "source": "plan",
         "muscles": [],
@@ -784,9 +789,9 @@
         "note": null,
         "bp": [
           {
-            "sys": 122,
-            "dia": 78,
-            "pulse": 59,
+            "sys": 131,
+            "dia": 80,
+            "pulse": 67,
             "ts": "2026-10-07T08:00:00+02:00"
           }
         ]
@@ -811,13 +816,13 @@
           "biceps",
           "forearms"
         ],
-        "duration_min": 65,
+        "duration_min": 60,
         "note": "Short on time, still did it",
         "bp": [
           {
-            "sys": 127,
-            "dia": 81,
-            "pulse": 61,
+            "sys": 126,
+            "dia": 77,
+            "pulse": 64,
             "ts": "2026-10-06T08:00:00+02:00"
           }
         ]
@@ -831,7 +836,7 @@
         "label": "PUSH",
         "color": "#FF6A1A",
         "icon": "fitness_center",
-        "score": 67,
+        "score": 44,
         "status": "done",
         "source": "app",
         "muscles": [
@@ -840,13 +845,13 @@
           "side_delts",
           "triceps"
         ],
-        "duration_min": 68,
+        "duration_min": 67,
         "note": null,
         "bp": [
           {
-            "sys": 123,
-            "dia": 77,
-            "pulse": 66,
+            "sys": 129,
+            "dia": 80,
+            "pulse": 59,
             "ts": "2026-10-05T08:00:00+02:00"
           }
         ]
@@ -860,7 +865,7 @@
         "label": "SPA DAY",
         "color": "#2DD4BF",
         "icon": "hot_tub",
-        "score": 67,
+        "score": 33,
         "status": "rest",
         "source": "plan",
         "muscles": [],
@@ -868,9 +873,9 @@
         "note": null,
         "bp": [
           {
-            "sys": 127,
-            "dia": 82,
-            "pulse": 64,
+            "sys": 121,
+            "dia": 80,
+            "pulse": 59,
             "ts": "2026-10-04T08:00:00+02:00"
           }
         ]
@@ -884,7 +889,7 @@
         "label": "REST DAY",
         "color": "#2DD4BF",
         "icon": "bedtime",
-        "score": 78,
+        "score": 56,
         "status": "rest",
         "source": "plan",
         "muscles": [],
@@ -892,9 +897,9 @@
         "note": null,
         "bp": [
           {
-            "sys": 130,
-            "dia": 79,
-            "pulse": 61,
+            "sys": 127,
+            "dia": 78,
+            "pulse": 65,
             "ts": "2026-10-03T08:00:00+02:00"
           }
         ]
@@ -902,90 +907,6 @@
       {
         "date": "2026-10-02",
         "weekday": "fri",
-        "plan": "pull",
-        "plan_label": "PULL",
-        "split": "pull",
-        "label": "PULL",
-        "color": "#22D3EE",
-        "icon": "rowing",
-        "score": 78,
-        "status": "done",
-        "source": "app",
-        "muscles": [
-          "lats",
-          "upper_back",
-          "traps",
-          "rear_delts",
-          "biceps",
-          "forearms"
-        ],
-        "duration_min": 64,
-        "note": "New grip on rows",
-        "bp": [
-          {
-            "sys": 123,
-            "dia": 77,
-            "pulse": 64,
-            "ts": "2026-10-02T08:00:00+02:00"
-          }
-        ]
-      },
-      {
-        "date": "2026-10-01",
-        "weekday": "thu",
-        "plan": "push",
-        "plan_label": "PUSH",
-        "split": "push",
-        "label": "PUSH",
-        "color": "#FF6A1A",
-        "icon": "fitness_center",
-        "score": 33,
-        "status": "done",
-        "source": "app",
-        "muscles": [
-          "chest",
-          "front_delts",
-          "side_delts",
-          "triceps"
-        ],
-        "duration_min": 72,
-        "note": null,
-        "bp": [
-          {
-            "sys": 126,
-            "dia": 79,
-            "pulse": 65,
-            "ts": "2026-10-01T08:00:00+02:00"
-          }
-        ]
-      },
-      {
-        "date": "2026-09-30",
-        "weekday": "wed",
-        "plan": "rest",
-        "plan_label": "REST DAY",
-        "split": "rest",
-        "label": "REST DAY",
-        "color": "#2DD4BF",
-        "icon": "bedtime",
-        "score": 100,
-        "status": "rest",
-        "source": "plan",
-        "muscles": [],
-        "duration_min": null,
-        "note": null,
-        "bp": [
-          {
-            "sys": 123,
-            "dia": 78,
-            "pulse": 63,
-            "ts": "2026-09-30T08:00:00+02:00"
-          }
-        ]
-      },
-      {
-        "date": "2026-09-29",
-        "weekday": "tue",
         "plan": "pull",
         "plan_label": "PULL",
         "split": "pull",
@@ -1003,20 +924,20 @@
           "biceps",
           "forearms"
         ],
-        "duration_min": 56,
-        "note": null,
+        "duration_min": 48,
+        "note": "New grip on rows",
         "bp": [
           {
-            "sys": 123,
-            "dia": 80,
-            "pulse": 66,
-            "ts": "2026-09-29T08:00:00+02:00"
+            "sys": 122,
+            "dia": 83,
+            "pulse": 61,
+            "ts": "2026-10-02T08:00:00+02:00"
           }
         ]
       },
       {
-        "date": "2026-09-28",
-        "weekday": "mon",
+        "date": "2026-10-01",
+        "weekday": "thu",
         "plan": "push",
         "plan_label": "PUSH",
         "split": "push",
@@ -1032,13 +953,97 @@
           "side_delts",
           "triceps"
         ],
-        "duration_min": 54,
+        "duration_min": 74,
+        "note": null,
+        "bp": [
+          {
+            "sys": 127,
+            "dia": 83,
+            "pulse": 62,
+            "ts": "2026-10-01T08:00:00+02:00"
+          }
+        ]
+      },
+      {
+        "date": "2026-09-30",
+        "weekday": "wed",
+        "plan": "rest",
+        "plan_label": "REST DAY",
+        "split": "rest",
+        "label": "REST DAY",
+        "color": "#2DD4BF",
+        "icon": "bedtime",
+        "score": 56,
+        "status": "rest",
+        "source": "plan",
+        "muscles": [],
+        "duration_min": null,
+        "note": null,
+        "bp": [
+          {
+            "sys": 128,
+            "dia": 83,
+            "pulse": 67,
+            "ts": "2026-09-30T08:00:00+02:00"
+          }
+        ]
+      },
+      {
+        "date": "2026-09-29",
+        "weekday": "tue",
+        "plan": "pull",
+        "plan_label": "PULL",
+        "split": "pull",
+        "label": "PULL",
+        "color": "#22D3EE",
+        "icon": "rowing",
+        "score": 44,
+        "status": "done",
+        "source": "app",
+        "muscles": [
+          "lats",
+          "upper_back",
+          "traps",
+          "rear_delts",
+          "biceps",
+          "forearms"
+        ],
+        "duration_min": 72,
+        "note": null,
+        "bp": [
+          {
+            "sys": 126,
+            "dia": 79,
+            "pulse": 65,
+            "ts": "2026-09-29T08:00:00+02:00"
+          }
+        ]
+      },
+      {
+        "date": "2026-09-28",
+        "weekday": "mon",
+        "plan": "push",
+        "plan_label": "PUSH",
+        "split": "push",
+        "label": "PUSH",
+        "color": "#FF6A1A",
+        "icon": "fitness_center",
+        "score": 56,
+        "status": "done",
+        "source": "app",
+        "muscles": [
+          "chest",
+          "front_delts",
+          "side_delts",
+          "triceps"
+        ],
+        "duration_min": 74,
         "note": "Felt strong",
         "bp": [
           {
-            "sys": 124,
-            "dia": 80,
-            "pulse": 61,
+            "sys": 127,
+            "dia": 83,
+            "pulse": 65,
             "ts": "2026-09-28T08:00:00+02:00"
           }
         ]
@@ -1060,8 +1065,8 @@
         "note": null,
         "bp": [
           {
-            "sys": 123,
-            "dia": 80,
+            "sys": 131,
+            "dia": 81,
             "pulse": 62,
             "ts": "2026-09-27T08:00:00+02:00"
           }
@@ -1076,7 +1081,7 @@
         "label": "REST DAY",
         "color": "#2DD4BF",
         "icon": "bedtime",
-        "score": 33,
+        "score": 67,
         "status": "rest",
         "source": "plan",
         "muscles": [],
@@ -1093,7 +1098,7 @@
         "label": "PULL",
         "color": "#22D3EE",
         "icon": "rowing",
-        "score": 78,
+        "score": 67,
         "status": "done",
         "source": "app",
         "muscles": [
@@ -1104,7 +1109,7 @@
           "biceps",
           "forearms"
         ],
-        "duration_min": 63,
+        "duration_min": 51,
         "note": null,
         "bp": []
       },
@@ -1125,9 +1130,9 @@
         "note": null,
         "bp": [
           {
-            "sys": 128,
-            "dia": 79,
-            "pulse": 61,
+            "sys": 130,
+            "dia": 81,
+            "pulse": 62,
             "ts": "2026-09-24T08:00:00+02:00"
           }
         ]
@@ -1141,7 +1146,7 @@
         "label": "REST DAY",
         "color": "#2DD4BF",
         "icon": "bedtime",
-        "score": 78,
+        "score": 67,
         "status": "rest",
         "source": "plan",
         "muscles": [],
@@ -1158,7 +1163,7 @@
         "label": "PULL",
         "color": "#22D3EE",
         "icon": "rowing",
-        "score": 56,
+        "score": 67,
         "status": "done",
         "source": "app",
         "muscles": [
@@ -1169,7 +1174,7 @@
           "biceps",
           "forearms"
         ],
-        "duration_min": 73,
+        "duration_min": 51,
         "note": "Felt strong",
         "bp": []
       },
@@ -1191,13 +1196,13 @@
           "side_delts",
           "triceps"
         ],
-        "duration_min": 72,
+        "duration_min": 51,
         "note": "PR bench 80kg",
         "bp": [
           {
-            "sys": 128,
-            "dia": 80,
-            "pulse": 67,
+            "sys": 131,
+            "dia": 77,
+            "pulse": 68,
             "ts": "2026-09-21T08:00:00+02:00"
           }
         ]

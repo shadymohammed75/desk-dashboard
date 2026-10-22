@@ -44,7 +44,7 @@ static struct {
     /* stats */
     stat_row_t rows[3];
     /* bp */
-    lv_obj_t *bp_value, *bp_heart, *bp_pulse, *bp_time, *bp_note, *bp_line_sys, *bp_line_dia;
+    lv_obj_t *bp_value, *bp_unit, *bp_note, *bp_line_sys, *bp_line_dia, *vit_icon[3], *vit_value[3];
     lv_point_precise_t bp_pts[2][7];
     /* week */
     lv_obj_t *week_letter[7], *week_dot[7], *week_icon[7], *week_count, *week_unit;
@@ -453,25 +453,34 @@ static void update_rows(const DashboardData *d)
     show(U.rows[0].hl, d->mode == DD_MODE_MORNING);
 }
 
-/* ------------------------------------------------------------------ blood pressure card */
+/* ------------------------------------------------------------------ vitals card (blood pressure + Health) */
 
 #define BP_X 16
 #define BP_Y 270
 #define BP_W 250
 #define BP_H 160
 #define SPARK_W 220
-#define SPARK_H 34
+#define SPARK_H 30
+#define VIT_COL 78
 
 static void build_bp(lv_obj_t *p)
 {
     lv_obj_t *c = panel(p, BP_X, BP_Y, BP_W, BP_H);
-    caption(c, 14, 12, "BLOOD PRESSURE");
-    U.bp_value = ui_label(c, &font_36, C_TEXT, 13, 30, "");
-    U.bp_heart = ui_mask(c, &icon_favorite_16, C_TEXT_DIM, 14, 82);
-    U.bp_pulse = ui_label(c, &font_20, C_TEXT, 36, 77, "");
-    U.bp_time = ui_label(c, &font_14, C_TEXT_DIM, 0, 81, "");
-    U.bp_note = ui_label(c, &font_14, C_TEXT_FAINT, 14, 116, "Log BP in the app");
-    lv_obj_t *spark = ui_box(c, 14, 108, SPARK_W, SPARK_H + 4);
+    caption(c, 14, 12, "VITALS");
+    U.bp_value = ui_label(c, &font_28, C_TEXT, 13, 28, "");
+    U.bp_unit = ui_label(c, &font_12, C_TEXT_DIM, 0, 0, "");
+    /* heart rate (resting, latest) and blood oxygen, read from Apple Health by the Shortcut */
+    static const lv_image_dsc_t *const icons[3] = {&icon_ecg_heart_16, &icon_favorite_16, &icon_spo2_16};
+    static const char *const units[3] = {"rest bpm", "bpm", "SpO2"};
+    const lv_color_t colors[3] = {lv_color_hex(0xFF5A7A), lv_color_hex(0xFF8A5B), C_CYAN};
+    for(int i = 0; i < 3; i++) {
+        int32_t x = 14 + i * VIT_COL;
+        U.vit_icon[i] = ui_mask(c, icons[i], colors[i], x, 70);
+        U.vit_value[i] = ui_label(c, &font_20, C_TEXT, x + 21, 64, "");
+        ui_label(c, &font_12, C_TEXT_DIM, x, 90, units[i]);
+    }
+    U.bp_note = ui_label(c, &font_14, C_TEXT_FAINT, 14, 120, "Log BP in the app");
+    lv_obj_t *spark = ui_box(c, 14, 114, SPARK_W, SPARK_H + 4);
     U.bp_line_sys = lv_line_create(spark);
     U.bp_line_dia = lv_line_create(spark);
     lv_obj_set_style_line_color(U.bp_line_sys, C_TEXT, 0);
@@ -492,19 +501,23 @@ static void update_bp(const DashboardData *d)
     if(d->has_bp) {
         lv_label_set_text_fmt(U.bp_value, "%d/%d", (int)d->bp_sys, (int)d->bp_dia);
         lv_obj_set_style_text_color(U.bp_value, logged_today ? C_TEXT : C_TEXT_DIM, 0);
-        if(has(d->bp_pulse)) lv_label_set_text_fmt(U.bp_pulse, "%d", (int)d->bp_pulse);
-        else lv_label_set_text(U.bp_pulse, "\xE2\x80\x94");
-        if(logged_today) lv_label_set_text_fmt(U.bp_time, "\xC2\xB7 %.5s", d->bp_ts + 11);
-        else lv_label_set_text_fmt(U.bp_time, "\xC2\xB7 %.5s", d->bp_ts + 5);   /* MM-DD for older */
+        /* time today, MM-DD for an older reading */
+        lv_label_set_text_fmt(U.bp_unit, "mmHg \xC2\xB7 %.5s", logged_today ? d->bp_ts + 11 : d->bp_ts + 5);
     }
     else {
         lv_label_set_text(U.bp_value, "\xE2\x80\x94");
         lv_obj_set_style_text_color(U.bp_value, C_TEXT_FAINT, 0);
-        lv_label_set_text(U.bp_pulse, "");
-        lv_label_set_text(U.bp_time, "");
+        lv_label_set_text(U.bp_unit, "mmHg");
     }
-    show(U.bp_heart, d->has_bp);
-    lv_obj_align_to(U.bp_time, U.bp_pulse, LV_ALIGN_OUT_RIGHT_MID, 6, 1);
+    lv_obj_align_to(U.bp_unit, U.bp_value, LV_ALIGN_OUT_RIGHT_BOTTOM, 6, -5);
+
+    const int32_t vit[3] = {d->resting_hr, d->heart_rate, d->spo2};
+    for(int i = 0; i < 3; i++) {
+        if(!has(vit[i])) lv_label_set_text(U.vit_value[i], "\xE2\x80\x94");
+        else if(i == 2) lv_label_set_text_fmt(U.vit_value[i], "%d%%", (int)vit[i]);
+        else lv_label_set_text_fmt(U.vit_value[i], "%d", (int)vit[i]);
+        lv_obj_set_style_text_color(U.vit_value[i], has(vit[i]) ? C_TEXT : C_TEXT_FAINT, 0);
+    }
 
     /* sparkline: 7-day daily means, neutral colours only */
     int n = d->bp_trend_n;
@@ -513,7 +526,6 @@ static void update_bp(const DashboardData *d)
     show(U.bp_line_dia, spark);
     show(U.bp_note, !logged_today && !spark);
     if(!spark) {
-        if(!logged_today) lv_obj_set_y(U.bp_note, 116);
         return;
     }
     int lo = 999, hi = 0;

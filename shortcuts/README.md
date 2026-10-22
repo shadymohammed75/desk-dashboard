@@ -1,6 +1,6 @@
 # "Sync Health" Shortcut (Phase 7)
 
-This Shortcut sends today's **steps, active calories, food (calories and protein), last night's sleep and workouts** from Apple Health to the Worker.
+This Shortcut sends today's **steps, active calories, food (calories and protein), heart rate, blood oxygen, last night's sleep and workouts** from Apple Health to the Worker.
 
 Gym sessions, trained muscles and blood pressure are logged in the Gym Log app instead. Workouts here are only a backup, for days you forget to tap "I trained".
 
@@ -35,6 +35,16 @@ Shortcuts app → **+** → name it **Sync Health**. Add these actions in order.
 
    Check the units: in Find Health Samples, set Active and Dietary Energy to **kcal** and Protein to **g**, if Shortcuts offers a unit.
 
+### Heart rate and blood oxygen (from your Watch)
+
+6a. **Find Health Samples** where **Type** is **Resting Heart Rate**, **Start Date** is **in the last 1 days**, **Sort by: Start Date**, **Latest First**, **Limit** on, **1**. Then **Get Details of Health Samples** → **Value**. Rename it **RestHR**.
+
+6b. Do the same for **Heart Rate** → rename it **HR** (your latest reading).
+
+6c. Do the same for **Blood Oxygen Saturation** → rename it **SpO2**. A fraction (`0.97`), a percentage (`97`) or `97 %` are all fine.
+
+If the Watch has no reading yet, the value is empty and the screen shows "—".
+
 ### Sleep (last night)
 
 7. **Find Health Samples** where **Type** is **Sleep Analysis** and **Start Date** is **in the last 1 days**. Set **Sort by: Start Date**, **Oldest First**.
@@ -63,6 +73,7 @@ A strength workout of 20 minutes or more ("Traditional Strength Training", "Func
     ```
     {"date":"Today","sent_at":"SentAt","steps":"Steps","active_kcal":"Active",
      "nutrition":{"kcal":"Kcal","protein_g":"Protein"},
+     "vitals":{"resting_hr":"RestHR","heart_rate":"HR","spo2":"SpO2"},
      "sleep_samples":[SleepJSON],"workouts":[WorkoutJSON]}
     ```
 14. **Get Contents of URL**:

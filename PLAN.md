@@ -99,7 +99,8 @@ All writes send the header `Authorization: Bearer <INGEST_TOKEN>`.
   "active_kcal": 512,
   "nutrition": { "kcal": 1850, "protein_g": 120 },
   "sleep_samples": [ { "start": "…", "end": "…", "value": "Core" } ],
-  "workouts": [ { "type": "Traditional Strength Training", "start": "…", "duration_min": 52 } ]
+  "workouts": [ { "type": "Traditional Strength Training", "start": "…", "duration_min": 52 } ],
+  "vitals": { "resting_hr": 58, "heart_rate": 72, "spo2": 0.97 }
 }
 ```
 
@@ -142,6 +143,7 @@ All writes send the header `Authorization: Bearer <INGEST_TOKEN>`.
   "active": { "kcal": 512, "goal": 600 },
   "food":   { "kcal": 1850, "kcal_goal": 2600, "protein_g": 120, "protein_goal": 160 },
   "bp":     { "sys": 128, "dia": 82, "pulse": 64, "ts": "…", "trend7": [[126,80],[130,84]] },
+  "vitals": { "resting_hr": 58, "heart_rate": 72, "spo2": 97 },
   "gym":    { "day_type": "push", "label": "PUSH", "color": "#FF6A1A", "icon": "fitness_center",
               "muscles": ["chest","front_delts","side_delts","triceps"],
               "status": "pending", "done_min": null,
@@ -168,6 +170,7 @@ Notes on the new fields:
 - When `done`, `gym.muscles` lists what I **actually trained** (from the app); otherwise it lists the plan.
 - **Training on a rest day** sets the status to `done` with the logged muscles.
 - `stale` is `true` when the last Health sync is more than 3 hours old. Missing values are `null`.
+- `vitals` come from today's Health sync: resting heart rate, the latest heart rate, and the latest blood oxygen in %. Each value is `null` when Health has none. The ingest accepts SpO₂ as Apple's fraction (0.97) or as a percentage.
 
 ### 4.3 Gym status rules (in priority order)
 
@@ -334,9 +337,10 @@ It feels like a game HUD or a sci-fi cockpit that is *about me*. It's dark and n
 │  ╰───────────╯   kcal 1850 / 2600                    │   │front│     │back │       │
 │  4 colour arc segments: sleep·move·food·gym          │   │ map │     │ map │       │
 │                                                      │   │glow │     │glow │       │
-│  ┌ BLOOD PRESSURE ─────────────┐ ┌ THIS WEEK ───────┐│   ╰─────╯     ╰─────╯       │
-│  │ 128/82  ♥64   · 08:10       │ │ M T W T F S S    ││  chest · delts · triceps    │
-│  │ ╱╲_╱╲_ 7-day sparkline      │ │ ● ● ☾ ◎ ○ ☾ ☾    ││  [ ◉ LET'S GO — not done ]  │
+│  ┌ VITALS ─────────────────────┐ ┌ THIS WEEK ───────┐│   ╰─────╯     ╰─────╯       │
+│  │ 128/82 mmHg · 08:10         │ │ M T W T F S S    ││  chest · delts · triceps    │
+│  │ ♥58 rest  ♥72  ◆97% SpO2    │ │ ● ● ☾ ◎ ○ ☾ ☾    ││                             │
+│  │ ╱╲_╱╲_ 7-day BP sparkline   │ │                  ││  [ ◉ LET'S GO — not done ]  │
 │  └─────────────────────────────┘ └──────────────────┘│                             │
 ├─────────────────────────────────────────────────────┴─────────────────────────────┤
 │ ▸ Still time. 45 minutes is enough.                                    2/4 this wk │ 40px coach bar
@@ -358,10 +362,12 @@ It feels like a game HUD or a sci-fi cockpit that is *about me*. It's dark and n
    - Each row has an icon, a label, a big value and a segmented progress bar (8–10 blocks, game-style) with a %.
    - When a goal is hit, the bar turns lime, a small trophy icon appears, and the % becomes "GOAL ✓".
    - **Sleep** also shows a thin **stage bar**: deep in deep blue, core in cyan, REM in violet, awake in faint.
-4. **Blood pressure card:**
-   - Latest reading big, pulse with a heart icon, the time, and a 7-day sparkline.
+4. **Vitals card:**
+   - The latest BP reading big, with "mmHg" and its time, and a 7-day BP sparkline.
+   - A compact row of three readings from Apple Health (`vitals`): resting heart rate, latest heart rate and blood
+     oxygen (SpO₂), each with its icon. Missing values show "—".
    - **Neutral colours only** (white and cyan), with no judgement or medical colouring.
-   - When no reading was logged today, it shows a dim "Log BP in the app".
+   - When no BP reading exists, it shows a dim "Log BP in the app".
 5. **This week:**
    - Seven day dots:
      - **done:** filled lime;
@@ -445,8 +451,9 @@ It feels like a game HUD or a sci-fi cockpit that is *about me*. It's dark and n
   - Save.
 - Today's metrics in small cards (sleep, steps, food) from the last Health sync.
 
-**BP tab**
-- Three large number fields (SYS, DIA, pulse), with the time defaulting to now. Save.
+**Vitals tab**
+- At the top, three tiles from the last Health sync: resting heart rate, heart rate and SpO₂, with the sync time.
+- Then the blood pressure form: three large number fields (SYS, DIA, pulse), with the time defaulting to now. Save.
 - Below: the last 14 readings as a list and a small trend chart.
 
 **Plan tab**
@@ -643,7 +650,7 @@ Board: **Waveshare ESP32-S3-LCD-4.3** (non-touch, 800×480, 16 MB flash / 8 MB P
 
 ## Phase 7: Apple Health sync (Shortcut)
 
-The app covers the gym and BP, so this Shortcut only brings **sleep, steps, active kcal and food** from Apple Health.
+The app covers the gym and BP, so this Shortcut only brings **sleep, steps, active kcal, food, heart rate and blood oxygen** from Apple Health.
 
 **Tasks**
 - [ ] Write `shortcuts/README.md` with exact steps for **"Sync Health"**:

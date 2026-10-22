@@ -20,7 +20,7 @@ MUSCLES = {
 }
 COLOR = re.compile(r"^#[0-9A-Fa-f]{6}$")
 ICON = re.compile(r"^[a-z0-9_]{2,40}$")
-TOP_KEYS = {"now", "updated", "stale", "mode", "sleep", "steps", "active", "food", "bp", "gym",
+TOP_KEYS = {"now", "updated", "stale", "mode", "sleep", "steps", "active", "food", "bp", "vitals", "gym",
             "score", "progress", "week", "coach", "mascot", "celebrate"}
 
 
@@ -57,6 +57,11 @@ def check(d):
         need(all(is_num_or_null(bp.get(k)) for k in ("sys", "dia", "pulse")), "bp numbers")
         need(all(isinstance(p, list) and len(p) == 2 for p in bp.get("trend7", [])), "bp.trend7 pairs")
         need(len(bp.get("trend7", [])) <= 7, "bp.trend7 has more than 7 days")
+
+    v = d.get("vitals") or {}
+    need(set(v) == {"resting_hr", "heart_rate", "spo2"}, "vitals keys")
+    need(all(is_num_or_null(v.get(k)) for k in v), "vitals values must be numbers or null")
+    need(v.get("spo2") is None or 50 <= v["spo2"] <= 100, "vitals.spo2 must be a percentage")
 
     g = d.get("gym") or {}
     need(g.get("status") in GYM_STATUS, f"bad gym.status {g.get('status')}")

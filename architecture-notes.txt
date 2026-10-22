@@ -66,6 +66,8 @@ Last updated: 2026-10-22 (redesign)
 - Deploy: push to main -> Cloudflare Workers Builds (root backend/) -> wrangler deploy; KV namespace auto-provisioned on first deploy
 - Health Shortcut (shortcuts/README.md): JSON built as Text (robust vs Dictionary nesting), all numbers quoted;
   server parses "8.432"/"8,432" grouped ints and "1850,5" decimals, so iPhone locale can't corrupt values
+- Vitals pass-through: ingest.vitals {resting_hr, heart_rate, spo2} stored with the day and echoed as dashboard.vitals;
+  SpO2 accepted as fraction or % (normalised server-side so the device never branches); missing -> null, older days -> all null
 - GET /api/debug/last-ingest (ingest token): what the last sync delivered (counts, labels, computed sleep) for debugging
 - Live verification: smoke.yml (workflow_dispatch) runs scripts/smoke.sh with repo secrets — workers.dev isn't reachable
   from the cloud dev environment and tokens never need to be shared in chat
@@ -114,3 +116,5 @@ Last updated: 2026-10-22 (redesign)
 - 2026-10-22: Phase 7 — Shortcut guide, locale-proof number parsing, /api/debug/last-ingest, smoke.yml, SETUP.md
 - 2026-10-22: Redesign — licensed assets (CREDITS.md), habit-based score + POST /api/tasks, split colours/icons, Sunday spa day,
   new phone app (hero, habits, tiles, heat-map, celebration card), desk screen with new body/icons/Inter/habit ring
+- 2026-10-22: Vitals — BP card became a compact VITALS card (BP + resting HR, HR, SpO2 from Apple Health); app tab "Vitals";
+  Shortcut steps, contract/mocks/validator, tests

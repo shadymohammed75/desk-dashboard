@@ -93,6 +93,11 @@ bool dashboard_parse(const char *json, DashboardData *d)
         d->bp_trend_n++;
     }
 
+    const cJSON *vit = get(root, "vitals");
+    d->resting_hr = num(vit, "resting_hr");
+    d->heart_rate = num(vit, "heart_rate");
+    d->spo2 = num(vit, "spo2");
+
     const cJSON *g = get(root, "gym");
     str(g, "day_type", d->day_type, sizeof d->day_type);
     str(g, "label", d->label, sizeof d->label);

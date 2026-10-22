@@ -31,6 +31,7 @@ SIZES: dict[str, list[int]] = {
     "hot_tub": [14, 20, 28, 120], "bedtime": [14, 20, 28, 120],   # + pill, rest-day hero
     "directions_walk": [20], "nutrition": [20], "local_fire_department": [20], "favorite": [16],
     "trophy": [16], "check": [14, 18], "close": [14], "bolt": [20],
+    "ecg_heart": [16], "spo2": [16],
 }
 
 

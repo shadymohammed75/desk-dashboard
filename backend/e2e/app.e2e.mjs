@@ -84,7 +84,7 @@ if (planned.status === "pending") {
 }
 
 // BP
-await page.click(".nav button:has-text('BP')");
+await page.click(".nav button:has-text('Vitals')");
 await page.fill("input[name=sys]", "128");
 await page.fill("input[name=dia]", "82");
 await page.fill("input[name=pulse]", "64");

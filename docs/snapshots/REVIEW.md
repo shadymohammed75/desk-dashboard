@@ -12,6 +12,7 @@
 | `rest_day.png` | Wednesday: "REST DAY" with a big moon | ✓ |
 | `morning_short_sleep.png` | Sleep row highlighted, FUEL "—", sleepy Pip, calm coach | ✓ |
 | `streak_milestone*.png` | Lime flame "14", hype coach, STREAK 14 card | ✓ |
+| all main states | VITALS card: BP 128/82 mmHg with time, then resting HR, heart rate and SpO₂ with icons, BP sparkline below; "—" when Health has no reading | ✓ |
 | `no_data.png`, `stale.png` | "—" everywhere and "no sync yet"; amber "data 4h old" | ✓ |
 
 **Fixed during review**
@@ -32,6 +33,7 @@ States: push pending, push done + celebration, Sunday spa day, and a history mon
 - one toast at a time, above the nav, with the right text, gone after 2 s.
 
 **Fixed during review**
+- Vitals tiles wrapped ("HEART RATE", "BLOOD O₂"): shortened to Heart and SpO₂.
 - "33%" crowded the ring segments: the ring is now 96 px and the number 22 px.
 - "SPA DAY" wrapped onto two lines next to the status chip: the chip moved up to the date row.
 - Plan tiles were truncated ("REST…"): they now show short labels (REST, SPA).

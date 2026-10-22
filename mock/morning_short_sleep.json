@@ -64,6 +64,11 @@
       ]
     ]
   },
+  "vitals": {
+    "resting_hr": 63,
+    "heart_rate": 66,
+    "spo2": null
+  },
   "gym": {
     "day_type": "push",
     "label": "PUSH",

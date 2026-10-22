@@ -38,6 +38,9 @@ typedef struct {
     uint8_t bp_trend_n;
     int16_t bp_trend[7][2];
 
+    /* from Apple Health (DD_NONE = no data) */
+    int32_t resting_hr, heart_rate, spo2;
+
     char day_type[24];
     char label[16];
     uint32_t color;               /* split colour 0xRRGGBB (rest days: teal) */
