@@ -1,0 +1,30 @@
+# Desk Health Dashboard — Architecture Notes
+Last updated: 2026-10-22
+
+## Architecture
+- Monorepo: backend/ (Cloudflare Worker, TS), app/ (PWA source), firmware/ (ESP32-S3 + LVGL), tools/ (body map, snapshot renderer), mock/ (contract fixtures)
+- Thin-client pattern — backend computes everything display-ready; device only fetches GET /api/dashboard and draws
+- Single Worker as BFF for two clients: phone PWA (INGEST_TOKEN) and desk screen (DEVICE_TOKEN)
+- Shared-UI pattern — firmware/ui/ is pure LVGL so the same code renders PNG snapshots on Linux and runs on the board
+- Contract-first — mock/*.json fixtures + mock/validate.py define the /api/dashboard shape before any code exists
+
+## Pipelines
+- Health sync: iOS Shortcut -> POST /api/ingest (idempotent day overwrite) -> KV day:YYYY-MM-DD (planned)
+- Manual logs: PWA -> POST /api/gym, /api/bp, PUT /api/config -> KV (planned)
+- Display: ESP32 -> GET /api/dashboard every 10 min -> LVGL render (planned)
+- Firmware build: push -> GitHub Actions (PlatformIO) -> merged .bin -> /flash page (ESP Web Tools, Web Serial) (planned)
+
+## Security
+- Auth: two bearer tokens — INGEST_TOKEN (writes + app reads), DEVICE_TOKEN (read-only /api/dashboard)
+- Secrets handling: Cloudflare Worker secrets, GitHub Actions secrets, gitignored secrets.h / .dev.vars / .env*
+- Known risks / open items: token stored in phone localStorage (single-user trade-off); no rate limiting yet
+
+## Environment report (Phase 0, 2026-10-22)
+- Node v22.22.0, Python 3.13.16, gcc 13.3.0, cmake 3.28.3 — all present; enough for Worker dev/tests and the native LVGL snapshot tool
+- PlatformIO Core 6.2.0 installs fine via pip (PyPI reachable)
+- PlatformIO toolchain download FAILS: proxy returns 403 for api.registry.platformio.org and dl.registry.platformio.org
+- github.com is reachable (git clones of LVGL etc. will work)
+- Decision: firmware builds run in GitHub Actions (Phase 5); to build locally, add *.platformio.org to the environment's allowed domains
+
+## Changelog
+- 2026-10-22: Phase 0 — repo skeleton, .gitignore, CLAUDE.md, 9 contract mocks + validator, environment report

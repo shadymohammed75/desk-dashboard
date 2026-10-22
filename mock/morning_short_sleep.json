@@ -1,0 +1,133 @@
+{
+  "now": "2026-10-22T07:15:00+02:00",
+  "updated": "2026-10-22T07:05:00+02:00",
+  "stale": false,
+  "mode": "morning",
+  "sleep": {
+    "asleep_min": 340,
+    "avg7_min": 405,
+    "goal_min": 450,
+    "stages": {
+      "deep": 41,
+      "core": 214,
+      "rem": 58,
+      "awake": 27
+    }
+  },
+  "steps": {
+    "value": 900,
+    "goal": 10000
+  },
+  "active": {
+    "kcal": 40,
+    "goal": 600
+  },
+  "food": {
+    "kcal": null,
+    "kcal_goal": 2600,
+    "protein_g": null,
+    "protein_goal": 160
+  },
+  "bp": {
+    "sys": 128,
+    "dia": 82,
+    "pulse": 64,
+    "ts": "2026-10-22T08:10:00+02:00",
+    "trend7": [
+      [
+        126,
+        80
+      ],
+      [
+        130,
+        84
+      ],
+      [
+        124,
+        79
+      ],
+      [
+        128,
+        82
+      ],
+      [
+        127,
+        81
+      ],
+      [
+        131,
+        83
+      ],
+      [
+        128,
+        82
+      ]
+    ]
+  },
+  "gym": {
+    "day_type": "push",
+    "label": "PUSH",
+    "muscles": [
+      "chest",
+      "front_delts",
+      "side_delts",
+      "triceps"
+    ],
+    "status": "pending",
+    "done_min": null,
+    "week_done": 2,
+    "week_target": 4
+  },
+  "score": {
+    "value": 21,
+    "parts": {
+      "sleep": 19,
+      "move": 2,
+      "food": null,
+      "gym": 0
+    }
+  },
+  "progress": {
+    "level": 7,
+    "xp": 340,
+    "xp_next": 450,
+    "streak_days": 12,
+    "best_streak": 21
+  },
+  "week": [
+    {
+      "d": "M",
+      "state": "done"
+    },
+    {
+      "d": "T",
+      "state": "done"
+    },
+    {
+      "d": "W",
+      "state": "rest"
+    },
+    {
+      "d": "T",
+      "state": "today"
+    },
+    {
+      "d": "F",
+      "state": "planned"
+    },
+    {
+      "d": "S",
+      "state": "rest"
+    },
+    {
+      "d": "S",
+      "state": "rest"
+    }
+  ],
+  "coach": {
+    "text": "Short night. Train smart, not heavy.",
+    "tone": "calm"
+  },
+  "mascot": "sleepy",
+  "celebrate": null
+}

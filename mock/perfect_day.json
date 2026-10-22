@@ -1,0 +1,133 @@
+{
+  "now": "2026-10-22T21:15:00+02:00",
+  "updated": "2026-10-22T21:00:00+02:00",
+  "stale": false,
+  "mode": "evening",
+  "sleep": {
+    "asleep_min": 470,
+    "avg7_min": 430,
+    "goal_min": 450,
+    "stages": {
+      "deep": 85,
+      "core": 270,
+      "rem": 104,
+      "awake": 11
+    }
+  },
+  "steps": {
+    "value": 9200,
+    "goal": 10000
+  },
+  "active": {
+    "kcal": 520,
+    "goal": 600
+  },
+  "food": {
+    "kcal": 1950,
+    "kcal_goal": 2600,
+    "protein_g": 136,
+    "protein_goal": 160
+  },
+  "bp": {
+    "sys": 128,
+    "dia": 82,
+    "pulse": 64,
+    "ts": "2026-10-22T08:10:00+02:00",
+    "trend7": [
+      [
+        126,
+        80
+      ],
+      [
+        130,
+        84
+      ],
+      [
+        124,
+        79
+      ],
+      [
+        128,
+        82
+      ],
+      [
+        127,
+        81
+      ],
+      [
+        131,
+        83
+      ],
+      [
+        128,
+        82
+      ]
+    ]
+  },
+  "gym": {
+    "day_type": "push",
+    "label": "PUSH",
+    "muscles": [
+      "chest",
+      "front_delts",
+      "side_delts",
+      "triceps"
+    ],
+    "status": "done",
+    "done_min": 62,
+    "week_done": 3,
+    "week_target": 4
+  },
+  "score": {
+    "value": 92,
+    "parts": {
+      "sleep": 25,
+      "move": 22,
+      "food": 20,
+      "gym": 25
+    }
+  },
+  "progress": {
+    "level": 8,
+    "xp": 30,
+    "xp_next": 500,
+    "streak_days": 13,
+    "best_streak": 21
+  },
+  "week": [
+    {
+      "d": "M",
+      "state": "done"
+    },
+    {
+      "d": "T",
+      "state": "done"
+    },
+    {
+      "d": "W",
+      "state": "rest"
+    },
+    {
+      "d": "T",
+      "state": "done"
+    },
+    {
+      "d": "F",
+      "state": "planned"
+    },
+    {
+      "d": "S",
+      "state": "rest"
+    },
+    {
+      "d": "S",
+      "state": "rest"
+    }
+  ],
+  "coach": {
+    "text": "Push day crushed. Recover well.",
+    "tone": "proud"
+  },
+  "mascot": "proud",
+  "celebrate": null
+}

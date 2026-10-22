@@ -1,0 +1,19 @@
+# Secrets — never commit
+secrets.h
+.dev.vars
+.env
+.env.*
+
+# Build output / deps
+node_modules/
+.pio/
+out/
+.wrangler/
+dist/
+__pycache__/
+*.pyc
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store

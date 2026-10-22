@@ -1,0 +1,133 @@
+{
+  "now": "2026-10-22T16:20:00+02:00",
+  "updated": "2026-10-22T11:55:00+02:00",
+  "stale": true,
+  "mode": "day",
+  "sleep": {
+    "asleep_min": 432,
+    "avg7_min": 410,
+    "goal_min": 450,
+    "stages": {
+      "deep": 72,
+      "core": 250,
+      "rem": 95,
+      "awake": 15
+    }
+  },
+  "steps": {
+    "value": 3100,
+    "goal": 10000
+  },
+  "active": {
+    "kcal": 150,
+    "goal": 600
+  },
+  "food": {
+    "kcal": 900,
+    "kcal_goal": 2600,
+    "protein_g": 55,
+    "protein_goal": 160
+  },
+  "bp": {
+    "sys": 128,
+    "dia": 82,
+    "pulse": 64,
+    "ts": "2026-10-22T08:10:00+02:00",
+    "trend7": [
+      [
+        126,
+        80
+      ],
+      [
+        130,
+        84
+      ],
+      [
+        124,
+        79
+      ],
+      [
+        128,
+        82
+      ],
+      [
+        127,
+        81
+      ],
+      [
+        131,
+        83
+      ],
+      [
+        128,
+        82
+      ]
+    ]
+  },
+  "gym": {
+    "day_type": "push",
+    "label": "PUSH",
+    "muscles": [
+      "chest",
+      "front_delts",
+      "side_delts",
+      "triceps"
+    ],
+    "status": "pending",
+    "done_min": null,
+    "week_done": 2,
+    "week_target": 4
+  },
+  "score": {
+    "value": 40,
+    "parts": {
+      "sleep": 24,
+      "move": 7,
+      "food": 9,
+      "gym": 0
+    }
+  },
+  "progress": {
+    "level": 7,
+    "xp": 350,
+    "xp_next": 450,
+    "streak_days": 12,
+    "best_streak": 21
+  },
+  "week": [
+    {
+      "d": "M",
+      "state": "done"
+    },
+    {
+      "d": "T",
+      "state": "done"
+    },
+    {
+      "d": "W",
+      "state": "rest"
+    },
+    {
+      "d": "T",
+      "state": "today"
+    },
+    {
+      "d": "F",
+      "state": "planned"
+    },
+    {
+      "d": "S",
+      "state": "rest"
+    },
+    {
+      "d": "S",
+      "state": "rest"
+    }
+  ],
+  "coach": {
+    "text": "PUSH day loaded. You know the drill.",
+    "tone": "nudge"
+  },
+  "mascot": "pumped",
+  "celebrate": null
+}

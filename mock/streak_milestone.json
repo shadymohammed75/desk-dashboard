@@ -1,0 +1,137 @@
+{
+  "now": "2026-10-22T19:05:00+02:00",
+  "updated": "2026-10-22T19:00:00+02:00",
+  "stale": false,
+  "mode": "evening",
+  "sleep": {
+    "asleep_min": 440,
+    "avg7_min": 420,
+    "goal_min": 450,
+    "stages": {
+      "deep": 72,
+      "core": 250,
+      "rem": 95,
+      "awake": 15
+    }
+  },
+  "steps": {
+    "value": 8200,
+    "goal": 10000
+  },
+  "active": {
+    "kcal": 450,
+    "goal": 600
+  },
+  "food": {
+    "kcal": 2000,
+    "kcal_goal": 2600,
+    "protein_g": 120,
+    "protein_goal": 160
+  },
+  "bp": {
+    "sys": 128,
+    "dia": 82,
+    "pulse": 64,
+    "ts": "2026-10-22T08:10:00+02:00",
+    "trend7": [
+      [
+        126,
+        80
+      ],
+      [
+        130,
+        84
+      ],
+      [
+        124,
+        79
+      ],
+      [
+        128,
+        82
+      ],
+      [
+        127,
+        81
+      ],
+      [
+        131,
+        83
+      ],
+      [
+        128,
+        82
+      ]
+    ]
+  },
+  "gym": {
+    "day_type": "push",
+    "label": "PUSH",
+    "muscles": [
+      "chest",
+      "front_delts",
+      "side_delts",
+      "triceps"
+    ],
+    "status": "done",
+    "done_min": 58,
+    "week_done": 3,
+    "week_target": 4
+  },
+  "score": {
+    "value": 88,
+    "parts": {
+      "sleep": 24,
+      "move": 20,
+      "food": 19,
+      "gym": 25
+    }
+  },
+  "progress": {
+    "level": 9,
+    "xp": 120,
+    "xp_next": 550,
+    "streak_days": 14,
+    "best_streak": 21
+  },
+  "week": [
+    {
+      "d": "M",
+      "state": "done"
+    },
+    {
+      "d": "T",
+      "state": "done"
+    },
+    {
+      "d": "W",
+      "state": "rest"
+    },
+    {
+      "d": "T",
+      "state": "done"
+    },
+    {
+      "d": "F",
+      "state": "planned"
+    },
+    {
+      "d": "S",
+      "state": "rest"
+    },
+    {
+      "d": "S",
+      "state": "rest"
+    }
+  ],
+  "coach": {
+    "text": "14 days straight. Don't break it.",
+    "tone": "hype"
+  },
+  "mascot": "proud",
+  "celebrate": {
+    "id": "streak_14_2026-10-22",
+    "title": "STREAK 14",
+    "sub": "14 planned days in a row"
+  }
+}

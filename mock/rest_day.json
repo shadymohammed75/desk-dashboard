@@ -1,0 +1,124 @@
+{
+  "now": "2026-10-21T15:00:00+02:00",
+  "updated": "2026-10-21T14:40:00+02:00",
+  "stale": false,
+  "mode": "day",
+  "sleep": {
+    "asleep_min": 465,
+    "avg7_min": 412,
+    "goal_min": 450,
+    "stages": {
+      "deep": 80,
+      "core": 268,
+      "rem": 105,
+      "awake": 12
+    }
+  },
+  "steps": {
+    "value": 6400,
+    "goal": 10000
+  },
+  "active": {
+    "kcal": 310,
+    "goal": 600
+  },
+  "food": {
+    "kcal": 1600,
+    "kcal_goal": 2600,
+    "protein_g": 95,
+    "protein_goal": 160
+  },
+  "bp": {
+    "sys": 127,
+    "dia": 81,
+    "pulse": 62,
+    "ts": "2026-10-21T08:05:00+02:00",
+    "trend7": [
+      [
+        126,
+        80
+      ],
+      [
+        130,
+        84
+      ],
+      [
+        124,
+        79
+      ],
+      [
+        128,
+        82
+      ],
+      [
+        127,
+        81
+      ],
+      [
+        131,
+        83
+      ]
+    ]
+  },
+  "gym": {
+    "day_type": "rest",
+    "label": "REST DAY",
+    "muscles": [],
+    "status": "rest",
+    "done_min": null,
+    "week_done": 2,
+    "week_target": 4
+  },
+  "score": {
+    "value": 79,
+    "parts": {
+      "sleep": 25,
+      "move": 14,
+      "food": 15,
+      "gym": 25
+    }
+  },
+  "progress": {
+    "level": 7,
+    "xp": 290,
+    "xp_next": 450,
+    "streak_days": 11,
+    "best_streak": 21
+  },
+  "week": [
+    {
+      "d": "M",
+      "state": "done"
+    },
+    {
+      "d": "T",
+      "state": "done"
+    },
+    {
+      "d": "W",
+      "state": "today"
+    },
+    {
+      "d": "T",
+      "state": "planned"
+    },
+    {
+      "d": "F",
+      "state": "planned"
+    },
+    {
+      "d": "S",
+      "state": "rest"
+    },
+    {
+      "d": "S",
+      "state": "rest"
+    }
+  ],
+  "coach": {
+    "text": "Rest day. Muscles grow now.",
+    "tone": "calm"
+  },
+  "mascot": "chill",
+  "celebrate": null
+}

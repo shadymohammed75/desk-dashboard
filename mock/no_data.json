@@ -1,0 +1,93 @@
+{
+  "now": "2026-10-22T10:30:00+02:00",
+  "updated": null,
+  "stale": true,
+  "mode": "day",
+  "sleep": {
+    "asleep_min": null,
+    "avg7_min": null,
+    "goal_min": 450,
+    "stages": null
+  },
+  "steps": {
+    "value": null,
+    "goal": 10000
+  },
+  "active": {
+    "kcal": null,
+    "goal": 600
+  },
+  "food": {
+    "kcal": null,
+    "kcal_goal": 2600,
+    "protein_g": null,
+    "protein_goal": 160
+  },
+  "bp": null,
+  "gym": {
+    "day_type": "push",
+    "label": "PUSH",
+    "muscles": [
+      "chest",
+      "front_delts",
+      "side_delts",
+      "triceps"
+    ],
+    "status": "pending",
+    "done_min": null,
+    "week_done": 0,
+    "week_target": 4
+  },
+  "score": {
+    "value": 0,
+    "parts": {
+      "sleep": null,
+      "move": null,
+      "food": null,
+      "gym": 0
+    }
+  },
+  "progress": {
+    "level": 1,
+    "xp": 0,
+    "xp_next": 150,
+    "streak_days": 0,
+    "best_streak": 0
+  },
+  "week": [
+    {
+      "d": "M",
+      "state": "planned"
+    },
+    {
+      "d": "T",
+      "state": "planned"
+    },
+    {
+      "d": "W",
+      "state": "rest"
+    },
+    {
+      "d": "T",
+      "state": "today"
+    },
+    {
+      "d": "F",
+      "state": "planned"
+    },
+    {
+      "d": "S",
+      "state": "rest"
+    },
+    {
+      "d": "S",
+      "state": "rest"
+    }
+  ],
+  "coach": {
+    "text": "PUSH day loaded. You know the drill.",
+    "tone": "nudge"
+  },
+  "mascot": "pumped",
+  "celebrate": null
+}

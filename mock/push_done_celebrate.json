@@ -1,0 +1,136 @@
+{
+  "now": "2026-10-22T19:40:00+02:00",
+  "updated": "2026-10-22T19:35:00+02:00",
+  "stale": false,
+  "mode": "evening",
+  "sleep": {
+    "asleep_min": 432,
+    "avg7_min": 410,
+    "goal_min": 450,
+    "stages": {
+      "deep": 72,
+      "core": 250,
+      "rem": 95,
+      "awake": 15
+    }
+  },
+  "steps": {
+    "value": 7800,
+    "goal": 10000
+  },
+  "active": {
+    "kcal": 480,
+    "goal": 600
+  },
+  "food": {
+    "kcal": 1700,
+    "kcal_goal": 2600,
+    "protein_g": 110,
+    "protein_goal": 160
+  },
+  "bp": {
+    "sys": 128,
+    "dia": 82,
+    "pulse": 64,
+    "ts": "2026-10-22T08:10:00+02:00",
+    "trend7": [
+      [
+        126,
+        80
+      ],
+      [
+        130,
+        84
+      ],
+      [
+        124,
+        79
+      ],
+      [
+        128,
+        82
+      ],
+      [
+        127,
+        81
+      ],
+      [
+        131,
+        83
+      ],
+      [
+        128,
+        82
+      ]
+    ]
+  },
+  "gym": {
+    "day_type": "push",
+    "label": "PUSH",
+    "muscles": [
+      "chest",
+      "front_delts",
+      "triceps"
+    ],
+    "status": "done",
+    "done_min": 55,
+    "week_done": 3,
+    "week_target": 4
+  },
+  "score": {
+    "value": 86,
+    "parts": {
+      "sleep": 24,
+      "move": 20,
+      "food": 17,
+      "gym": 25
+    }
+  },
+  "progress": {
+    "level": 7,
+    "xp": 420,
+    "xp_next": 450,
+    "streak_days": 13,
+    "best_streak": 21
+  },
+  "week": [
+    {
+      "d": "M",
+      "state": "done"
+    },
+    {
+      "d": "T",
+      "state": "done"
+    },
+    {
+      "d": "W",
+      "state": "rest"
+    },
+    {
+      "d": "T",
+      "state": "done"
+    },
+    {
+      "d": "F",
+      "state": "planned"
+    },
+    {
+      "d": "S",
+      "state": "rest"
+    },
+    {
+      "d": "S",
+      "state": "rest"
+    }
+  ],
+  "coach": {
+    "text": "Push day crushed. Recover well.",
+    "tone": "proud"
+  },
+  "mascot": "proud",
+  "celebrate": {
+    "id": "gym_done_2026-10-22",
+    "title": "PUSH DAY COMPLETE",
+    "sub": "+50 XP · streak 13"
+  }
+}
