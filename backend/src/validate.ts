@@ -18,10 +18,17 @@ function obj(v: unknown, path: string): Record<string, unknown> {
   return isObj(v) ? v : bad(`${path} must be a JSON object`);
 }
 
-/** Numbers may arrive as strings from iOS Shortcuts ("8432", "1850.5"); null/absent means "no data". */
+/** A whole number written with grouping separators, as Shortcuts does in some locales ("8.432", "8,432", "1 850"). */
+const GROUPED_INT = /^\d{1,3}([.,\u00a0\u202f ]\d{3})+$/;
+
+/** Numbers may arrive as strings from iOS Shortcuts ("8432", "1850,5", "8.432"); null/absent means "no data". */
 function num(v: unknown, path: string, min: number, max: number, opts: { int?: boolean } = {}): number | null {
   if (v === null || v === undefined || v === "") return null;
-  const n = typeof v === "string" ? Number(v.replace(",", ".")) : v;
+  let n: unknown = v;
+  if (typeof v === "string") {
+    const t = v.trim();
+    n = opts.int && GROUPED_INT.test(t) ? Number(t.replace(/[^\d]/g, "")) : Number(t.replace(",", "."));
+  }
   if (typeof n !== "number" || !Number.isFinite(n)) return bad(`${path} must be a number`);
   if (n < min || n > max) return bad(`${path} must be between ${min} and ${max}`);
   return opts.int ? Math.round(n) : Math.round(n * 10) / 10;

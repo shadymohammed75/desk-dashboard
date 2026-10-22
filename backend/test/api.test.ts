@@ -114,6 +114,37 @@ describe("validation", () => {
     expect(res.status).toBe(400);
   });
 
+  it("reads grouped thousands from German/English Shortcuts as whole numbers", async () => {
+    const { call } = makeApi();
+    await call("POST", "/api/ingest", {
+      body: { date: "2026-10-22", steps: "8.432", active_kcal: "1,050", nutrition: { kcal: "2.150", protein_g: "120,4" } }, now,
+    });
+    const d = (await call("GET", "/api/dashboard", { now })).body;
+    expect([d.steps.value, d.active.kcal, d.food.kcal, d.food.protein_g]).toEqual([8432, 1050, 2150, 120]);
+  });
+
+  it("accepts the exact body shape the iOS Shortcut builds (shortcuts/README.md)", async () => {
+    const { call } = makeApi();
+    const body = JSON.parse(`{"date":"2026-10-22","sent_at":"2026-10-22T07:05:12+02:00","steps":"8.432","active_kcal":"512",
+      "nutrition":{"kcal":"1850","protein_g":"120"},
+      "sleep_samples":[{"start":"2026-10-21T23:30:00+02:00","end":"2026-10-22T06:42:00+02:00","value":"Core"}],
+      "workouts":[{"type":"Traditional Strength Training","start":"2026-10-22T06:50:00+02:00","duration_min":"41"}]}`);
+    expect((await call("POST", "/api/ingest", { body, now })).body).toEqual({ ok: true, date: "2026-10-22" });
+    const d = (await call("GET", "/api/dashboard", { now })).body;
+    expect(d).toMatchObject({ steps: { value: 8432 }, sleep: { asleep_min: 432 }, gym: { status: "done", done_min: 41 } });
+    const empty = { ...body, sleep_samples: [], workouts: [] };
+    expect((await call("POST", "/api/ingest", { body: empty, now })).status).toBe(200);
+  });
+
+  it("shows what the last sync delivered", async () => {
+    const { call } = makeApi();
+    expect((await call("GET", "/api/debug/last-ingest", { now })).body).toEqual({ last_ingest: null, ingest: null });
+    await call("POST", "/api/ingest", { body: ingestBody("2026-10-22"), now });
+    const r = (await call("GET", "/api/debug/last-ingest", { now })).body;
+    expect(r).toMatchObject({ date: "2026-10-22", steps: 8432, sleep: { samples: 1, values: ["Core"], asleep_min: 432 } });
+    expect((await call("GET", "/api/debug/last-ingest", { now, token: DEVICE })).status).toBe(401);
+  });
+
   it("accepts numbers sent as strings by Shortcuts", async () => {
     const { call } = makeApi();
     const r = await call("POST", "/api/ingest", { body: { date: "2026-10-22", steps: "8432", nutrition: { kcal: "1850,5" } }, now });

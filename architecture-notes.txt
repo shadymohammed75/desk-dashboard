@@ -1,5 +1,5 @@
 # Desk Health Dashboard — Architecture Notes
-Last updated: 2026-10-22 (Phase 5)
+Last updated: 2026-10-22 (Phase 7 docs)
 
 ## Architecture
 - Monorepo: backend/ (Cloudflare Worker, TS), app/ (PWA source), firmware/ (ESP32-S3 + LVGL), tools/ (body map, snapshot renderer), mock/ (contract fixtures)
@@ -54,6 +54,11 @@ Last updated: 2026-10-22 (Phase 5)
 - recompute(DATE): day record + config + bp -> summarizeDay -> meta:days, meta:best_streak, meta:celebrate (today only)
 - Display: ESP32 -> GET /api/dashboard -> buildDashboard(state, now) computed live (mode, staleness, coach depend on the clock)
 - Deploy: push to main -> Cloudflare Workers Builds (root backend/) -> wrangler deploy; KV namespace auto-provisioned on first deploy
+- Health Shortcut (shortcuts/README.md): JSON built as Text (robust vs Dictionary nesting), all numbers quoted;
+  server parses "8.432"/"8,432" grouped ints and "1850,5" decimals, so iPhone locale can't corrupt values
+- GET /api/debug/last-ingest (ingest token): what the last sync delivered (counts, labels, computed sleep) for debugging
+- Live verification: smoke.yml (workflow_dispatch) runs scripts/smoke.sh with repo secrets — workers.dev isn't reachable
+  from the cloud dev environment and tokens never need to be shared in chat
 - CI: .github/workflows/backend.yml -> typecheck, vitest, mock contract check, wrangler dry-run
 - App E2E: backend/e2e/app.e2e.mjs (Playwright, iPhone 390×844) against wrangler dev — login, I trained, BP, plan, rollback, CSP
 - Firmware build: push -> GitHub Actions (firmware.yml) -> secrets.h from Actions secrets -> pio run -> factory (merged) .bin
@@ -94,3 +99,4 @@ Last updated: 2026-10-22 (Phase 5)
 - 2026-10-22: Phase 4 — LVGL Training HUD, fonts, HUD/glow assets, snapshot tool, 11 reviewed PNGs (docs/snapshots/REVIEW.md)
 - 2026-10-22: Phase 5 — firmware (Waveshare board config, net task, HTTPS cert bundle, watchdog, backlight schedule),
   firmware.yml CI with secrets injection, /flash page (local-file ESP Web Tools), FLASHING.md; local build OK (1.76 MB)
+- 2026-10-22: Phase 7 — Shortcut guide, locale-proof number parsing, /api/debug/last-ingest, smoke.yml, SETUP.md

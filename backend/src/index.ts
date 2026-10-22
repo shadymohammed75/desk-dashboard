@@ -4,6 +4,7 @@ import { buildDashboard, type State } from "./logic/dashboard";
 import { addReading, latest } from "./logic/bp";
 import { gymStatus, plannedSplit, splitInfo } from "./logic/gym";
 import { firstTrackedDay } from "./logic/motivation";
+import { computeSleep } from "./logic/sleep";
 import { addDays, localDate, toLocalIso, weekdayOf } from "./logic/time";
 import { Store, type KVLike } from "./store";
 import { HttpError, parseBp, parseConfig, parseGym, parseIngest } from "./validate";
@@ -200,6 +201,33 @@ export async function handle(req: Request, env: Env, now: Date): Promise<Respons
       return json(config);
     }
 
+    case "GET /api/debug/last-ingest": {
+      // What the last Health sync actually delivered, to debug the iOS Shortcut without reading KV by hand.
+      await app();
+      const [config, last] = await Promise.all([store.config(), store.lastIngest()]);
+      const tz = config.timezone;
+      const date = last ? localDate(new Date(last), tz) : null;
+      const ing = date ? (await store.day(date)).ingest : undefined;
+      if (!ing || !date) return json({ last_ingest: last, ingest: null });
+      const samples = ing.sleep_samples;
+      return json({
+        last_ingest: toLocalIso(new Date(ing.received_at), tz),
+        date,
+        sent_at: ing.sent_at,
+        steps: ing.steps,
+        active_kcal: ing.active_kcal,
+        nutrition: ing.nutrition,
+        sleep: {
+          samples: samples.length,
+          values: [...new Set(samples.map((x) => x.value))],
+          first_start: samples[0]?.start ?? null,
+          last_end: samples[samples.length - 1]?.end ?? null,
+          asleep_min: computeSleep(samples, date, tz)?.asleep_min ?? null,
+        },
+        workouts: ing.workouts,
+      });
+    }
+
     case "GET /api/today":
       await app();
       return json(await todayView(store, now));
@@ -213,7 +241,8 @@ export async function handle(req: Request, env: Env, now: Date): Promise<Respons
     }
   }
 
-  const known = ["/api/health", "/api/dashboard", "/api/ingest", "/api/gym", "/api/bp", "/api/config", "/api/today", "/api/history"];
+  const known = ["/api/health", "/api/dashboard", "/api/ingest", "/api/gym", "/api/bp", "/api/config", "/api/today",
+    "/api/history", "/api/debug/last-ingest"];
   if (known.includes(path)) throw new HttpError(405, `${method} is not allowed on ${path}`);
   throw new HttpError(404, `no route for ${path}`);
 }

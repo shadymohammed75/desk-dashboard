@@ -1,0 +1,28 @@
+name: smoke
+
+# Run by hand after a deploy: checks the live Worker end to end (auth, ingest, gym, bp, dashboard contract).
+# Uses the API_URL, INGEST_TOKEN and DEVICE_TOKEN repository secrets, so tokens never leave GitHub.
+on:
+  workflow_dispatch:
+    inputs:
+      keep_gym:
+        description: "Leave the smoke test's 'gym done' entry in place (otherwise it is undone at the end)"
+        type: boolean
+        default: false
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Smoke test the live Worker
+        env:
+          API_URL: ${{ secrets.API_URL }}
+          INGEST_TOKEN: ${{ secrets.INGEST_TOKEN }}
+          DEVICE_TOKEN: ${{ secrets.DEVICE_TOKEN }}
+        run: |
+          if [ -z "$API_URL" ] || [ -z "$INGEST_TOKEN" ] || [ -z "$DEVICE_TOKEN" ]; then
+            echo "::error::Add the API_URL, INGEST_TOKEN and DEVICE_TOKEN repository secrets first (see SETUP.md)."
+            exit 1
+          fi
+          backend/scripts/smoke.sh "$API_URL" ${{ inputs.keep_gym && '--keep-gym' || '' }}
