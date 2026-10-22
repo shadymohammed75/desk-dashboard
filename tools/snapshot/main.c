@@ -87,7 +87,7 @@ static int frames(DashboardData *d, const char *prefix, const char *name)
     DashboardData before = *d;
     bool need_before = true;
 
-    if(!strcmp(name, "score")) { memset(&before.part_sleep, 0, 4 * sizeof(int32_t)); before.score = 0; dur = 600; }
+    if(!strcmp(name, "score")) { before.score = 0; dur = 600; }
     else if(!strcmp(name, "done")) { before.gym = DD_GYM_PENDING; d->gym = DD_GYM_DONE; dur = 560; }
     else if(!strcmp(name, "coach")) { snprintf(before.coach, sizeof before.coach, "..."); dur = 400; }
     else if(!strcmp(name, "breathe")) { d->gym = DD_GYM_PENDING; dur = 2400; need_before = false; }

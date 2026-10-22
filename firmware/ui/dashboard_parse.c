@@ -1,6 +1,7 @@
 /* /api/dashboard → DashboardData, with cJSON (bundled with ESP-IDF/Arduino-ESP32; fetched by the snapshot tool). */
 #include "dashboard_data.h"
 
+#include <stdlib.h>
 #include <string.h>
 
 #include "cJSON.h"
@@ -24,6 +25,16 @@ static void str(const cJSON *o, const char *k, char *dst, size_t n)
         strncpy(dst, v->valuestring, n - 1);
         dst[n - 1] = '\0';
     }
+}
+
+/* "#RRGGBB" → 0xRRGGBB; `fallback` when missing or malformed. */
+static uint32_t color(const cJSON *o, const char *k, uint32_t fallback)
+{
+    const cJSON *v = get(o, k);
+    if(!cJSON_IsString(v) || strlen(v->valuestring) != 7 || v->valuestring[0] != '#') return fallback;
+    char *end;
+    unsigned long c = strtoul(v->valuestring + 1, &end, 16);
+    return *end ? fallback : (uint32_t)c;
 }
 
 static bool is(const cJSON *o, const char *k, const char *val)
@@ -85,6 +96,8 @@ bool dashboard_parse(const char *json, DashboardData *d)
     const cJSON *g = get(root, "gym");
     str(g, "day_type", d->day_type, sizeof d->day_type);
     str(g, "label", d->label, sizeof d->label);
+    d->color = color(g, "color", 0xFF6A1A);
+    str(g, "icon", d->icon, sizeof d->icon);
     const cJSON *m;
     cJSON_ArrayForEach(m, get(g, "muscles")) {
         if(d->muscles_n >= DD_MAX_MUSCLES || !cJSON_IsString(m)) continue;
@@ -99,11 +112,14 @@ bool dashboard_parse(const char *json, DashboardData *d)
 
     const cJSON *sc = get(root, "score");
     d->score = num(sc, "value");
-    const cJSON *parts = get(sc, "parts");
-    d->part_sleep = num(parts, "sleep");
-    d->part_move = num(parts, "move");
-    d->part_food = num(parts, "food");
-    d->part_gym = num(parts, "gym");
+    d->perfect = cJSON_IsTrue(get(sc, "perfect"));
+    const cJSON *t;
+    cJSON_ArrayForEach(t, get(sc, "tasks")) {
+        if(d->tasks_total >= DD_MAX_TASKS) break;
+        bool done = cJSON_IsTrue(get(t, "done"));
+        d->task_done[d->tasks_total++] = done;
+        d->tasks_done += done;
+    }
 
     const cJSON *p = get(root, "progress");
     d->level = num(p, "level");
@@ -117,6 +133,8 @@ bool dashboard_parse(const char *json, DashboardData *d)
     cJSON_ArrayForEach(w, get(root, "week")) {
         if(i >= 7) break;
         str(w, "d", d->week_d[i], sizeof d->week_d[i]);
+        d->week_color[i] = color(w, "color", 0xFF6A1A);
+        str(w, "icon", d->week_icon[i], sizeof d->week_icon[i]);
         d->week[i] = is(w, "state", "done") ? DD_WEEK_DONE : is(w, "state", "rest") ? DD_WEEK_REST
                      : is(w, "state", "missed") ? DD_WEEK_MISSED : is(w, "state", "skipped") ? DD_WEEK_SKIPPED
                      : is(w, "state", "today") ? DD_WEEK_TODAY : DD_WEEK_PLANNED;

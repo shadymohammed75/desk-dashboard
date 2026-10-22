@@ -7,7 +7,10 @@
 #define C_PANEL       lv_color_hex(0x11131A)
 #define C_PANEL_2     lv_color_hex(0x171A23)
 #define C_BORDER      lv_color_hex(0x1E2230)
-#define C_MUSCLE      lv_color_hex(0x1E2230)
+#define C_MUSCLE      lv_color_hex(0x232836)   /* untrained muscle */
+#define C_MUSCLE_LINE lv_color_hex(0x343B4D)
+#define C_BODY_PART   lv_color_hex(0x191C25)   /* head, hands, feet… */
+#define C_TEAL        lv_color_hex(0x2DD4BF)   /* rest days */
 #define C_PRIMARY     lv_color_hex(0xFF6A1A)   /* today's target, CTAs, score ring */
 #define C_CYAN        lv_color_hex(0x22D3EE)   /* sleep, recovery */
 #define C_LIME        lv_color_hex(0x3DFF8F)   /* done, goals hit */

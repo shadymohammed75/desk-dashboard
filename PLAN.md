@@ -351,10 +351,9 @@ It feels like a game HUD or a sci-fi cockpit that is *about me*. It's dark and n
    - In the centre: the **mascot** (an original 32×32 pixel creature in 5 moods), "LV 7", and a gold XP bar with `xp/xp_next`.
    - On the right: a flame icon with the streak in gold (it turns lime with a sparkle at milestones), then a connection dot that is lime when live and amber with "data 4h old" when stale.
 2. **Daily Score ring (hero):**
-   - A 180px ring made of **4 arc segments**: sleep (cyan), move (orange), food (gold) and gym (lime). Each fills in proportion to its points.
-   - In the middle: a big number and the label "DAILY SCORE".
-   - When the score is 90 or more, the number turns gold with a soft glow and a tiny "PERFECT" tag.
-   - On data refresh the arcs **sweep** from the old value to the new one over 600 ms (ease-out).
+   - A 180px ring with **one segment per daily habit** (§4.3b): lime when done, a faint track when not. All segments turn **gold** on a perfect day.
+   - In the middle: the score as a percentage and "6/9 HABITS".
+   - On a perfect day, the ring gets a soft gold glow and a "PERFECT DAY" tag.
 3. **Stat rows (sleep, move, fuel):**
    - Each row has an icon, a label, a big value and a segmented progress bar (8–10 blocks, game-style) with a %.
    - When a goal is hit, the bar turns lime, a small trophy icon appears, and the % becomes "GOAL ✓".
@@ -371,7 +370,8 @@ It feels like a game HUD or a sci-fi cockpit that is *about me*. It's dark and n
      - **planned:** hollow;
      - **missed or skipped:** faint ✕.
    - Underneath: "2/4 sessions".
-6. **Body map (right column, the star):**
+6. **Body map (right column, the star).** The polygons come from react-native-body-highlighter (MIT), see CREDITS.md. Untrained muscles are #232836 with #343B4D outlines. The title shows the split's icon and colour.
+   - **Rest days** show a big teal icon instead of the body: a hot tub with rising steam on Sunday ("SPA DAY"), a moon on other rest days.
    - **Pending:** today's muscles are orange with a slow **breathing glow** (opacity 55% → 100% → 55% over 2.4 s). The rest of the body is faint outline only.
    - **Done:** the trained muscles fill **lime with a bottom-to-top sweep** (500 ms), and the pill becomes "✓ DONE · 55 MIN".
    - **Rest:** the whole body is a calm cyan outline at 40%, with a moon icon and "RECOVERY DAY".
@@ -411,9 +411,28 @@ It feels like a game HUD or a sci-fi cockpit that is *about me*. It's dark and n
 - Text stays readable from about 1 m: values at least 28px, labels at least 12px but only for labels.
 - Everything is original art, including the mascot, icons and body.
 
-### 5.2 Phone app "Gym Log" (PWA, mobile-first, same dark/orange style)
+### 5.2 Phone app "Gym Log" (PWA, mobile-first)
 
-**Look and feel:** the same "Training HUD" palette, icons and mascot as the desk screen (§5.1). The app shows the same score ring, streak flame and XP bar at the top. Saving a workout plays a short confetti burst plus "+50 XP", using CSS only.
+**Design system:**
+- Inter (self-hosted, OFL), type scale 40 / 28 / 20 / 16 / 13 / 12, on an 8 pt spacing grid.
+- Surfaces are separated by elevation and contrast rather than borders. Text is #F4F5F8, labels #8A90A2, and tap targets are at least 44 px.
+- **Split colours** are used everywhere: push orange, pull cyan, legs violet, rest teal.
+- Icons are Material Symbols.
+- The score / LV / XP header appears **only on Today**. Other tabs get a compact title bar.
+
+**Today:**
+- A hero card: the split name in large type in the split colour, the big body map (or the rest-day icon with steam), and one full-width primary button "I trained" in the split colour.
+- The daily habits checklist, then 3 metric cards and the week dots.
+
+**Plan:**
+- 7 big day tiles. Tapping one opens a bottom sheet to pick the split.
+- Split cards with a mini body preview and muscle chips. The habits editor, then goals.
+
+**History:** a month heat-map (split colours, teal rest days, outline-only missed days, gold dot for a perfect day), stats, then recent sessions with a coloured stripe.
+
+**Feedback:**
+- **Celebration:** a centred card on a blurred backdrop, with confetti behind the card and below the header. It closes itself after 2.5 s.
+- **Toasts:** one at a time, above the nav, shown for 2 s.
 
 **Today tab**
 - A big header: "Today: PUSH" (or "Rest day") with a small front/back body map in SVG, showing the same states as the desk screen.

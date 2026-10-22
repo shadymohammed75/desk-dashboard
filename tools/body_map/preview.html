@@ -22,15 +22,13 @@
     .card h3 { margin: 0 0 4px; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
     .names { text-align: center; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); min-height: 1.4em; }
     svg { width: 100%; height: auto; display: block; }
-    svg .silhouette { fill: #171A23; stroke: var(--faint); stroke-width: 1.2; }
-    svg path.muscle { fill: #1E2230; stroke: #2A3042; stroke-width: .8; }
+    svg .part { fill: #191C25; stroke: #343B4D; stroke-width: 2; }
+    svg path.muscle { fill: #232836; stroke: #343B4D; stroke-width: 2; }
     svg.pending path.on { fill: var(--primary); animation: breathe 2.4s ease-in-out infinite; }
-    svg.done path.on { fill: var(--lime); animation: sweep .5s ease-out both; }
-    svg.skipped path.on { fill: var(--faint); }
-    svg.rest .silhouette { stroke: var(--cyan); stroke-opacity: .4; fill: var(--panel); }
-    svg.rest path.muscle { fill: transparent; stroke: var(--cyan); stroke-opacity: .25; }
+    svg.done path.on { fill: var(--lime); }
+    svg.skipped path.on { fill: #3A4052; }
+    svg.rest path.muscle, svg.rest .part { fill: #12141B; stroke: #2DD4BF; stroke-opacity: .35; }
     @keyframes breathe { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
-    @keyframes sweep { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0); } }
   </style>
 </head>
 <body>
@@ -43,7 +41,7 @@
 
 <script>
 const MOCKS = ["morning_short_sleep", "push_pending_day", "push_pending_evening", "push_done_celebrate", "rest_day",
-               "perfect_day", "streak_milestone", "no_data", "stale"];
+               "perfect_day", "streak_milestone", "no_data", "stale", "spa_day"];
 const SPLITS = {
   push: ["chest", "front_delts", "side_delts", "triceps"],
   pull: ["lats", "upper_back", "traps", "rear_delts", "biceps", "forearms"],
@@ -73,7 +71,10 @@ function figure(title, gym) {
   svg.classList.add(gym.status);
   const on = new Set(gym.muscles);
   if (on.has("calves")) on.add("calves_front");
-  on.forEach((id) => svg.querySelector(`#${id}`)?.classList.add("on"));
+  // muscle polygons carry data-ids (see muscle_map.json); light every polygon that lists a trained muscle
+  svg.querySelectorAll(".muscle").forEach((p) => {
+    if ((p.getAttribute("data-ids") || "").split(" ").some((id) => on.has(id))) p.classList.add("on");
+  });
   const names = document.createElement("div");
   names.className = "names";
   names.textContent = gym.status === "rest" ? "Recovery day" : gym.muscles.join(" · ").replaceAll("_", " ");

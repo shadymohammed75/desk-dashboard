@@ -1,5 +1,5 @@
 # Desk Health Dashboard — Architecture Notes
-Last updated: 2026-10-22 (Phase 7 docs)
+Last updated: 2026-10-22 (redesign)
 
 ## Architecture
 - Monorepo: backend/ (Cloudflare Worker, TS), app/ (PWA source), firmware/ (ESP32-S3 + LVGL), tools/ (body map, snapshot renderer), mock/ (contract fixtures)
@@ -18,11 +18,15 @@ Last updated: 2026-10-22 (Phase 7 docs)
 - Phone app (backend/public/app): plain HTML/CSS/JS PWA, no build step, no framework; manifest + apple-touch-icon for Home Screen
 - App state is one object S re-rendered wholesale (render()); form drafts (BP, plan) live in S so re-renders never wipe input
 - Optimistic UI — apply locally, POST, replace with server's /api/today payload; on failure restore snapshot + toast
-- Body map: tools/body_map/make_body.py generates body.svg (rounded, mirrored geometric shapes; one <path id> per muscle);
-  writes the app's copy too; a vitest test asserts both copies are identical and every muscle id exists exactly once
+- Body map (redesign): react-native-body-highlighter (MIT) polygons -> make_body.mjs + muscle_map.json (slug -> our ids,
+  per-polygon/per-side where the library has no separate muscle, e.g. lats) -> body.svg with data-ids on each path;
+  the app lights [data-ids~=id]; svg_to_lvgl.py emits one A8 mask + glow per polygon group with its ids string
 - Asset pipeline (Python, run by hand, outputs committed): body.svg -> svg_to_lvgl.py -> A8 masks (firmware/ui/assets/body_assets.c)
   * one A8 alpha mask per muscle + silhouette fill/line per figure; tinted at runtime via image_recolor, so one mask serves all states
   * figure scaled to 0.64 (90×243 px) to fit the 480 px screen's right column (PLAN said ~140×380 — too tall); ~102 KiB pixels
+- Asset policy: original or MIT/Apache-2.0/CC BY (OFL fonts), recorded in CREDITS.md; generators pinned in tools/package.json
+- Icons: Material Symbols Rounded fill (Apache-2.0) -> tools/icons/svg -> app icons.js (window.MS_ICONS) + LVGL A8 icon_for(name,size)
+- Fonts: Inter (OFL) — self-hosted variable woff2 in the app (no third-party request), lv_font_conv subsets for the desk
 - Mascot "Pip": original 32×32 pixel art drawn in code (tools/mascot/make_mascot.py), 5 moods -> PNGs for the app + ARGB8888 C
 - tools/lvgl_c.py: shared emitter for lv_image_dsc_t (LVGL 9 header: magic/cf/flags/w/h/stride; ARGB8888 bytes are B,G,R,A)
 - firmware/include/lv_conf.h: one LVGL config shared by firmware and the snapshot tool (RGB565, clib malloc)
@@ -48,6 +52,12 @@ Last updated: 2026-10-22 (Phase 7 docs)
   --celebrate peak frame, --frames NAME for 6-frame animation strips; CI uploads PNGs (ui.yml); copies in docs/snapshots
 - App icons generated from an SVG (score-ring motif + bolt) by tools/app_icons/make_icons.py
 
+- Daily score = habits: config.tasks (manual or auto gym/steps/sleep_early), day.tasks ticks, score = round(100*done/total),
+  perfect = all done; XP +10 per habit (task:<id> events), +30 perfect; ring on both clients = one segment per habit
+- Split styling: splits carry color+icon; config.days overrides weekday icon/label (Sunday SPA DAY hot_tub);
+  dashboard.gym/week[] and history carry resolved color/icon so clients never re-derive it
+- normalizeConfig upgrades older stored configs (missing colours/icons/tasks/days/sleep_by) on read
+
 ## Pipelines
 - Health sync: iOS Shortcut -> POST /api/ingest (validated, day overwrite) -> KV day:DATE + meta:last_ingest -> recompute(DATE)
 - Manual logs: PWA -> POST /api/gym (done/skip/undo, 7-day backfill) | /api/bp | PUT /api/config -> KV -> recompute(DATE)
@@ -60,6 +70,8 @@ Last updated: 2026-10-22 (Phase 7 docs)
 - Live verification: smoke.yml (workflow_dispatch) runs scripts/smoke.sh with repo secrets — workers.dev isn't reachable
   from the cloud dev environment and tokens never need to be shared in chat
 - CI: .github/workflows/backend.yml -> typecheck, vitest, mock contract check, wrangler dry-run
+- Visual tests: e2e/make_fixtures.ts drives the real router (respond(), injected time) through 5 weeks of mixed data ->
+  fixtures; e2e/visual.mjs serves them to the app via Playwright routes and screenshots every tab at 390×844
 - App E2E: backend/e2e/app.e2e.mjs (Playwright, iPhone 390×844) against wrangler dev — login, I trained, BP, plan, rollback, CSP
 - Firmware build: push -> GitHub Actions (firmware.yml) -> secrets.h from Actions secrets -> pio run -> factory (merged) .bin
   -> PRIVATE artifact -> user downloads -> /flash page loads it from disk into a blob manifest -> ESP Web Tools (Web Serial)
@@ -100,3 +112,5 @@ Last updated: 2026-10-22 (Phase 7 docs)
 - 2026-10-22: Phase 5 — firmware (Waveshare board config, net task, HTTPS cert bundle, watchdog, backlight schedule),
   firmware.yml CI with secrets injection, /flash page (local-file ESP Web Tools), FLASHING.md; local build OK (1.76 MB)
 - 2026-10-22: Phase 7 — Shortcut guide, locale-proof number parsing, /api/debug/last-ingest, smoke.yml, SETUP.md
+- 2026-10-22: Redesign — licensed assets (CREDITS.md), habit-based score + POST /api/tasks, split colours/icons, Sunday spa day,
+  new phone app (hero, habits, tiles, heat-map, celebration card), desk screen with new body/icons/Inter/habit ring

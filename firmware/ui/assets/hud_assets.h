@@ -7,20 +7,36 @@
 extern "C" {
 #endif
 
-extern const lv_image_dsc_t icon_moon_14;   /* 14x14 A8 */
-extern const lv_image_dsc_t icon_moon_20;   /* 20x20 A8 */
-extern const lv_image_dsc_t icon_steps_20;   /* 20x20 A8 */
-extern const lv_image_dsc_t icon_flame_20;   /* 20x20 A8 */
-extern const lv_image_dsc_t icon_flame_28;   /* 28x28 A8 */
-extern const lv_image_dsc_t icon_fuel_20;   /* 20x20 A8 */
-extern const lv_image_dsc_t icon_heart_16;   /* 16x16 A8 */
-extern const lv_image_dsc_t icon_bolt_20;   /* 20x20 A8 */
+extern const lv_image_dsc_t icon_fitness_center_14;   /* 14x14 A8 */
+extern const lv_image_dsc_t icon_fitness_center_28;   /* 28x28 A8 */
+extern const lv_image_dsc_t icon_rowing_14;   /* 14x14 A8 */
+extern const lv_image_dsc_t icon_rowing_28;   /* 28x28 A8 */
+extern const lv_image_dsc_t icon_directions_run_14;   /* 14x14 A8 */
+extern const lv_image_dsc_t icon_directions_run_28;   /* 28x28 A8 */
+extern const lv_image_dsc_t icon_hot_tub_14;   /* 14x14 A8 */
+extern const lv_image_dsc_t icon_hot_tub_20;   /* 20x20 A8 */
+extern const lv_image_dsc_t icon_hot_tub_28;   /* 28x28 A8 */
+extern const lv_image_dsc_t icon_hot_tub_120;   /* 120x120 A8 */
+extern const lv_image_dsc_t icon_bedtime_14;   /* 14x14 A8 */
+extern const lv_image_dsc_t icon_bedtime_20;   /* 20x20 A8 */
+extern const lv_image_dsc_t icon_bedtime_28;   /* 28x28 A8 */
+extern const lv_image_dsc_t icon_bedtime_120;   /* 120x120 A8 */
+extern const lv_image_dsc_t icon_directions_walk_20;   /* 20x20 A8 */
+extern const lv_image_dsc_t icon_nutrition_20;   /* 20x20 A8 */
+extern const lv_image_dsc_t icon_local_fire_department_20;   /* 20x20 A8 */
+extern const lv_image_dsc_t icon_favorite_16;   /* 16x16 A8 */
 extern const lv_image_dsc_t icon_trophy_16;   /* 16x16 A8 */
 extern const lv_image_dsc_t icon_check_14;   /* 14x14 A8 */
 extern const lv_image_dsc_t icon_check_18;   /* 18x18 A8 */
-extern const lv_image_dsc_t icon_x_14;   /* 14x14 A8 */
+extern const lv_image_dsc_t icon_close_14;   /* 14x14 A8 */
+extern const lv_image_dsc_t icon_bolt_20;   /* 20x20 A8 */
 extern const lv_image_dsc_t glow_ring;   /* 232x232 A8 */
 extern const lv_image_dsc_t glow_banner;   /* 640x140 A8 */
+extern const lv_image_dsc_t steam_wisp;   /* 14x44 A8 */
+
+/** Material Symbols icon by name (as sent by the API) and pixel size; unknown names fall back to
+ *  fitness_center at that size. */
+const lv_image_dsc_t *icon_for(const char *name, int size);
 
 #ifdef __cplusplus
 }

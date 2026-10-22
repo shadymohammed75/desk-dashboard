@@ -11,6 +11,7 @@ extern "C" {
 
 #define DD_NONE INT32_MIN
 #define DD_MAX_MUSCLES 18
+#define DD_MAX_TASKS 16
 
 typedef enum { DD_MODE_MORNING, DD_MODE_DAY, DD_MODE_EVENING, DD_MODE_NIGHT } dd_mode_t;
 typedef enum { DD_GYM_PENDING, DD_GYM_DONE, DD_GYM_SKIPPED, DD_GYM_REST } dd_gym_t;
@@ -39,19 +40,26 @@ typedef struct {
 
     char day_type[24];
     char label[16];
+    uint32_t color;               /* split colour 0xRRGGBB (rest days: teal) */
+    char icon[24];                /* Material Symbols name */
     char muscles[DD_MAX_MUSCLES][16];
     uint8_t muscles_n;
     dd_gym_t gym;
     int32_t done_min;
     int32_t week_done, week_target;
 
+    /* daily score = share of habits done; perfect = all done (PLAN.md §4.3b) */
     int32_t score;
-    int32_t part_sleep, part_move, part_food, part_gym;   /* DD_NONE = no data ("—") */
+    uint8_t tasks_done, tasks_total;
+    bool perfect;
+    bool task_done[DD_MAX_TASKS];
 
     int32_t level, xp, xp_next, streak, best_streak;
 
     dd_week_t week[7];
     char week_d[7][2];
+    uint32_t week_color[7];
+    char week_icon[7][24];
 
     char coach[72];
     dd_tone_t tone;
