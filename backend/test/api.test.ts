@@ -155,6 +155,48 @@ describe("validation", () => {
   });
 });
 
+describe("habits", () => {
+  it("ticks a habit from the app, scores it and reaches a perfect day", async () => {
+    const { call } = makeApi();
+    const now = berlin("2026-10-22T20:00");
+    let r = await call("POST", "/api/tasks", { body: { id: "apple", done: true }, now });
+    expect(r.status).toBe(200);
+    expect(r.body.dashboard.score).toMatchObject({ done: 1, total: 9, value: 11 });
+    expect(r.body.dashboard.score.tasks.find((t: any) => t.id === "apple")).toMatchObject({ done: true, auto: false });
+    for (const id of ["gym", "no_sweets", "focus", "steps", "morning", "night", "sleep_early", "read"]) {
+      r = await call("POST", "/api/tasks", { body: { id, done: true }, now });
+    }
+    expect(r.body.dashboard.score).toMatchObject({ value: 100, perfect: true });
+    expect(r.body.dashboard.coach.text).toMatch(/Perfect day|9 for 9|All habits done/);
+    expect(r.body.dashboard.celebrate).toMatchObject({ title: "PERFECT DAY" });
+    // unticking takes it back
+    r = await call("POST", "/api/tasks", { body: { id: "read", done: false }, now });
+    expect(r.body.dashboard.score).toMatchObject({ done: 8, perfect: false });
+  });
+
+  it("validates habit ticks", async () => {
+    const { call } = makeApi();
+    const now = berlin("2026-10-22T20:00");
+    expect((await call("POST", "/api/tasks", { body: { id: "fly", done: true }, now })).body.error).toMatch(/id must be one of/);
+    expect((await call("POST", "/api/tasks", { body: { id: "apple", done: "yes" }, now })).status).toBe(400);
+  });
+
+  it("edits the habit list and the Sunday style through the config", async () => {
+    const { call } = makeApi();
+    const now = berlin("2026-10-25T11:00");
+    const cfg = (await call("GET", "/api/config", { now })).body;
+    expect(cfg.days.sun).toEqual({ icon: "hot_tub", label: "SPA DAY" });
+    let d = (await call("GET", "/api/dashboard", { now })).body;
+    expect(d.gym).toMatchObject({ status: "rest", label: "SPA DAY", icon: "hot_tub", color: "#2DD4BF" });
+    const tasks = [{ id: "water", label: "2 l water", icon: "water_drop" }, { id: "gym", label: "Train", icon: "fitness_center", auto: "gym" }];
+    expect((await call("PUT", "/api/config", { body: { tasks }, now })).status).toBe(200);
+    d = (await call("GET", "/api/dashboard", { now })).body;
+    expect(d.score).toMatchObject({ total: 2, done: 1, value: 50 });   // gym is ticked by the rest day
+    expect((await call("PUT", "/api/config", { body: { splits: { ...cfg.splits, push: { ...cfg.splits.push, color: "orange" } } }, now })).body.error)
+      .toMatch(/colour/);
+  });
+});
+
 describe("dashboard", () => {
   it("works with no data at all", async () => {
     const { call } = makeApi();
@@ -164,7 +206,7 @@ describe("dashboard", () => {
       sleep: { asleep_min: null, avg7_min: null, stages: null },
       steps: { value: null }, food: { kcal: null, protein_g: null },
       gym: { status: "pending", label: "PUSH", week_done: 0 },
-      score: { value: 0, parts: { sleep: null, move: null, food: null, gym: 0 } },
+      score: { value: 0, done: 0, total: 9, perfect: false },
       progress: { level: 1, xp: 0, xp_next: 150, streak_days: 0 },
     });
     expect(d.week.map((x: any) => x.state)).toEqual(["planned", "planned", "rest", "today", "planned", "rest", "rest"]);
@@ -178,7 +220,7 @@ describe("dashboard", () => {
     expect(d).toMatchObject({
       now: "2026-10-22T18:10:00+02:00", updated: "2026-10-22T18:05:00+02:00", stale: false, mode: "evening",
       sleep: { asleep_min: 432 }, steps: { value: 8432 }, food: { kcal: 1850, protein_g: 120 },
-      coach: { tone: "nudge" }, mascot: "pumped",
+      coach: { tone: "nudge" }, mascot: "tired",   // evening, no habits done yet → score 0
     });
     d = (await call("GET", "/api/dashboard", { now: berlin("2026-10-22T21:06") })).body;
     expect(d.stale).toBe(true);
@@ -226,7 +268,7 @@ describe("dashboard", () => {
     const body = ingestBody("2026-10-22", { steps: 12000, nutrition: { kcal: 2500, protein_g: 170 } });
     await call("POST", "/api/ingest", { body, now });
     const xp1 = (await call("GET", "/api/dashboard", { now })).body.progress.xp;
-    expect(xp1).toBe(40); // steps + protein
+    expect(xp1).toBe(10); // the steps habit (asleep at 23:30, so not "asleep by 23:00")
     for (let i = 0; i < 3; i++) await call("POST", "/api/ingest", { body, now });
     expect((await call("GET", "/api/dashboard", { now })).body.progress.xp).toBe(xp1);
   });

@@ -52,7 +52,7 @@ await page.waitForSelector(".err:has-text('rejected')");
 check("wrong token shows an error", true);
 await page.fill("input[name=token]", INGEST);
 await page.click("button[type=submit]");
-await page.waitForSelector(".today-head");
+await page.waitForSelector(".hero");
 await page.waitForTimeout(400);
 await page.screenshot({ path: `${OUT}/1_today.png`, fullPage: true });
 
@@ -67,12 +67,12 @@ if (planned.status === "pending") {
   await page.click(".sheet .chip:has-text('PUSH')");
   await page.click(".sheet .chip:has-text('Side delts')"); // untick
   await page.click("button[aria-label='5 minutes less']");
-  await page.fill(".sheet input", "PR bench 80kg");
+  await page.fill(".sheet input.input", "PR bench 80kg");
   await page.screenshot({ path: `${OUT}/2_sheet.png` });
   await page.click("button:has-text('Save session')");
   await page.waitForTimeout(300);
   await page.screenshot({ path: `${OUT}/3_celebrate.png` });
-  await page.waitForSelector(".pill.done");
+  await page.waitForSelector(".status.done");
   await page.waitForTimeout(2200);
   await page.screenshot({ path: `${OUT}/4_done.png`, fullPage: true });
   const d = await dashboard();
@@ -89,7 +89,7 @@ await page.fill("input[name=sys]", "128");
 await page.fill("input[name=dia]", "82");
 await page.fill("input[name=pulse]", "64");
 await page.click("button:has-text('Save reading')");
-await page.waitForSelector(".toast.ok");
+await page.waitForSelector(".toast.ok:has-text('Reading saved')");
 await page.waitForTimeout(300);
 await page.screenshot({ path: `${OUT}/5_bp.png`, fullPage: true });
 const bp = (await dashboard()).bp;
@@ -101,28 +101,34 @@ const tomorrowKey = weekdays[(new Date(`${today}T12:00:00Z`).getUTCDay() + 1) % 
 const before = (await config()).schedule[tomorrowKey];
 const target = before === "legs" ? "pull" : "legs";
 await page.click(".nav button:has-text('Plan')");
-await page.waitForSelector(".plan-row");
+await page.waitForSelector(".tile");
 const idx = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"].indexOf(tomorrowKey);
-await page.locator(".plan-row select").nth(idx).selectOption(target);
+await page.locator(".tile").nth(idx).click();
+await page.waitForSelector(".sheet .option");
+await page.click(`.sheet .option:has-text('${target.toUpperCase()}')`);
+await page.waitForSelector(".toast.ok:has-text('is now')");
 await page.screenshot({ path: `${OUT}/6_plan.png`, fullPage: true });
-await page.click("button:has-text('Save plan')");
-await page.waitForSelector(".toast.ok");
 const after = (await config()).schedule[tomorrowKey];
 check(`plan edit changes tomorrow (${tomorrowKey}: ${before} → ${after})`, after === target);
 
 // History
 await page.click(".nav button:has-text('History')");
-await page.waitForSelector(".item");
+await page.waitForSelector(".cell");
 await page.screenshot({ path: `${OUT}/7_history.png`, fullPage: true });
 
 // Undo the session again (keeps the dev data tidy) and check rollback on a failed request.
 await page.click(".nav button:has-text('Today')");
+// tick a habit, and check the dashboard counts it
+const doneBefore = (await dashboard()).score.done;
+await page.click(".habit:has-text('Read something')");
+await page.waitForTimeout(500);
+check("ticking a habit raises the score", (await dashboard()).score.done === doneBefore + 1);
 await ctx.route("**/api/gym", (r) => r.abort());
-const statusBefore = await page.textContent(".pill");
+const statusBefore = await page.textContent(".status");
 if (await page.$("button:has-text('Undo')")) {
   await page.click("button:has-text('Undo')");
-  await page.waitForSelector(".toast:not(.ok)");
-  check("failed request rolls back and shows a toast", (await page.textContent(".pill")) === statusBefore);
+  await page.waitForSelector(".toast.error");
+  check("failed request rolls back and shows a toast", (await page.textContent(".status")) === statusBefore);
   await ctx.unroute("**/api/gym");
   await page.click("button:has-text('Undo')");
   await page.waitForTimeout(500);

@@ -2,11 +2,28 @@
   "timezone": "Europe/Berlin",
   "schedule": { "mon": "push", "tue": "pull", "wed": "rest", "thu": "push",
                 "fri": "pull", "sat": "rest", "sun": "rest" },
-  "splits": {
-    "push": { "label": "PUSH", "muscles": ["chest", "front_delts", "side_delts", "triceps"] },
-    "pull": { "label": "PULL", "muscles": ["lats", "upper_back", "traps", "rear_delts", "biceps", "forearms"] },
-    "legs": { "label": "LEGS", "muscles": ["quads", "hamstrings", "glutes", "calves"] },
-    "rest": { "label": "REST DAY", "muscles": [] }
+  "days": {
+    "wed": { "icon": "bedtime" },
+    "sat": { "icon": "bedtime" },
+    "sun": { "icon": "hot_tub", "label": "SPA DAY" }
   },
-  "goals": { "steps": 10000, "active_kcal": 600, "kcal": 2600, "protein_g": 160, "sleep_min": 450, "gym_per_week": 4 }
+  "splits": {
+    "push": { "label": "PUSH", "color": "#FF6A1A", "icon": "fitness_center", "muscles": ["chest", "front_delts", "side_delts", "triceps"] },
+    "pull": { "label": "PULL", "color": "#22D3EE", "icon": "rowing", "muscles": ["lats", "upper_back", "traps", "rear_delts", "biceps", "forearms"] },
+    "legs": { "label": "LEGS", "color": "#8B7CFF", "icon": "directions_run", "muscles": ["quads", "hamstrings", "glutes", "calves"] },
+    "rest": { "label": "REST DAY", "color": "#2DD4BF", "icon": "hot_tub", "muscles": [] }
+  },
+  "tasks": [
+    { "id": "gym", "label": "Train or rest as planned", "icon": "fitness_center", "auto": "gym" },
+    { "id": "apple", "label": "Eat one apple", "icon": "nutrition" },
+    { "id": "no_sweets", "label": "No sweets", "icon": "no_food" },
+    { "id": "focus", "label": "4h focus session", "icon": "timer" },
+    { "id": "steps", "label": "Steps goal", "icon": "directions_walk", "auto": "steps" },
+    { "id": "morning", "label": "Morning routine", "icon": "wb_sunny" },
+    { "id": "night", "label": "Night routine", "icon": "dark_mode" },
+    { "id": "sleep_early", "label": "Asleep by 23:00", "icon": "bedtime", "auto": "sleep_early" },
+    { "id": "read", "label": "Read something", "icon": "menu_book" }
+  ],
+  "goals": { "steps": 10000, "active_kcal": 600, "kcal": 2600, "protein_g": 160, "sleep_min": 450, "gym_per_week": 4,
+             "sleep_by": "23:00" }
 }

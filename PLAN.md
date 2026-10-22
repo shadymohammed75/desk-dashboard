@@ -32,7 +32,7 @@ A small 800×480 desk screen showing my daily health metrics (sleep, steps, food
 - **No secrets in git.** Tokens live in Cloudflare secrets and in a gitignored `secrets.h`.
 - **Free tiers only:** Cloudflare Workers + KV + Static Assets, GitHub Actions, iOS Shortcuts, LVGL.
 - **Health data is private.** Every endpoint needs a token, everything is HTTPS, and data lives only in my Cloudflare account.
-- **Original artwork only.** The body map is drawn from scratch; images from the web are not copied.
+- **Original or openly licensed assets only.** Use our own artwork, or assets under MIT / Apache-2.0 / CC BY (OFL for fonts). Record each one in `CREDITS.md` with its source, licence and attribution. Never copy unlicensed images from the web.
 
 ---
 
@@ -115,7 +115,12 @@ All writes send the header `Authorization: Bearer <INGEST_TOKEN>`.
 { "sys": 128, "dia": 82, "pulse": 64, "ts": "2026-10-22T08:10:00+02:00" }
 ```
 
-**`PUT /api/config`**: from the app's Plan screen. Replaces the schedule, splits or goals.
+**`POST /api/tasks`**: from the app's Today checklist. Ticks or unticks one daily habit.
+```json
+{ "id": "apple", "done": true }
+```
+
+**`PUT /api/config`**: from the app's Plan screen. Replaces the schedule, day overrides, splits, tasks or goals.
 
 ### 4.2 Reads
 
@@ -137,15 +142,17 @@ All writes send the header `Authorization: Bearer <INGEST_TOKEN>`.
   "active": { "kcal": 512, "goal": 600 },
   "food":   { "kcal": 1850, "kcal_goal": 2600, "protein_g": 120, "protein_goal": 160 },
   "bp":     { "sys": 128, "dia": 82, "pulse": 64, "ts": "…", "trend7": [[126,80],[130,84]] },
-  "gym":    { "day_type": "push", "label": "PUSH",
+  "gym":    { "day_type": "push", "label": "PUSH", "color": "#FF6A1A", "icon": "fitness_center",
               "muscles": ["chest","front_delts","side_delts","triceps"],
               "status": "pending", "done_min": null,
               "week_done": 2, "week_target": 4 },
-  "score":  { "value": 78, "parts": { "sleep": 22, "move": 20, "food": 18, "gym": 18 } },
+  "score":  { "value": 67, "done": 6, "total": 9, "perfect": false,
+              "tasks": [ { "id": "gym", "label": "Train or rest as planned", "icon": "fitness_center", "done": false, "auto": true },
+                         { "id": "apple", "label": "Eat one apple", "icon": "nutrition", "done": true, "auto": false } ] },
   "progress": { "level": 7, "xp": 340, "xp_next": 500, "streak_days": 12, "best_streak": 21 },
-  "week":   [ { "d": "M", "state": "done" }, { "d": "T", "state": "done" }, { "d": "W", "state": "rest" },
-              { "d": "T", "state": "today" }, { "d": "F", "state": "planned" },
-              { "d": "S", "state": "rest" }, { "d": "S", "state": "rest" } ],
+  "week":   [ { "d": "M", "state": "done", "color": "#FF6A1A", "icon": "fitness_center" },
+              { "d": "W", "state": "rest", "color": "#2DD4BF", "icon": "bedtime" },
+              { "d": "S", "state": "rest", "color": "#2DD4BF", "icon": "hot_tub" } ],
   "coach":  { "text": "Push day is waiting. 45 minutes is enough.", "tone": "nudge" },
   "mascot": "pumped",
   "celebrate": null
@@ -172,13 +179,21 @@ Notes on the new fields:
 
 ### 4.3b Motivation engine (backend, pure functions, unit-tested)
 
-**Daily Score (0–100)** has four parts worth up to 25 points each:
-- **sleep:** `min(asleep / goal, 1) × 25`
-- **move:** the average of steps% and active%, capped at 1, × 25
-- **food:** the average of protein% (capped at 1) and kcal-closeness (`1 − |kcal − goal| / goal`, floored at 0), × 25
-- **gym:** done = 25; rest day = 25 (resting is part of the plan); pending = 0; skipped = 0
+**Daily Score (0–100)** is the share of today's habits that are done. Doing **all** of them is a **perfect day**.
 
-Missing data counts as 0, and the UI shows "—" for that part.
+- The habits are a list in config (`tasks`), editable in the app. The defaults are:
+  - **Train or rest as planned** (auto: gym done, or a rest day)
+  - Eat one apple
+  - No sweets
+  - 4h focus session
+  - **Steps goal** (auto, from Apple Health)
+  - Morning routine
+  - Night routine
+  - **Asleep by 23:00** (auto: last night's first asleep sample before `goals.sleep_by`)
+  - Read something
+- `value = round(100 × done / total)`, and `perfect = (done == total)`.
+- Manual habits are ticked in the app. Auto habits tick themselves, and can also be ticked by hand when Health data is missing.
+- Sleep, steps, food and blood pressure are still shown as metrics. They no longer make up the score directly.
 
 **XP and levels** (lifetime total, stored in KV `meta:xp`, added once per day per event):
 
@@ -186,11 +201,9 @@ Missing data counts as 0, and the UI shows "—" for that part.
 |---|---|
 | Gym done | +50 |
 | Training on a planned rest day | +20 (bonus, not double) |
-| Steps goal hit | +20 |
-| Protein goal hit | +20 |
-| Sleep goal hit | +20 |
+| Each habit done (except the gym habit) | +10 |
 | BP logged | +10 |
-| Perfect day (score ≥ 90) | +30 bonus |
+| Perfect day (all habits done) | +30 bonus |
 
 - **Level curve:** `xp_next(level) = 100 + 50 × level`, so it's quick early and slower later.
 
@@ -222,7 +235,7 @@ Missing data counts as 0, and the UI shows "—" for that part.
 
 **Celebrate events** are emitted when:
 - gym is marked done;
-- a goal is hit for the first time today;
+- a perfect day is reached;
 - the level goes up;
 - a streak milestone is reached.
 
@@ -235,15 +248,33 @@ Each event has a unique id, and the server keeps it active for 30 min.
   "timezone": "Europe/Berlin",
   "schedule": { "mon": "push", "tue": "pull", "wed": "rest", "thu": "push",
                 "fri": "pull", "sat": "rest", "sun": "rest" },
+  "days": { "wed": { "icon": "bedtime" }, "sat": { "icon": "bedtime" },
+            "sun": { "icon": "hot_tub", "label": "SPA DAY" } },
   "splits": {
-    "push": { "label": "PUSH", "muscles": ["chest","front_delts","side_delts","triceps"] },
-    "pull": { "label": "PULL", "muscles": ["lats","upper_back","traps","rear_delts","biceps","forearms"] },
-    "legs": { "label": "LEGS", "muscles": ["quads","hamstrings","glutes","calves"] },
-    "rest": { "label": "REST DAY", "muscles": [] }
+    "push": { "label": "PUSH", "color": "#FF6A1A", "icon": "fitness_center", "muscles": ["chest","front_delts","side_delts","triceps"] },
+    "pull": { "label": "PULL", "color": "#22D3EE", "icon": "rowing", "muscles": ["lats","upper_back","traps","rear_delts","biceps","forearms"] },
+    "legs": { "label": "LEGS", "color": "#8B7CFF", "icon": "directions_run", "muscles": ["quads","hamstrings","glutes","calves"] },
+    "rest": { "label": "REST DAY", "color": "#2DD4BF", "icon": "hot_tub", "muscles": [] }
   },
-  "goals": { "steps": 10000, "active_kcal": 600, "kcal": 2600, "protein_g": 160, "sleep_min": 450, "gym_per_week": 4 }
+  "tasks": [
+    { "id": "gym", "label": "Train or rest as planned", "icon": "fitness_center", "auto": "gym" },
+    { "id": "apple", "label": "Eat one apple", "icon": "nutrition" },
+    { "id": "no_sweets", "label": "No sweets", "icon": "no_food" },
+    { "id": "focus", "label": "4h focus session", "icon": "timer" },
+    { "id": "steps", "label": "Steps goal", "icon": "directions_walk", "auto": "steps" },
+    { "id": "morning", "label": "Morning routine", "icon": "wb_sunny" },
+    { "id": "night", "label": "Night routine", "icon": "dark_mode" },
+    { "id": "sleep_early", "label": "Asleep by 23:00", "icon": "bedtime", "auto": "sleep_early" },
+    { "id": "read", "label": "Read something", "icon": "menu_book" }
+  ],
+  "goals": { "steps": 10000, "active_kcal": 600, "kcal": 2600, "protein_g": 160, "sleep_min": 450, "gym_per_week": 4,
+             "sleep_by": "23:00" }
 }
 ```
+- **Day overrides:** `days.<weekday>` can override the icon and label shown for that day. Sunday is the "SPA DAY" with a hot tub.
+- **Icons:** names of [Material Symbols](https://fonts.google.com/icons) from the set in `tools/icons/make_icons.mjs`.
+- **Split colours** are used everywhere for that split: titles, buttons, week dots, the heat-map and the pending body map.
+
 These values are **placeholders**. I'll set my real ones in the app.
 
 ### 4.5 Muscle IDs (shared by the backend, app, SVG and firmware)

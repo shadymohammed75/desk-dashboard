@@ -1,11 +1,11 @@
 // Motivation engine (PLAN.md §4.3b). Every function here is pure.
 import type {
-  Celebration, Config, DaysIndex, GymResult, GymStatus, Mascot, Mode, ScoreParts, Tone, WeekState,
+  Celebration, Config, DaysIndex, GymResult, GymStatus, Mascot, Mode, Score, Tone, WeekState,
 } from "../types";
-import { isRestSplit, plannedSplit } from "./gym";
+import { dayStyle, isRestSplit, plannedSplit, splitInfo } from "./gym";
 import { addDays, dayOfYear, mondayOf } from "./time";
 
-// ---------------------------------------------------------------- score
+// ---------------------------------------------------------------- metrics (shown, no longer scored directly)
 
 export interface DayMetrics {
   asleep_min: number | null;
@@ -15,40 +15,25 @@ export interface DayMetrics {
   protein_g: number | null;
 }
 
-const clamp01 = (x: number) => Math.min(Math.max(x, 0), 1);
-
-/** Four parts of up to 25 points. A part with no data at all is null (shown as "—", counted as 0). */
-export function score(m: DayMetrics, g: Config["goals"], gym: GymStatus): { value: number; parts: ScoreParts } {
-  const sleep = m.asleep_min == null ? null : Math.round(clamp01(m.asleep_min / g.sleep_min) * 25);
-  const move = m.steps == null && m.active_kcal == null ? null
-    : Math.round(clamp01((clamp01((m.steps ?? 0) / g.steps) + clamp01((m.active_kcal ?? 0) / g.active_kcal)) / 2) * 25);
-  const food = m.kcal == null && m.protein_g == null ? null
-    : Math.round(((clamp01((m.protein_g ?? 0) / g.protein_g)
-        + (m.kcal == null ? 0 : clamp01(1 - Math.abs(m.kcal - g.kcal) / g.kcal))) / 2) * 25);
-  const parts: ScoreParts = { sleep, move, food, gym: gym === "done" || gym === "rest" ? 25 : 0 };
-  return { value: (sleep ?? 0) + (move ?? 0) + (food ?? 0) + parts.gym, parts };
-}
-
 // ---------------------------------------------------------------- XP and levels
 
 export const XP: Record<string, number> = {
-  gym_done: 50, rest_training: 20, steps: 20, protein: 20, sleep: 20, bp: 10, perfect: 30,
+  gym_done: 50, rest_training: 20, task: 10, bp: 10, perfect: 30,
 };
 
-/** XP events earned on one day. Recomputed from that day's data, so re-ingesting can never double them. */
-export function xpEvents(m: DayMetrics, g: Config["goals"], gym: GymResult, bpLogged: boolean, scoreValue: number): string[] {
+/** XP events earned on one day. Recomputed from that day's data, so re-ingesting can never double them.
+ *  Each done habit is "task:<id>" (+10), except the gym habit, which gym_done already rewards. */
+export function xpEvents(gym: GymResult, score: Score, bpLogged: boolean): string[] {
   const e: string[] = [];
   if (gym.status === "done") e.push("gym_done");
   if (gym.status === "done" && gym.rest_training) e.push("rest_training");
-  if (m.steps != null && m.steps >= g.steps) e.push("steps");
-  if (m.protein_g != null && m.protein_g >= g.protein_g) e.push("protein");
-  if (m.asleep_min != null && m.asleep_min >= g.sleep_min) e.push("sleep");
+  for (const t of score.tasks) if (t.done && t.id !== "gym") e.push(`task:${t.id}`);
   if (bpLogged) e.push("bp");
-  if (scoreValue >= 90) e.push("perfect");
+  if (score.perfect) e.push("perfect");
   return e;
 }
 
-export const pointsFor = (events: string[]) => events.reduce((a, e) => a + (XP[e] ?? 0), 0);
+export const pointsFor = (events: string[]) => events.reduce((a, e) => a + (XP[e.split(":")[0]] ?? 0), 0);
 
 export const xpNext = (level: number) => 100 + 50 * level;
 
@@ -86,9 +71,17 @@ export function dayState(date: string, today: string, index: DaysIndex, config: 
 
 const LETTERS = ["M", "T", "W", "T", "F", "S", "S"];
 
-export function week(today: string, index: DaysIndex, config: Config, todayGym: GymStatus) {
+/** Week strip: state plus the colour/icon to draw (the split actually trained, else the day's planned style). */
+export function week(today: string, index: DaysIndex, config: Config, todayGym: GymResult) {
   const mon = mondayOf(today);
-  return LETTERS.map((d, i) => ({ d, state: dayState(addDays(mon, i), today, index, config, todayGym) }));
+  return LETTERS.map((d, i) => {
+    const date = addDays(mon, i);
+    const state = dayState(date, today, index, config, todayGym.status);
+    const style = dayStyle(config, date);
+    const trained = date === today ? (todayGym.status === "done" ? todayGym.day_type : null) : index.days[date]?.split;
+    const sp = trained && trained !== style.split ? splitInfo(config, trained) : null;
+    return { d, state, color: sp ? sp.color : style.color, icon: sp ? sp.icon : style.icon };
+  });
 }
 
 export function weekDone(today: string, index: DaysIndex, todayGym: GymStatus): number {
@@ -156,12 +149,18 @@ export interface CoachInput {
   protein_g: number | null;
   goals: Config["goals"];
   streak: number;
+  score: Score;
 }
 
-// My own short phrases. {L} = split label (PUSH), {l} = title case (Push), {N} = streak, {G} = grams to go.
+// My own short phrases. {L} = split label (PUSH), {l} = title case (Push), {N} = streak, {G} = grams to go,
+// {R} = habits left, {T} = habits total.
 export const COACH_RULES: { id: string; tone: Tone; variants: string[] }[] = [
   { id: "milestone", tone: "hype", variants: [
     "{N} days straight. Don't break it.", "{N}-day streak. Keep the chain alive.", "Streak {N}. This is who you are now."] },
+  { id: "perfect", tone: "proud", variants: [
+    "Perfect day. Every box ticked.", "{T} for {T}. That's a perfect day.", "All habits done. Legendary."] },
+  { id: "tasks_left", tone: "nudge", variants: [
+    "{R} habits left. Finish strong.", "{R} to go for a perfect day.", "Close it out: {R} habits left."] },
   { id: "done", tone: "proud", variants: [
     "{l} day crushed. Recover well.", "{l} done. That's a win.", "Session banked. Eat, sleep, repeat."] },
   { id: "short_sleep", tone: "calm", variants: [
@@ -184,13 +183,16 @@ export const COACH_RULES: { id: string; tone: Tone; variants: string[] }[] = [
 export function coachRule(c: CoachInput): string {
   const today = c.gym.status;
   const counted = today === "done" || today === "rest";
+  const left = c.score.total - c.score.done;
   if (counted && STREAK_MILESTONES.includes(c.streak)) return "milestone";
-  if (today === "done") return "done";
-  if (c.mode === "morning" && c.asleep_min != null) {
+  if (c.score.perfect) return "perfect";
+  if (c.mode === "morning" && c.asleep_min != null && today !== "done") {
     if (c.asleep_min < c.goals.sleep_min - SHORT_SLEEP_MARGIN_MIN) return "short_sleep";
     if (c.asleep_min >= c.goals.sleep_min) return "rested";
   }
   if (today === "pending") return c.mode === "evening" || c.mode === "night" ? "pending_evening" : "pending_day";
+  if (c.hour >= 17 && left > 0 && left <= 4) return "tasks_left";
+  if (today === "done") return "done";
   if (c.hour >= 18 && c.protein_g != null && c.protein_g < c.goals.protein_g) return "protein";
   return today === "rest" ? "rest" : "skipped";
 }
@@ -204,11 +206,15 @@ export function coach(c: CoachInput): { text: string; tone: Tone } {
     .replace("{L}", c.gym.label)
     .replace("{l}", titleCase(c.gym.label))
     .replace("{N}", String(c.streak))
-    .replace("{G}", String(Math.max(0, Math.round(c.goals.protein_g - (c.protein_g ?? 0)))));
+    .replace("{G}", String(Math.max(0, Math.round(c.goals.protein_g - (c.protein_g ?? 0)))))
+    .replace("{R}", String(c.score.total - c.score.done))
+    .replaceAll("{T}", String(c.score.total));
   return { text, tone: rule.tone };
 }
 
-export function mascot(mode: Mode, gym: GymStatus, asleep: number | null, sleepGoal: number, scoreValue: number): Mascot {
+export function mascot(mode: Mode, gym: GymStatus, asleep: number | null, sleepGoal: number, scoreValue: number,
+                       perfect = false): Mascot {
+  if (perfect) return "proud";
   if (mode === "morning" && asleep != null && asleep < sleepGoal - SHORT_SLEEP_MARGIN_MIN) return "sleepy";
   if (gym === "done") return "proud";
   if (mode === "evening" && scoreValue < 40) return "tired";
@@ -239,9 +245,8 @@ export function newCelebrations(
       sub: `+${gym.rest_training ? XP.gym_done + XP.rest_training : XP.gym_done} XP · streak ${after.streak}`,
     });
   }
-  const goals: [string, string][] = [["steps", "STEPS GOAL HIT"], ["protein", "PROTEIN GOAL HIT"], ["sleep", "SLEEP GOAL HIT"]];
-  for (const [e, title] of goals) {
-    if (gained(e)) out.push({ id: `goal_${e}_${date}`, prio: 1, at, title, sub: `+${XP[e]} XP` });
+  if (gained("perfect")) {
+    out.push({ id: `perfect_${date}`, prio: 3, at, title: "PERFECT DAY", sub: `+${XP.perfect} XP \u00b7 every habit done` });
   }
   if (after.level > before.level) {
     out.push({ id: `level_${after.level}`, prio: 4, at, title: `LEVEL UP · ${after.level}`, sub: `Next level at ${xpNextLevel} XP` });

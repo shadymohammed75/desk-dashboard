@@ -17,7 +17,25 @@ export type Muscle = (typeof MUSCLES)[number];
 
 export interface Split {
   label: string;
+  color: string;   // "#RRGGBB", used everywhere for this split
+  icon: string;    // Material Symbols name
   muscles: string[];
+}
+
+/** Per-weekday display override (e.g. Sunday = "SPA DAY" with a hot tub). */
+export interface DayStyle {
+  icon?: string;
+  label?: string;
+}
+
+export type TaskAuto = "gym" | "steps" | "sleep_early";
+
+/** A daily habit. Auto habits tick themselves from data; any habit can also be ticked by hand. */
+export interface Task {
+  id: string;
+  label: string;
+  icon: string;
+  auto?: TaskAuto;
 }
 
 export interface Goals {
@@ -27,12 +45,15 @@ export interface Goals {
   protein_g: number;
   sleep_min: number;
   gym_per_week: number;
+  sleep_by: string;   // "HH:MM": "asleep by" time for the sleep_early habit
 }
 
 export interface Config {
   timezone: string;
   schedule: Record<Weekday, string>;
+  days: Partial<Record<Weekday, DayStyle>>;
   splits: Record<string, Split>;
+  tasks: Task[];
   goals: Goals;
 }
 
@@ -72,6 +93,8 @@ export interface GymEntry {
 export interface DayRecord {
   ingest?: Ingest;
   gym?: GymEntry;
+  /** Habits ticked by hand in the app: task id → done. */
+  tasks?: Record<string, boolean>;
 }
 
 export interface BpReading {
@@ -84,11 +107,14 @@ export interface BpReading {
 /** One line of the compact per-day index kept in KV `meta:days`. */
 export interface DaySummary {
   plan: string;
+  /** split actually trained (differs from plan when I logged another split) */
+  split?: string;
   status: GymStatus;
   muscles: string[];
   asleep_min: number | null;
   events: string[];
   points: number;
+  score?: number;
 }
 
 /** KV `meta:days`: per-day summaries used for streaks, the week strip, XP and the 7-day sleep average. */
@@ -105,16 +131,27 @@ export interface Celebration {
   prio: number;
 }
 
-export interface ScoreParts {
-  sleep: number | null;
-  move: number | null;
-  food: number | null;
-  gym: number;
+export interface TaskState {
+  id: string;
+  label: string;
+  icon: string;
+  done: boolean;
+  auto: boolean;
+}
+
+export interface Score {
+  value: number;
+  done: number;
+  total: number;
+  perfect: boolean;
+  tasks: TaskState[];
 }
 
 export interface GymResult {
   day_type: string;
   label: string;
+  color: string;
+  icon: string;
   muscles: string[];
   status: GymStatus;
   done_min: number | null;
@@ -134,11 +171,11 @@ export interface Dashboard {
   active: { kcal: number | null; goal: number };
   food: { kcal: number | null; kcal_goal: number; protein_g: number | null; protein_goal: number };
   bp: { sys: number; dia: number; pulse: number | null; ts: string; trend7: [number, number][] } | null;
-  gym: { day_type: string; label: string; muscles: string[]; status: GymStatus; done_min: number | null;
-         week_done: number; week_target: number };
-  score: { value: number; parts: ScoreParts };
+  gym: { day_type: string; label: string; color: string; icon: string; muscles: string[]; status: GymStatus;
+         done_min: number | null; week_done: number; week_target: number };
+  score: Score;
   progress: { level: number; xp: number; xp_next: number; streak_days: number; best_streak: number };
-  week: { d: string; state: WeekState }[];
+  week: { d: string; state: WeekState; color: string; icon: string }[];
   coach: { text: string; tone: Tone };
   mascot: Mascot;
   celebrate: { id: string; title: string; sub: string } | null;

@@ -36,6 +36,8 @@ function unionMs(intervals: Interval[]): number {
 export interface SleepResult {
   asleep_min: number;
   stages: Record<Stage, number>;
+  /** When I first fell asleep (ms since epoch), for the "asleep by 23:00" habit. */
+  onset: number;
 }
 
 /**
@@ -57,6 +59,7 @@ export function computeSleep(samples: SleepSample[], date: string, tz: string): 
   if (asleep.length === 0) return null;
   const min = (ms: number) => Math.round(ms / 60000);
   return {
+    onset: Math.min(...asleep.map(([s]) => s)),
     asleep_min: min(unionMs(asleep)),
     stages: {
       deep: min(unionMs(byStage.deep)),
@@ -71,4 +74,12 @@ export function computeSleep(samples: SleepSample[], date: string, tz: string): 
 export function average(values: (number | null | undefined)[]): number | null {
   const v = values.filter((x): x is number => typeof x === "number");
   return v.length ? Math.round(v.reduce((a, b) => a + b, 0) / v.length) : null;
+}
+
+/** True when sleep started no later than `by` ("HH:MM") on the evening before `date`. Times after midnight are late. */
+export function asleepBy(onset: number, date: string, by: string, tz: string): boolean {
+  const [h, m] = by.split(":").map(Number);
+  // "by" is on the previous evening when it is in the afternoon/evening, otherwise early on `date` itself
+  const day = h >= 12 ? addDays(date, -1) : date;
+  return onset <= zonedToUtc(day, h, m, tz).getTime();
 }

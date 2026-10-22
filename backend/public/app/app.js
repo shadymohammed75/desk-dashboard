@@ -1,11 +1,13 @@
 // Gym Log — phone app for the desk dashboard. Plain JS, no build step.
 // All logic (status, score, XP, streak) lives on the server; this app logs and displays.
+// The DOM is built with createElement/createElementNS only (no innerHTML), which the strict CSP relies on.
 "use strict";
 
 // ---------------------------------------------------------------- constants
 
 const TOKEN_KEY = "gymlog.token";
 const TAB_KEY = "gymlog.tab";
+const SVGNS = "http://www.w3.org/2000/svg";
 
 const MUSCLE_NAMES = {
   chest: "Chest", front_delts: "Front delts", side_delts: "Side delts", rear_delts: "Rear delts",
@@ -15,36 +17,24 @@ const MUSCLE_NAMES = {
 };
 const MUSCLE_ORDER = Object.keys(MUSCLE_NAMES);
 const WEEKDAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
-const WEEKDAY_LABEL = { mon: "Mon", tue: "Tue", wed: "Wed", thu: "Thu", fri: "Fri", sat: "Sat", sun: "Sun" };
+const WEEKDAY_SHORT = { mon: "Mon", tue: "Tue", wed: "Wed", thu: "Thu", fri: "Fri", sat: "Sat", sun: "Sun" };
 const GOAL_FIELDS = [
   ["steps", "Steps"], ["active_kcal", "Active kcal"], ["kcal", "Food kcal"],
   ["protein_g", "Protein g"], ["sleep_min", "Sleep min"], ["gym_per_week", "Gym / week"],
 ];
+const AUTO_SOURCE = { gym: "Auto · your plan", steps: "Auto · Apple Health", sleep_early: "Auto · Apple Health" };
+const TEAL = "#2DD4BF";
+const GOLD = "#FFC53D";
 
-// Small original line icons (24×24, stroke = currentColor).
-const ICONS = {
-  today: '<path d="M12 3v3M12 18v3M3 12h3M18 12h3"/><circle cx="12" cy="12" r="5"/>',
-  heart: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
-  plan: '<rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4"/>',
-  history: '<path d="M4 12a8 8 0 1 0 2.4-5.7L4 8.6"/><path d="M4 4v4.6h4.6M12 8v4l3 2"/>',
-  flame: '<path d="M12 21c-3.9 0-6-2.6-6-5.6 0-3.6 3-5.4 3.6-8.4 2.4 1.2 3.4 3.4 3.2 5.2 1-.6 1.7-1.8 1.8-3 1.8 1.6 3.4 3.6 3.4 6.2 0 3-2.1 5.6-6 5.6z"/>',
-  moon: '<path d="M19 14.5A7.5 7.5 0 0 1 9.5 5a7.5 7.5 0 1 0 9.5 9.5z"/>',
-  x: '<path d="M7 7l10 10M17 7L7 17"/>',
-  check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
-};
-
-const icon = (name, cls = "") =>
-  `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]}</svg>`;
-
-// ---------------------------------------------------------------- tiny DOM helper (never uses innerHTML for data)
+// ---------------------------------------------------------------- DOM helpers
 
 function h(tag, attrs, ...children) {
   const el = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs || {})) {
     if (v === null || v === undefined || v === false) continue;
     if (k === "class") el.className = v;
+    else if (k === "c") el.style.setProperty("--c", v);          // split colour
     else if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
-    else if (k === "html") el.innerHTML = v; // only ever used with our own static icon markup
     else el.setAttribute(k, v === true ? "" : v);
   }
   for (const c of children.flat()) {
@@ -52,6 +42,19 @@ function h(tag, attrs, ...children) {
     el.append(c instanceof Node ? c : document.createTextNode(String(c)));
   }
   return el;
+}
+
+function s(tag, attrs) {
+  const el = document.createElementNS(SVGNS, tag);
+  for (const [k, v] of Object.entries(attrs || {})) el.setAttribute(k, String(v));
+  return el;
+}
+
+/** A Material Symbols icon (Rounded, filled), from icons.js. */
+function icon(name, cls = "") {
+  const svg = s("svg", { viewBox: "0 -960 960 960", class: `ms ${cls}`.trim(), "aria-hidden": "true" });
+  svg.append(s("path", { d: (window.MS_ICONS || {})[name] || (window.MS_ICONS || {}).bolt || "" }));
+  return svg;
 }
 
 // ---------------------------------------------------------------- storage (Safari private mode can throw)
@@ -70,12 +73,13 @@ const S = {
   today: null,      // GET /api/today
   config: null,     // GET /api/config
   history: null,    // GET /api/history
-  sheet: null,      // "I trained" sheet state
+  sheet: null,      // { type: "session" | "day", ... }
   loginError: null,
-  bodySvg: null,    // parsed body.svg (cloned per render)
+  bodySvg: null,    // parsed body.svg, cloned per render
   planDraft: null,
+  bpDraft: null,
   sweepUntil: 0,    // play the bottom-to-top "done" sweep until this time
-  bpDraft: null,    // BP form values, kept across re-renders
+  openSplit: null,  // split whose muscle chips are expanded in Plan
 };
 
 // ---------------------------------------------------------------- API
@@ -94,7 +98,7 @@ async function api(method, path, body) {
       cache: "no-store",
     });
   } catch {
-    throw new ApiError(0, "No connection. Try again.");
+    throw new ApiError(0, "No connection");
   }
   const data = await res.json().catch(() => ({}));
   if (res.status === 401) {
@@ -107,7 +111,7 @@ async function api(method, path, body) {
 
 async function loadToday() { S.today = await api("GET", "/api/today"); }
 async function loadConfig() { S.config = await api("GET", "/api/config"); }
-async function loadHistory() { S.history = await api("GET", "/api/history?days=14"); }
+async function loadHistory() { S.history = await api("GET", "/api/history?days=45"); }
 
 async function loadBody() {
   if (S.bodySvg) return;
@@ -128,32 +132,43 @@ function logout(message) {
   render();
 }
 
-// ---------------------------------------------------------------- feedback
+// ---------------------------------------------------------------- feedback: one toast at a time, 2 s
 
-let toastTimer;
-function toast(message, ok = false) {
-  document.querySelector(".toast")?.remove();
-  const el = h("div", { class: `toast${ok ? " ok" : ""}`, role: "status" }, message);
-  document.body.append(el);
+let toastEl = null;
+let toastTimer = 0;
+function toast(message, kind = "ok") {
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.remove(), 3200);
+  toastEl?.remove();
+  toastEl = h("div", { class: `toast ${kind}`, role: "status" }, icon(kind === "ok" ? "check" : "close"), message);
+  document.body.append(toastEl);
+  toastTimer = setTimeout(() => { toastEl?.remove(); toastEl = null; }, 2000);
 }
 
-function celebrate(title, sub) {
-  const colors = ["#FF6A1A", "#3DFF8F", "#FFC53D", "#22D3EE"];
-  const layer = h("div", { class: "celebrate", "aria-hidden": "true" });
-  for (let i = 0; i < 34; i++) {
+/** Centred card on a blurred backdrop; confetti falls behind the card and never over the header. */
+function celebrate({ title, xp, sub, color, iconName }) {
+  document.querySelector(".celebrate")?.remove();
+  const headerBottom = Math.max(0, document.querySelector(".hud, .titlebar")?.getBoundingClientRect().bottom ?? 0);
+  const layer = h("div", { class: "confetti-layer", "aria-hidden": "true" });
+  layer.style.top = `${headerBottom}px`;
+  const colors = ["#FF6A1A", "#3DFF8F", "#FFC53D", "#22D3EE", "#8B7CFF"];
+  for (let i = 0; i < 36; i++) {
     const c = h("i", { class: "confetti" });
     c.style.left = `${Math.random() * 100}%`;
-    c.style.background = colors[i % 4];
-    c.style.animationDelay = `${Math.random() * 0.35}s`;
-    c.style.setProperty("--dx", `${(Math.random() - 0.5) * 120}px`);
+    c.style.background = colors[i % colors.length];
+    c.style.animationDelay = `${Math.random() * 0.5}s`;
+    c.style.setProperty("--dx", `${(Math.random() - 0.5) * 140}px`);
     c.style.setProperty("--rot", `${Math.round(Math.random() * 720 - 360)}deg`);
     layer.append(c);
   }
-  layer.append(h("div", { class: "msg" }, h("b", {}, title), h("span", {}, sub)));
-  document.body.append(layer);
-  setTimeout(() => layer.remove(), 2000);
+  const card = h("div", { class: "cele-card", c: color, role: "dialog", "aria-label": title },
+    h("div", { class: "badge" }, icon(iconName)),
+    h("div", { class: "t-title" }, title),
+    h("div", { class: "xp num" }, xp),
+    sub ? h("div", { class: "dim" }, sub) : null);
+  const close = () => { overlay.classList.add("out"); setTimeout(() => overlay.remove(), 300); };
+  const overlay = h("div", { class: "celebrate", onclick: close }, layer, card);
+  document.body.append(overlay);
+  setTimeout(close, 2500);
 }
 
 // ---------------------------------------------------------------- formatting
@@ -163,135 +178,208 @@ const fmtInt = (n) => (n == null ? dash : Math.round(n).toLocaleString("en-US"))
 const fmtSleep = (min) => (min == null ? dash : `${Math.floor(min / 60)}h${String(Math.round(min % 60)).padStart(2, "0")}`);
 const pct = (v, goal) => (v == null || !goal ? 0 : Math.min(100, Math.round((v / goal) * 100)));
 const timeOf = (iso) => (iso ? iso.slice(11, 16) : "");
-const muscleList = (ids) => ids.filter((m) => MUSCLE_NAMES[m]).map((m) => MUSCLE_NAMES[m].toLowerCase()).join(" · ");
-function dayLabel(date) {
-  const d = new Date(`${date}T12:00:00`);
-  return d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+function muscleList(ids) {
+  const short = (id) => (id.includes("delts") ? "delts" : (MUSCLE_NAMES[id] || id).toLowerCase());
+  return [...new Set(ids.filter((m) => MUSCLE_NAMES[m]).map(short))].join(" · ");
 }
+const dateOf = (iso) => new Date(`${iso.slice(0, 10)}T12:00:00`);
+const dayLabel = (date) => dateOf(date).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+const splitOf = (key) => S.config?.splits?.[key] || { label: key.toUpperCase(), color: "#FF6A1A", icon: "fitness_center", muscles: [] };
 
-// ---------------------------------------------------------------- components
+// ---------------------------------------------------------------- shared components
 
+/** Score ring: one segment per habit, done = lime (gold when perfect). */
 function scoreRing(score) {
-  const parts = [
-    ["sleep", "#22D3EE"], ["move", "#FF6A1A"], ["food", "#FFC53D"], ["gym", "#3DFF8F"],
-  ];
-  const R = 32, C = 38, gap = 10;
-  const arc = (a0, a1) => {
-    const p = (a) => [C + R * Math.cos((a - 90) * Math.PI / 180), C + R * Math.sin((a - 90) * Math.PI / 180)];
-    const [x0, y0] = p(a0), [x1, y1] = p(a1);
-    return `M${x0.toFixed(2)},${y0.toFixed(2)} A${R},${R} 0 ${a1 - a0 > 180 ? 1 : 0},1 ${x1.toFixed(2)},${y1.toFixed(2)}`;
-  };
-  let paths = "";
-  parts.forEach(([k, color], i) => {
-    const a0 = i * 90 + gap / 2;
-    const span = 90 - gap;
-    paths += `<path d="${arc(a0, a0 + span)}" stroke="#1E2230" stroke-width="7" fill="none" stroke-linecap="round"/>`;
-    const v = score.parts[k];
-    if (v) paths += `<path d="${arc(a0, a0 + span * Math.max(v / 25, 0.02))}" stroke="${color}" stroke-width="7" fill="none" stroke-linecap="round"/>`;
+  const wrap = h("div", { class: `ring${score.perfect ? " perfect" : ""}`, "aria-label": `Daily score ${score.value}%` });
+  const svg = s("svg", { viewBox: "0 0 88 88" });
+  const R = 38, C = 2 * Math.PI * R, n = Math.max(score.total, 1), gap = n > 1 ? 4 : 0;
+  const seg = C / n - gap;
+  score.tasks.forEach((t, i) => {
+    svg.append(s("circle", {
+      cx: 44, cy: 44, r: R, fill: "none", "stroke-width": 8, "stroke-linecap": "round",
+      stroke: t.done ? (score.perfect ? GOLD : "#3DFF8F") : "#222631",
+      "stroke-dasharray": `${Math.max(seg - 4, 1)} ${C}`, "stroke-dashoffset": `${-(i * (seg + gap) + 2)}`,
+    }));
   });
-  const wrap = h("div", { class: `ring${score.value >= 90 ? " perfect" : ""}`, "aria-label": `Daily score ${score.value}` });
-  wrap.innerHTML = `<svg viewBox="0 0 76 76">${paths}</svg>`; // static markup built from numbers only
-  wrap.append(h("div", { class: "val num" }, score.value));
+  wrap.append(svg, h("div", { class: "val" }, h("b", { class: "num" }, `${score.value}%`),
+    h("span", { class: "num" }, score.perfect ? "PERFECT" : `${score.done}/${score.total} habits`)));
   return wrap;
 }
 
 function hud(d) {
   const p = d.progress;
-  const milestone = [7, 14, 30, 50, 100].includes(p.streak_days);
   return h("header", { class: "hud" },
     scoreRing(d.score),
-    h("img", { class: "mascot", src: `mascot/${d.mascot}.png`, alt: `Pip is ${d.mascot}`, width: 40, height: 40 }),
     h("div", { class: "hud-mid" },
-      h("div", { class: "lv" }, h("span", {}, `LV ${p.level}`), h("small", { class: "num" }, `${p.xp}/${p.xp_next} XP`)),
-      h("div", { class: "xpbar" }, Object.assign(h("i"), { style: `width:${pct(p.xp, p.xp_next)}%` })),
-      h("div", { class: "dim", style: null }, h("small", {}, d.score.value >= 90 ? "PERFECT DAY" : "Daily score")),
-    ),
-    h("div", { class: `streak${milestone ? " milestone" : ""}`, title: `Best ${p.best_streak}`, html: icon("flame") },
-      h("span", { class: "num" }, p.streak_days)),
-  );
+      h("div", { class: "hud-lv" }, h("b", {}, `LV ${p.level}`), h("span", { class: "t-caption num" }, `${p.xp}/${p.xp_next} XP`)),
+      xpBar(p),
+      h("div", { class: "t-caption" }, d.score.perfect ? "Perfect day" : "Daily score")),
+    h("div", { class: "hud-right" },
+      h("img", { class: "mascot", src: `mascot/${d.mascot}.png`, alt: `Pip is ${d.mascot}`, width: 44, height: 44 }),
+      streakChip(p)));
 }
 
-function bodyMap(gym) {
+function xpBar(p) {
+  const bar = h("div", { class: "xpbar" });
+  const fill = h("i");
+  fill.style.width = `${pct(p.xp, p.xp_next)}%`;
+  bar.append(fill);
+  return bar;
+}
+
+function streakChip(p) {
+  return h("span", { class: "chip-stat num", title: `Best streak ${p.best_streak}` }, icon("local_fire_department"), p.streak_days);
+}
+
+function titlebar(title, right) {
+  return h("header", { class: "titlebar" }, h("h1", { class: "t-title" }, title), right || null);
+}
+
+/** Body map from body.svg. Lights polygons whose data-ids include today's muscles. */
+function bodyMap(gym, { mini = false, color } = {}) {
   if (!S.bodySvg) return h("div", { class: "faint" }, "Body map unavailable");
   const svg = S.bodySvg.cloneNode(true);
   svg.removeAttribute("width");
   svg.removeAttribute("height");
-  svg.classList.add("body", gym.status);
-  if (Date.now() < S.sweepUntil) svg.classList.add("sweep"); // only right after logging, not on every render
+  svg.setAttribute("class", `${mini ? "mini-body" : "bodymap"} ${gym.status}`);
+  svg.setAttribute("role", "img");
+  svg.setAttribute("aria-label", gym.muscles.length ? `Muscles: ${muscleList(gym.muscles)}` : "No muscles");
+  if (color) svg.style.setProperty("--c", color);
   const on = new Set(gym.muscles);
   if (on.has("calves")) on.add("calves_front");
-  for (const id of on) svg.querySelector(`#${id}`)?.classList.add("on");
-  svg.setAttribute("role", "img");
-  svg.setAttribute("aria-label", gym.muscles.length ? `Muscles: ${muscleList(gym.muscles)}` : "Rest day");
+  const lit = [...svg.querySelectorAll(".muscle")].filter((p) => (p.getAttribute("data-ids") || "").split(" ").some((id) => on.has(id)));
+  if (mini) {
+    lit.forEach((p) => p.classList.add("on"));
+    return svg;
+  }
+  // soft outer glow via an SVG filter (works in Safari, unlike CSS filters on SVG children)
+  const defs = s("defs");
+  const f = s("filter", { id: "glow", x: "-30%", y: "-30%", width: "160%", height: "160%" });
+  f.append(s("feGaussianBlur", { in: "SourceGraphic", stdDeviation: 10, result: "b" }));
+  const merge = s("feMerge");
+  merge.append(s("feMergeNode", { in: "b" }), s("feMergeNode", { in: "SourceGraphic" }));
+  f.append(merge);
+  defs.append(f);
+  svg.prepend(defs);
+
+  const sweep = gym.status === "done" && Date.now() < S.sweepUntil;
+  if (!sweep) {
+    lit.forEach((p) => { p.classList.add("on"); p.setAttribute("filter", "url(#glow)"); });
+    return svg;
+  }
+  // Done: lime sweeps in from bottom to top (a clip rect animated with SMIL)
+  const vb = svg.viewBox.baseVal;
+  const clip = s("clipPath", { id: "sweep" });
+  const rect = s("rect", { x: vb.x, y: vb.y + vb.height, width: vb.width, height: 0 });
+  rect.append(s("animate", { attributeName: "y", from: vb.y + vb.height, to: vb.y, dur: "0.7s", fill: "freeze" }),
+    s("animate", { attributeName: "height", from: 0, to: vb.height, dur: "0.7s", fill: "freeze" }));
+  clip.append(rect);
+  defs.append(clip);
+  const g = s("g", { "clip-path": "url(#sweep)", filter: "url(#glow)" });
+  lit.forEach((p) => { const c = p.cloneNode(); c.classList.add("on"); g.append(c); });
+  svg.append(g);
   return svg;
 }
 
-function statusPill(gym) {
-  if (gym.status === "done") return h("span", { class: "pill done", html: icon("check") }, `Done${gym.done_min ? ` · ${gym.done_min} min` : ""}`);
-  if (gym.status === "rest") return h("span", { class: "pill rest" }, "Recovery day");
-  if (gym.status === "skipped") return h("span", { class: "pill skipped" }, "Skipped");
-  return h("span", { class: "pill" }, "Let's go");
+function restArt(iconName) {
+  return h("div", { class: "rest-art" },
+    iconName === "hot_tub" ? h("div", { class: "steam", "aria-hidden": "true" }, h("i"), h("i"), h("i")) : null,
+    icon(iconName, "big"));
 }
 
-function weekStrip(d) {
-  const glyph = (state) => (state === "rest" ? icon("moon") : state === "missed" || state === "skipped" ? icon("x") : "");
-  return h("div", { class: "panel" },
-    h("div", { class: "row" }, h("h2", { class: "label grow" }, "This week"),
-      h("span", { class: "dim num" }, `${d.gym.week_done}/${d.gym.week_target} sessions`)),
-    h("div", { class: "week" }, d.week.map((w) =>
-      h("div", { class: "day" }, h("div", { class: `dot ${w.state}`, html: glyph(w.state), title: w.state }), w.d))),
-  );
+function statusChip(g) {
+  if (g.status === "done") return h("span", { class: "status done" }, icon("check"), g.done_min ? `DONE · ${g.done_min} MIN` : "DONE");
+  if (g.status === "rest") return h("span", { class: "status", c: TEAL }, icon(g.icon), "RECOVERY");
+  if (g.status === "skipped") return h("span", { class: "status skipped" }, "SKIPPED");
+  return h("span", { class: "status" }, icon("bolt"), "LET'S GO");
 }
 
-function metricCards(d) {
-  const sleepHit = d.sleep.asleep_min != null && d.sleep.asleep_min >= d.sleep.goal_min;
-  const stepsHit = d.steps.value != null && d.steps.value >= d.steps.goal;
-  const protHit = d.food.protein_g != null && d.food.protein_g >= d.food.protein_goal;
-  const card = (cls, label, value, sub, p, hit) =>
-    h("div", { class: `card ${cls}${hit ? " hit" : ""}` },
-      h("div", { class: "label" }, label),
-      h("div", { class: `v num${value === dash ? " faint" : ""}` }, value),
-      h("div", { class: "s num" }, sub),
-      h("div", { class: "bar" }, Object.assign(h("i"), { style: `width:${p}%` })));
-  return h("div", { class: "cards" },
-    card("sleep", "Sleep", fmtSleep(d.sleep.asleep_min), `goal ${fmtSleep(d.sleep.goal_min)}`, pct(d.sleep.asleep_min, d.sleep.goal_min), sleepHit),
-    card("move", "Steps", fmtInt(d.steps.value), `of ${fmtInt(d.steps.goal)}`, pct(d.steps.value, d.steps.goal), stepsHit),
-    card("food", "Protein", d.food.protein_g == null ? dash : `${d.food.protein_g} g`,
-      d.food.kcal == null ? `goal ${d.food.protein_goal} g` : `${fmtInt(d.food.kcal)} kcal`, pct(d.food.protein_g, d.food.protein_goal), protHit),
-  );
-}
-
-// ---------------------------------------------------------------- views
+// ---------------------------------------------------------------- Today
 
 function viewToday() {
   const t = S.today;
   const d = t.dashboard;
   const g = d.gym;
-  const isRest = g.status === "rest" || (g.day_type === "rest" && g.status !== "done");
-  const title = isRest ? h("h1", { class: "rest" }, "Today: ", h("span", {}, "Rest day"))
-    : h("h1", {}, "Today: ", h("span", {}, g.label));
-  const logged = t.entry || g.status === "done" || g.status === "skipped";
+  const rest = g.status === "rest";
+  const color = rest ? TEAL : g.color;
 
-  const buttons = [];
-  if (g.status !== "done") buttons.push(h("button", { class: "btn primary wide", onclick: openSheet, html: icon("check") }, "I trained"));
-  else buttons.push(h("button", { class: "btn wide", onclick: openSheet }, "Edit session"));
-  if (g.status === "pending") buttons.push(h("button", { class: "btn", onclick: skipToday }, "Skip today"));
-  if (t.entry) buttons.push(h("button", { class: `btn ghost${g.status === "pending" ? "" : " wide"}`, onclick: undoToday }, "Undo"));
+  const actions = [];
+  if (g.status === "pending") {
+    actions.push(h("button", { class: "btn primary", onclick: openSession }, icon("check"), "I trained"),
+      h("div", { class: "row between" }, h("span"), h("button", { class: "link", onclick: skipToday }, "Skip today")));
+  }
+  else if (g.status === "done") {
+    actions.push(h("div", { class: "btn-row" },
+      h("button", { class: "btn", onclick: openSession }, "Edit session"),
+      h("button", { class: "btn ghost", onclick: undoToday }, icon("undo"), "Undo")));
+  }
+  else if (g.status === "skipped") {
+    actions.push(h("button", { class: "btn primary", onclick: openSession }, icon("check"), "I trained after all"),
+      h("div", { class: "row between" }, h("span"), h("button", { class: "link", onclick: undoToday }, "Undo skip")));
+  }
+  else actions.push(h("button", { class: "btn block", onclick: openSession }, icon("add"), "I trained anyway"));
+
+  const hero = h("section", { class: "hero", c: color },
+    h("div", { class: "hero-top" }, h("div", { class: "t-label" }, `Today · ${dayLabel(t.date)}`), statusChip(g)),
+    h("div", { class: "hero-name" }, icon(g.icon), h("div", { class: "t-display" }, g.label)),
+    h("p", { class: "coach t-body" }, d.coach.text),
+    rest ? restArt(g.icon) : bodyMap(g),
+    h("div", { class: "muscle-names" }, rest ? "Recovery is training too" : muscleList(g.muscles) || dash),
+    h("div", { class: "stack" }, actions));
+  hero.lastChild.style.marginTop = "16px";
 
   return h("div", { class: "stack" },
-    h("div", { class: "today-head" }, title, statusPill(g)),
-    h("div", { class: `coach ${d.coach.tone}` }, d.coach.text),
-    h("div", { class: "panel body-wrap" },
-      bodyMap(g),
-      h("div", { class: "muscle-names" }, isRest && !g.muscles.length ? "Muscles grow now" : muscleList(g.muscles) || dash)),
-    h("div", { class: "actions" }, buttons),
-    logged && t.entry?.note ? h("div", { class: "dim" }, `Note: ${t.entry.note}`) : null,
-    metricCards(d),
+    hud(d), hero, habitsCard(d.score), metricCards(d),
     h("div", { class: `sync${d.stale ? " stale" : ""}` },
       d.updated ? `${d.stale ? "Health data is old · last sync" : "Health synced"} ${timeOf(d.updated)}` : "No Apple Health sync yet"),
-    weekStrip(d),
-  );
+    weekCard(d));
 }
+
+function habitsCard(score) {
+  return h("section", { class: "card" },
+    h("div", { class: "card-head" },
+      h("h2", { class: "t-h2" }, "Daily habits"),
+      h("span", { class: "t-label num" }, score.perfect ? "PERFECT DAY" : `${score.done} / ${score.total}`)),
+    (() => { const b = h("div", { class: "habits-progress" }); const i = h("i"); i.style.width = `${score.value}%`; b.append(i); return b; })(),
+    h("div", { style: null }, score.tasks.map((t) =>
+      h("button", { class: `habit${t.done ? " done" : ""}`, "aria-pressed": String(t.done), onclick: () => toggleTask(t) },
+        h("span", { class: "ic" }, icon(t.icon)),
+        h("span", { class: "grow" }, h("div", { class: "name" }, t.label), t.auto ? h("div", { class: "src" }, AUTO_SOURCE[t.id] || "Auto") : null),
+        h("span", { class: "tick" }, icon("check"))))));
+}
+
+function metricCards(d) {
+  const card = (label, value, sub, p, hit, color) => {
+    const bar = h("div", { class: "bar" });
+    const i = h("i");
+    i.style.width = `${p}%`;
+    bar.append(i);
+    return h("div", { class: `metric${hit ? " hit" : ""}`, c: color },
+      h("div", { class: "t-label" }, label), h("div", { class: `v num${value === dash ? " faint" : ""}` }, value),
+      h("div", { class: "s num" }, sub), bar);
+  };
+  return h("div", { class: "metrics" },
+    card("Sleep", fmtSleep(d.sleep.asleep_min), `goal ${fmtSleep(d.sleep.goal_min)}`, pct(d.sleep.asleep_min, d.sleep.goal_min),
+      d.sleep.asleep_min >= d.sleep.goal_min, "#8B7CFF"),
+    card("Steps", fmtInt(d.steps.value), `of ${fmtInt(d.steps.goal)}`, pct(d.steps.value, d.steps.goal),
+      d.steps.value >= d.steps.goal, "#22D3EE"),
+    card("Protein", d.food.protein_g == null ? dash : `${d.food.protein_g} g`,
+      d.food.kcal == null ? `goal ${d.food.protein_goal} g` : `${fmtInt(d.food.kcal)} kcal`,
+      pct(d.food.protein_g, d.food.protein_goal), d.food.protein_g >= d.food.protein_goal, GOLD));
+}
+
+function weekCard(d) {
+  return h("section", { class: "card" },
+    h("div", { class: "card-head" }, h("h2", { class: "t-h2" }, "This week"),
+      h("span", { class: "t-label num" }, `${d.gym.week_done} / ${d.gym.week_target} sessions`)),
+    h("div", { class: "week" }, d.week.map((w) =>
+      h("div", { class: `wday${w.state === "today" ? " is-today" : ""}` },
+        h("div", { class: `wdot ${w.state}`, c: w.color, title: w.state },
+          w.state === "missed" || w.state === "skipped" ? icon("close") : w.state === "planned" && !w.icon ? null : icon(w.icon)),
+        w.d))));
+}
+
+// ---------------------------------------------------------------- BP
 
 function viewBp() {
   const now = new Date();
@@ -299,151 +387,222 @@ function viewBp() {
   if (!S.bpDraft) S.bpDraft = { sys: "", dia: "", pulse: "", ts: local };
   const draft = S.bpDraft;
   const err = h("div", { class: "err", role: "alert" });
-  const field = (name, placeholder, required) => h("input", {
-    class: "input num", name, inputmode: "numeric", pattern: "[0-9]*", required, placeholder, autocomplete: "off",
-    value: draft[name], oninput: (e) => { draft[name] = e.target.value; },
-  });
-  const form = h("form", { class: "panel stack", onsubmit: (e) => { e.preventDefault(); saveBp(err); } },
-    h("h2", { class: "label" }, "Log blood pressure"),
-    h("div", { class: "bp-fields" },
-      h("label", { class: "field" }, h("span", { class: "label" }, "SYS"), field("sys", "120", true)),
-      h("label", { class: "field" }, h("span", { class: "label" }, "DIA"), field("dia", "80", true)),
-      h("label", { class: "field" }, h("span", { class: "label" }, "Pulse"), field("pulse", "65", false)),
-    ),
-    h("label", { class: "field" }, h("span", { class: "label" }, "Time"),
-      h("input", { class: "input", type: "datetime-local", name: "ts", value: draft.ts, max: local,
-        oninput: (e) => { draft.ts = e.target.value; } })),
+  const field = (name, label, placeholder, required) => h("label", { class: "field" }, h("span", { class: "t-label" }, label),
+    h("input", { class: "input num", name, inputmode: "numeric", pattern: "[0-9]*", required, placeholder, autocomplete: "off",
+      value: draft[name], oninput: (e) => { draft[name] = e.target.value; } }));
+  const form = h("form", { class: "card stack", onsubmit: (e) => { e.preventDefault(); saveBp(err); } },
+    h("div", { class: "bp-fields" }, field("sys", "SYS", "120", true), field("dia", "DIA", "80", true), field("pulse", "Pulse", "65", false)),
+    h("label", { class: "field" }, h("span", { class: "t-label" }, "Time"),
+      h("input", { class: "input", type: "datetime-local", name: "ts", value: draft.ts, max: local, oninput: (e) => { draft.ts = e.target.value; } })),
     err,
-    h("button", { class: "btn primary", type: "submit" }, "Save reading"),
-  );
+    h("button", { class: "btn primary", type: "submit", c: "#22D3EE" }, "Save reading"));
 
   const readings = (S.history?.days || []).flatMap((day) => day.bp).sort((a, b) => b.ts.localeCompare(a.ts)).slice(0, 14);
   return h("div", { class: "stack" },
-    h("h1", {}, "Blood pressure"),
+    titlebar("Blood pressure"),
     form,
-    readings.length ? bpChart(readings) : null,
-    h("div", { class: "list" }, readings.length ? readings.map((r) =>
-      h("div", { class: "item" }, h("div", { class: "top" },
-        h("strong", { class: "num" }, `${r.sys}/${r.dia}`),
-        h("span", { class: "dim num" }, r.pulse ? `♥ ${r.pulse}` : ""),
-        h("span", { class: "dim num" }, `${dayLabel(r.ts.slice(0, 10))} · ${timeOf(r.ts)}`))),
-    ) : h("div", { class: "faint" }, S.history ? "No readings in the last 14 days." : "Loading…")),
-  );
+    readings.length > 1 ? bpChart(readings) : null,
+    h("section", { class: "card" }, h("h2", { class: "t-h2" }, "Recent readings"),
+      readings.length ? readings.map((r) => h("div", { class: "reading" },
+        h("b", { class: "t-h2 num" }, `${r.sys}/${r.dia}`),
+        h("span", { class: "dim num" }, r.pulse ? `${r.pulse} bpm` : ""),
+        h("span", { class: "dim num" }, `${dayLabel(r.ts)} · ${timeOf(r.ts)}`)))
+        : h("p", { class: "dim" }, S.history ? "No readings in the last weeks." : "Loading…")));
 }
 
 function bpChart(readings) {
   const pts = [...readings].reverse();
-  const W = 340, Hh = 120, pad = 18;
+  const W = 340, H = 120, pad = 16;
   const vals = pts.flatMap((r) => [r.sys, r.dia]);
   const lo = Math.min(...vals) - 6, hi = Math.max(...vals) + 6;
-  const x = (i) => pad + (pts.length === 1 ? (W - 2 * pad) / 2 : (i * (W - 2 * pad)) / (pts.length - 1));
-  const y = (v) => Hh - pad - ((v - lo) / (hi - lo)) * (Hh - 2 * pad);
-  const line = (k) => pts.map((r, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(r[k]).toFixed(1)}`).join(" ");
-  const dots = (k, c) => pts.map((r, i) => `<circle cx="${x(i).toFixed(1)}" cy="${y(r[k]).toFixed(1)}" r="3" fill="${c}"/>`).join("");
-  const el = h("div", { class: "panel" }, h("h2", { class: "label" }, "Trend"));
-  const svg = `<svg class="chart" viewBox="0 0 ${W} ${Hh}" preserveAspectRatio="none" role="img" aria-label="Blood pressure trend">
-    <path d="${line("sys")}" fill="none" stroke="#F4F5F8" stroke-width="2"/>${dots("sys", "#F4F5F8")}
-    <path d="${line("dia")}" fill="none" stroke="#22D3EE" stroke-width="2"/>${dots("dia", "#22D3EE")}
-    <text x="${pad}" y="12" fill="#8A90A2" font-size="10">${hi - 6}</text>
-    <text x="${pad}" y="${Hh - 4}" fill="#8A90A2" font-size="10">${lo + 6}</text></svg>`;
-  el.append(Object.assign(h("div"), { innerHTML: svg })); // numbers only
-  el.append(h("div", { class: "dim" }, h("small", {}, "White = systolic · cyan = diastolic")));
-  return el;
+  const x = (i) => pad + (i * (W - 2 * pad)) / (pts.length - 1);
+  const y = (v) => H - pad - ((v - lo) / (hi - lo)) * (H - 2 * pad);
+  const svg = s("svg", { class: "chart", viewBox: `0 0 ${W} ${H}`, preserveAspectRatio: "none", role: "img", "aria-label": "Blood pressure trend" });
+  for (const [k, c] of [["sys", "#F4F5F8"], ["dia", "#22D3EE"]]) {
+    svg.append(s("path", { d: pts.map((r, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(r[k]).toFixed(1)}`).join(" "), fill: "none", stroke: c, "stroke-width": 2.5, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+    pts.forEach((r, i) => svg.append(s("circle", { cx: x(i).toFixed(1), cy: y(r[k]).toFixed(1), r: 3, fill: c })));
+  }
+  return h("section", { class: "card" }, h("div", { class: "card-head" }, h("h2", { class: "t-h2" }, "Trend"),
+    h("span", { class: "t-caption" }, "systolic · diastolic")), svg);
+}
+
+// ---------------------------------------------------------------- Plan
+
+function dayLook(c, d) {
+  const sp = c.splits[c.schedule[d]] || splitOf(c.schedule[d]);
+  const o = c.days?.[d] || {};
+  return { color: sp.color, icon: o.icon || sp.icon, label: o.label || sp.label };
 }
 
 function viewPlan() {
   if (!S.config) return h("div", { class: "faint" }, "Loading…");
   if (!S.planDraft) S.planDraft = structuredClone(S.config);
   const c = S.planDraft;
-  const splitKeys = Object.keys(c.splits);
+  const todayKey = S.today ? WEEKDAYS[(dateOf(S.today.date).getDay() + 6) % 7] : null;
   const err = h("div", { class: "err", role: "alert" });
 
-  const schedule = h("div", { class: "panel stack" }, h("h2", { class: "label" }, "Weekly schedule"),
-    WEEKDAYS.map((d) => h("label", { class: "plan-row" }, h("strong", {}, WEEKDAY_LABEL[d]),
-      h("select", { class: "input", onchange: (e) => { c.schedule[d] = e.target.value; } },
-        splitKeys.map((k) => h("option", { value: k, selected: c.schedule[d] === k }, c.splits[k].label))))));
+  const tiles = h("div", { class: "tiles" }, WEEKDAYS.map((d) => {
+    const look = dayLook(S.config, d);
+    return h("button", { class: `tile${d === todayKey ? " today" : ""}`, c: look.color, "aria-label": `${WEEKDAY_SHORT[d]}: ${look.label}`,
+      onclick: () => { S.sheet = { type: "day", day: d }; render(); } },
+      h("span", { class: "d" }, WEEKDAY_SHORT[d]), icon(look.icon), h("span", { class: "n" }, look.label.split(" ")[0].slice(0, 5)));
+  }));
 
-  const splits = h("div", { class: "panel stack" }, h("h2", { class: "label" }, "Splits"),
-    splitKeys.filter((k) => k !== "rest").map((k) => h("div", { class: "stack" },
-      h("div", { class: "row" },
-        h("input", { class: "input grow", value: c.splits[k].label, maxlength: 12, "aria-label": `${k} label`,
-          oninput: (e) => { c.splits[k].label = e.target.value; } }),
-        h("button", { class: "btn small ghost danger", type: "button", onclick: () => removeSplit(k) }, "Remove")),
-      h("div", { class: "chips" }, MUSCLE_ORDER.map((m) => {
-        const chip = h("button", { type: "button", class: `chip${c.splits[k].muscles.includes(m) ? " on" : ""}`,
-          "aria-pressed": String(c.splits[k].muscles.includes(m)) }, MUSCLE_NAMES[m]);
-        chip.addEventListener("click", () => {
-          const list = c.splits[k].muscles;
-          const i = list.indexOf(m);
-          if (i >= 0) list.splice(i, 1); else list.push(m);
-          chip.classList.toggle("on", i < 0);
-          chip.setAttribute("aria-pressed", String(i < 0));
-        });
-        return chip;
-      })))),
-    h("button", { class: "btn small", type: "button", onclick: addSplit }, "+ Add split"));
+  const splitCards = Object.entries(c.splits).filter(([k]) => k !== "rest").map(([k, sp]) => h("section", { class: "split-card", c: sp.color },
+    h("div", { class: "split-head" },
+      h("span", { class: "sw" }, icon(sp.icon)),
+      h("input", { class: "input name grow", value: sp.label, maxlength: 12, "aria-label": `${k} name`, oninput: (e) => { sp.label = e.target.value; } }),
+      h("button", { class: "link", type: "button", onclick: () => removeSplit(k), "aria-label": `Remove ${sp.label}` }, icon("close"))),
+    h("div", { class: "split-body" },
+      bodyMap({ status: "pending", muscles: sp.muscles }, { mini: true, color: sp.color }),
+      h("div", { class: "stack" },
+        h("div", { class: "sel" }, sp.muscles.length ? sp.muscles.map((m) => MUSCLE_NAMES[m] || m).join(", ") : "No muscles yet"),
+        h("button", { class: "btn", type: "button", "aria-expanded": String(S.openSplit === k),
+          onclick: () => { S.openSplit = S.openSplit === k ? null : k; render(); } }, S.openSplit === k ? "Done" : "Edit muscles"))),
+    S.openSplit === k ? h("div", { class: "chips expanded" }, MUSCLE_ORDER.map((m) =>
+      h("button", { type: "button", class: `chip${sp.muscles.includes(m) ? " on" : ""}`, "aria-pressed": String(sp.muscles.includes(m)),
+        onclick: () => { const i = sp.muscles.indexOf(m); if (i >= 0) sp.muscles.splice(i, 1); else sp.muscles.push(m); render(); } },
+      MUSCLE_NAMES[m]))) : null));
 
-  const goals = h("div", { class: "panel stack" }, h("h2", { class: "label" }, "Goals"),
+  const habits = h("section", { class: "card" },
+    h("div", { class: "card-head" }, h("h2", { class: "t-h2" }, "Daily habits"),
+      h("span", { class: "t-label" }, "All done = perfect day")),
+    c.tasks.map((t, i) => h("div", { class: "habit" },
+      h("span", { class: "ic" }, icon(t.icon)),
+      h("input", { class: "input name grow", value: t.label, maxlength: 40, "aria-label": "Habit name",
+        oninput: (e) => { t.label = e.target.value; } }),
+      t.auto ? h("span", { class: "src" }, "auto") : null,
+      h("button", { class: "link", type: "button", "aria-label": `Remove ${t.label}`, onclick: () => { c.tasks.splice(i, 1); render(); } }, icon("close")))),
+    h("button", { class: "btn block", type: "button", onclick: addHabit }, icon("add"), "Add habit"));
+  habits.querySelectorAll(".input.name").forEach((el) => { el.style.fontSize = "16px"; el.style.fontWeight = "500"; });
+
+  const goals = h("section", { class: "card" }, h("h2", { class: "t-h2" }, "Goals"),
     h("div", { class: "goal-grid" }, GOAL_FIELDS.map(([k, label]) => h("label", { class: "field" },
-      h("span", { class: "label" }, label),
-      h("input", { class: "input num", inputmode: "numeric", value: c.goals[k],
-        oninput: (e) => { c.goals[k] = e.target.value === "" ? null : Number(e.target.value); } })))));
+      h("span", { class: "t-label" }, label),
+      h("input", { class: "input num", inputmode: "numeric", value: c.goals[k], oninput: (e) => { c.goals[k] = e.target.value === "" ? null : Number(e.target.value); } }))),
+      h("label", { class: "field" }, h("span", { class: "t-label" }, "Asleep by"),
+        h("input", { class: "input num", type: "time", value: c.goals.sleep_by, oninput: (e) => { c.goals.sleep_by = e.target.value; } }))));
+  goals.lastChild.style.marginTop = "16px";
 
   return h("div", { class: "stack" },
-    h("h1", {}, "Plan"),
-    schedule, splits, goals, err,
-    h("button", { class: "btn primary", onclick: () => savePlan(err) }, "Save plan"),
-    h("button", { class: "btn ghost", onclick: () => { S.planDraft = null; render(); } }, "Discard changes"),
-    h("button", { class: "btn ghost danger", onclick: () => { if (confirm("Log out of Gym Log on this phone?")) logout(); } }, "Log out"),
-  );
+    titlebar("Plan", streakChip(S.today.dashboard.progress)),
+    h("section", { class: "card" }, h("div", { class: "card-head" }, h("h2", { class: "t-h2" }, "Your week"),
+      h("span", { class: "t-caption" }, "Tap a day to change it")), tiles),
+    h("div", { class: "t-label" }, "Splits"),
+    ...splitCards,
+    h("button", { class: "btn block", type: "button", onclick: addSplit }, icon("add"), "Add split"),
+    habits, goals, err,
+    h("button", { class: "btn primary", c: "#FF6A1A", onclick: () => savePlan(err) }, "Save plan"),
+    h("div", { class: "btn-row" },
+      h("button", { class: "btn ghost", onclick: () => { S.planDraft = null; render(); } }, "Discard changes"),
+      h("button", { class: "btn danger", onclick: () => { if (confirm("Log out of Gym Log on this phone?")) logout(); } }, "Log out")));
 }
 
-function viewHistory() {
-  if (!S.history) return h("div", { class: "faint" }, "Loading…");
-  return h("div", { class: "stack" },
-    h("h1", {}, "History"),
-    h("div", { class: "list" }, S.history.days.map((d) => h("div", { class: "item" },
-      h("div", { class: "top" },
-        h("strong", {}, dayLabel(d.date)),
-        h("span", { class: "dim" }, d.status === "done" ? (S.config?.splits[d.split]?.label || d.split.toUpperCase()) : d.plan_label),
-        h("span", { class: `tag ${d.status}` }, d.status === "no_data" ? "no data" : d.status)),
-      d.muscles.length ? h("div", { class: "sub" }, muscleList(d.muscles), d.duration_min ? ` · ${d.duration_min} min` : "") : null,
-      d.note ? h("div", { class: "sub" }, `“${d.note}”`) : null,
-      d.bp.length ? h("div", { class: "sub num" }, `BP ${d.bp.map((r) => `${r.sys}/${r.dia}`).join(", ")}`) : null,
-    ))),
-  );
-}
-
-function viewSheet() {
-  const sh = S.sheet;
-  const splits = Object.entries(S.config?.splits || {}).filter(([k, v]) => k !== "rest" && v.muscles.length);
-  const chipsSplit = h("div", { class: "chips" },
-    [...splits.map(([k, v]) => [k, v.label]), ["other", "Other"]].map(([k, label]) =>
-      h("button", { type: "button", class: `chip${sh.split === k ? " on" : ""}`, onclick: () => pickSplit(k) }, label)));
-  const chipsMuscle = h("div", { class: "chips" }, MUSCLE_ORDER.map((m) =>
-    h("button", { type: "button", class: `chip lime${sh.muscles.includes(m) ? " on" : ""}`, "aria-pressed": String(sh.muscles.includes(m)),
-      onclick: () => { sh.muscles = sh.muscles.includes(m) ? sh.muscles.filter((x) => x !== m) : [...sh.muscles, m]; render(); } },
-    MUSCLE_NAMES[m])));
-  const step = (delta) => { sh.duration = Math.max(5, Math.min(240, sh.duration + delta)); render(); };
-
+function daySheet(day) {
+  const c = S.config;
   return [
     h("div", { class: "scrim", onclick: closeSheet }),
-    h("div", { class: "sheet stack", role: "dialog", "aria-label": "Log session" },
+    h("div", { class: "sheet", role: "dialog", "aria-label": `Choose the split for ${WEEKDAY_SHORT[day]}` },
       h("div", { class: "grab" }),
-      h("h2", { class: "label" }, "Split"), chipsSplit,
-      h("h2", { class: "label" }, "Muscles trained"), chipsMuscle,
-      h("h2", { class: "label" }, "Duration"),
-      h("div", { class: "stepper" },
-        h("button", { class: "btn", type: "button", onclick: () => step(-5), "aria-label": "5 minutes less" }, "−"),
-        h("div", { class: "val num" }, `${sh.duration} min`),
-        h("button", { class: "btn", type: "button", onclick: () => step(5), "aria-label": "5 minutes more" }, "+")),
-      h("input", { class: "input", placeholder: "Note (optional)", maxlength: 200, value: sh.note,
-        oninput: (e) => { sh.note = e.target.value; } }),
-      h("button", { class: "btn lime", onclick: saveSession, disabled: !sh.muscles.length }, "Save session"),
-      h("button", { class: "btn ghost", onclick: closeSheet }, "Cancel"),
-    ),
+      h("h2", { class: "t-h2" }, `${WEEKDAY_SHORT[day]} is…`),
+      h("div", { style: null }, Object.entries(c.splits).map(([k, sp]) => {
+        const label = k === c.schedule[day] ? dayLook(c, day).label : sp.label;
+        const ic = k === "rest" && c.days?.[day]?.icon ? c.days[day].icon : sp.icon;
+        return h("button", { class: `option${k === c.schedule[day] ? " on" : ""}`, c: sp.color, onclick: () => pickDay(day, k) },
+          h("span", { class: "sw" }, icon(ic)), h("span", { class: "grow" }, label), k === c.schedule[day] ? icon("check") : null);
+      })),
+      h("button", { class: "btn ghost block", onclick: closeSheet }, "Cancel")),
   ];
 }
+
+// ---------------------------------------------------------------- History
+
+function viewHistory() {
+  if (!S.history) return h("div", { class: "stack" }, titlebar("History"), h("div", { class: "faint" }, "Loading…"));
+  const byDate = Object.fromEntries(S.history.days.map((d) => [d.date, d]));
+  const today = S.today.date;
+  const [y, m] = today.split("-").map(Number);
+  const first = new Date(Date.UTC(y, m - 1, 1));
+  const daysIn = new Date(Date.UTC(y, m, 0)).getUTCDate();
+  const lead = (first.getUTCDay() + 6) % 7;
+  const monthName = first.toLocaleDateString("en-GB", { month: "long", year: "numeric", timeZone: "UTC" });
+
+  const cells = [];
+  for (let i = 0; i < lead; i++) cells.push(h("div"));
+  let sessions = 0, perfect = 0, scored = 0, scoreSum = 0;
+  for (let d = 1; d <= daysIn; d++) {
+    const date = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+    const e = byDate[date];
+    let cls = "future", color = null;
+    if (date <= today) {
+      cls = e ? e.status : "no_data";
+      color = e?.color;
+      if (e?.status === "done") sessions++;
+      if (e && e.score != null && (e.status !== "no_data")) { scored++; scoreSum += e.score; if (e.score === 100) perfect++; }
+    }
+    cells.push(h("div", { class: `cell ${cls}${date === today ? " today" : ""}`, c: color, title: e ? `${date}: ${e.label} · ${e.status}` : date },
+      d, e?.score === 100 ? h("span", { class: "perfect", "aria-label": "perfect day" }) : null));
+  }
+
+  const recent = S.history.days.filter((d) => d.status === "done").slice(0, 8);
+  return h("div", { class: "stack" },
+    titlebar("History", streakChip(S.today.dashboard.progress)),
+    h("section", { class: "card" },
+      h("div", { class: "card-head" }, h("h2", { class: "t-h2" }, monthName)),
+      h("div", { class: "heat-head" }, ["M", "T", "W", "T", "F", "S", "S"].map((l) => h("span", {}, l))),
+      h("div", { class: "heat" }, cells),
+      h("div", { class: "legend" },
+        ...Object.values(S.config.splits).filter((sp) => sp.muscles.length).map((sp) => h("span", { c: sp.color }, h("i"), sp.label.toLowerCase())),
+        h("span", {}, h("i", { class: "rest" }), "rest"),
+        h("span", {}, h("i", { class: "missed" }), "missed"),
+        h("span", {}, h("i", { class: "perfect" }), "perfect day"))),
+    h("div", { class: "stats" },
+      h("div", { class: "stat" }, h("b", { class: "num" }, sessions), h("span", { class: "t-caption" }, "sessions")),
+      h("div", { class: "stat" }, h("b", { class: "num" }, perfect), h("span", { class: "t-caption" }, "perfect days")),
+      h("div", { class: "stat" }, h("b", { class: "num" }, scored ? `${Math.round(scoreSum / scored)}%` : dash), h("span", { class: "t-caption" }, "avg score"))),
+    h("h2", { class: "t-h2" }, "Recent sessions"),
+    recent.length ? h("div", {}, recent.map((d) => h("article", { class: "session", c: d.color },
+      h("span", { class: "ic" }, icon(d.icon)),
+      h("div", { class: "grow" },
+        h("div", { class: "row between" }, h("b", {}, d.label), h("span", { class: "meta num" }, dayLabel(d.date))),
+        h("div", { class: "meta" }, [muscleList(d.muscles), d.duration_min ? `${d.duration_min} min` : null].filter(Boolean).join(" · ")),
+        d.note ? h("div", { class: "meta" }, `“${d.note}”`) : null))))
+      : h("p", { class: "dim" }, "No sessions yet. Tap “I trained” after your next workout."));
+}
+
+// ---------------------------------------------------------------- "I trained" sheet
+
+function sessionSheet() {
+  const sh = S.sheet;
+  const sp = splitOf(sh.split);
+  const splits = Object.entries(S.config?.splits || {}).filter(([, v]) => v.muscles.length);
+  const step = (delta) => { sh.duration = Math.max(5, Math.min(240, sh.duration + delta)); render(); };
+  return [
+    h("div", { class: "scrim", onclick: closeSheet }),
+    h("div", { class: "sheet stack", role: "dialog", "aria-label": "Log session", c: sp.color },
+      h("div", { class: "grab" }),
+      h("div", { class: "t-label" }, "Split"),
+      h("div", { class: "chips" }, [...splits, ["other", { label: "OTHER", color: "#8A90A2", muscles: [] }]].map(([k, v]) =>
+        h("button", { type: "button", class: `chip${sh.split === k ? " on" : ""}`, c: v.color, onclick: () => pickSplit(k) }, v.label))),
+      h("div", { class: "split-body" },
+        bodyMap({ status: "pending", muscles: sh.muscles }, { mini: true, color: sp.color }),
+        h("div", { class: "stack" }, h("div", { class: "t-label" }, "Muscles trained"),
+          h("div", { class: "chips" }, MUSCLE_ORDER.map((m) => h("button", {
+            type: "button", class: `chip${sh.muscles.includes(m) ? " on" : ""}`, "aria-pressed": String(sh.muscles.includes(m)),
+            onclick: () => { sh.muscles = sh.muscles.includes(m) ? sh.muscles.filter((x) => x !== m) : [...sh.muscles, m]; render(); },
+          }, MUSCLE_NAMES[m]))))),
+      h("div", { class: "t-label" }, "Duration"),
+      h("div", { class: "stepper" },
+        h("button", { class: "btn", type: "button", onclick: () => step(-5), "aria-label": "5 minutes less" }, icon("remove")),
+        h("div", { class: "val num" }, `${sh.duration} min`),
+        h("button", { class: "btn", type: "button", onclick: () => step(5), "aria-label": "5 minutes more" }, icon("add"))),
+      h("input", { class: "input", placeholder: "Note (optional)", maxlength: 200, value: sh.note, oninput: (e) => { sh.note = e.target.value; } }),
+      h("button", { class: "btn primary", onclick: saveSession, disabled: !sh.muscles.length }, icon("check"), "Save session"),
+      h("button", { class: "btn ghost block", onclick: closeSheet }, "Cancel")),
+  ];
+}
+
+// ---------------------------------------------------------------- login
 
 function viewLogin() {
   const err = h("div", { class: "err", role: "alert" }, S.loginError || "");
@@ -462,16 +621,15 @@ function viewLogin() {
     }
   } },
     h("img", { class: "logo", src: "icons/icon-192.png", alt: "" }),
-    h("h1", {}, "Gym Log"),
+    h("h1", { class: "t-title" }, "Gym Log"),
     h("p", { class: "dim" }, "Enter your app token once. It stays on this phone."),
     input, err,
-    h("button", { class: "btn primary", type: "submit" }, "Unlock"),
-  ));
+    h("button", { class: "btn primary", type: "submit" }, "Unlock")));
 }
 
 // ---------------------------------------------------------------- actions (optimistic, with rollback)
 
-async function optimistic(apply, request, onSuccess) {
+async function optimistic(apply, request, { ok, onSuccess } = {}) {
   const snapshot = structuredClone(S.today);
   apply();
   render();
@@ -480,23 +638,25 @@ async function optimistic(apply, request, onSuccess) {
     S.today = fresh;
     S.history = null; // refetch lazily
     render();
+    if (ok) toast(ok);
     onSuccess?.(fresh);
   } catch (e) {
     if (e.status === 401) return;
     S.today = snapshot;
     render();
-    toast(`Couldn't save: ${e.message}`);
+    toast(`Couldn't save: ${e.message}`, "error");
   }
 }
 
-function openSheet() {
+function openSession() {
   const g = S.today.dashboard.gym;
   const e = S.today.entry;
   const plan = S.today.plan;
   const split = e?.split || (g.status === "done" ? g.day_type : plan.muscles.length ? plan.split : "push");
   S.sheet = {
+    type: "session",
     split,
-    muscles: [...(g.status === "done" ? g.muscles : S.config?.splits[split]?.muscles || [])],
+    muscles: [...(g.status === "done" ? g.muscles : splitOf(split).muscles)],
     duration: e?.duration_min || g.done_min || 60,
     note: e?.note || "",
   };
@@ -505,43 +665,72 @@ function openSheet() {
 
 function pickSplit(k) {
   S.sheet.split = k;
-  S.sheet.muscles = [...(S.config?.splits[k]?.muscles || [])];
+  S.sheet.muscles = [...splitOf(k).muscles];
   render();
 }
 
 function closeSheet() { S.sheet = null; render(); }
 
+function recount(score) {
+  score.done = score.tasks.filter((t) => t.done).length;
+  score.value = score.total ? Math.round((100 * score.done) / score.total) : 0;
+  score.perfect = score.total > 0 && score.done === score.total;
+}
+
 function saveSession() {
   const sh = S.sheet;
   const wasDone = S.today.dashboard.gym.status === "done";
+  const sp = splitOf(sh.split);
   const body = { action: "done", split: sh.split, muscles: sh.muscles, duration_min: sh.duration, note: sh.note.trim() || null };
   S.sheet = null;
   optimistic(() => {
     const g = S.today.dashboard.gym;
-    Object.assign(g, { status: "done", muscles: sh.muscles, done_min: sh.duration,
-      label: S.config?.splits[sh.split]?.label || sh.split.toUpperCase(), day_type: sh.split });
+    Object.assign(g, { status: "done", muscles: sh.muscles, done_min: sh.duration, label: sp.label, color: sp.color, icon: sp.icon, day_type: sh.split });
     S.today.entry = { ...body, ts: new Date().toISOString() };
-    if (!wasDone) {
-      S.sweepUntil = Date.now() + 1500;
-      celebrate(`${g.label} DAY COMPLETE`, "+50 XP");
-    }
-  }, () => api("POST", "/api/gym", body));
+    const gt = S.today.dashboard.score.tasks.find((t) => t.id === "gym");
+    if (gt) { gt.done = true; recount(S.today.dashboard.score); }
+    if (!wasDone) S.sweepUntil = Date.now() + 1500;
+  }, () => api("POST", "/api/gym", body), {
+    ok: wasDone ? "Session updated" : null,
+    onSuccess: (fresh) => {
+      if (wasDone) return;
+      const c = fresh.dashboard.celebrate;
+      celebrate({ title: c?.title || `${sp.label} DAY COMPLETE`, xp: "+50 XP", sub: c?.sub?.split("·").slice(1).join("·").trim() || null,
+        color: sp.color, iconName: sp.icon });
+    },
+  });
 }
 
 function skipToday() {
   optimistic(() => {
     S.today.dashboard.gym.status = "skipped";
     S.today.entry = { action: "skip" };
-  }, () => api("POST", "/api/gym", { action: "skip" }));
+  }, () => api("POST", "/api/gym", { action: "skip" }), { ok: "Skipped today. Back at it next time." });
 }
 
 function undoToday() {
   optimistic(() => {
     const g = S.today.dashboard.gym;
-    Object.assign(g, { status: S.today.plan.muscles.length ? "pending" : "rest", muscles: S.today.plan.muscles,
-      label: S.today.plan.label, done_min: null });
+    const p = S.today.plan;
+    Object.assign(g, { status: p.muscles.length ? "pending" : "rest", muscles: p.muscles, label: p.label, color: p.color, icon: p.icon, done_min: null });
     S.today.entry = null;
-  }, () => api("POST", "/api/gym", { action: "undo" }));
+  }, () => api("POST", "/api/gym", { action: "undo" }), { ok: "Undone" });
+}
+
+function toggleTask(t) {
+  const before = S.today.dashboard.score.perfect;
+  const done = !t.done;
+  optimistic(() => {
+    const task = S.today.dashboard.score.tasks.find((x) => x.id === t.id);
+    task.done = done;
+    recount(S.today.dashboard.score);
+  }, () => api("POST", "/api/tasks", { id: t.id, done }), {
+    onSuccess: (fresh) => {
+      if (!before && fresh.dashboard.score.perfect) {
+        celebrate({ title: "PERFECT DAY", xp: "+30 XP", sub: "Every habit done", color: GOLD, iconName: "trophy" });
+      }
+    },
+  });
 }
 
 async function saveBp(err) {
@@ -550,56 +739,69 @@ async function saveBp(err) {
   const pulse = f.pulse ? Number(f.pulse) : null;
   if (!(sys > dia)) { err.textContent = "SYS should be higher than DIA."; return; }
   const ts = f.ts ? new Date(f.ts).toISOString() : new Date().toISOString();
-  const body = { sys, dia, pulse, ts };
-  const snapshot = structuredClone(S.history);
-  // optimistic: show the reading at the top of the list straight away
-  if (S.history?.days?.length) S.history.days[0].bp.push({ ...body, ts: localIso(new Date(ts)) });
   err.textContent = "";
-  render();
   try {
-    S.today = await api("POST", "/api/bp", body);
+    S.today = await api("POST", "/api/bp", { sys, dia, pulse, ts });
     S.bpDraft = null;
     await loadHistory();
     render();
-    toast("Reading saved", true);
+    toast("Reading saved");
   } catch (e) {
-    if (e.status === 401) return;
-    S.history = snapshot;
-    render();
-    toast(`Couldn't save: ${e.message}`);
+    if (e.status !== 401) toast(`Couldn't save: ${e.message}`, "error");
   }
 }
 
-function localIso(d) {
-  const off = -d.getTimezoneOffset();
-  const p = (n) => String(Math.floor(Math.abs(n))).padStart(2, "0");
-  return new Date(d.getTime() + off * 60000).toISOString().slice(0, 19) + (off >= 0 ? "+" : "-") + p(off / 60) + ":" + p(off % 60);
+async function pickDay(day, split) {
+  S.sheet = null;
+  if (S.config.schedule[day] === split) { render(); return; }
+  const schedule = { ...S.config.schedule, [day]: split };
+  try {
+    S.config = await api("PUT", "/api/config", { schedule });
+    if (S.planDraft) S.planDraft.schedule = { ...schedule };
+    await loadToday();
+    render();
+    toast(`${WEEKDAY_SHORT[day]} is now ${dayLook(S.config, day).label}`);
+  } catch (e) {
+    render();
+    if (e.status !== 401) toast(`Couldn't save: ${e.message}`, "error");
+  }
 }
 
 function addSplit() {
   const name = prompt("Name of the new split (e.g. Arms)");
   if (!name) return;
   const key = name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 20);
-  if (!key || S.planDraft.splits[key]) { toast("That split already exists or the name is invalid."); return; }
-  S.planDraft.splits[key] = { label: name.trim().toUpperCase().slice(0, 12), muscles: [] };
+  if (!key || S.planDraft.splits[key]) { toast("That split already exists", "error"); return; }
+  S.planDraft.splits[key] = { label: name.trim().toUpperCase().slice(0, 12), color: "#FF6A1A", icon: "fitness_center", muscles: [] };
   render();
 }
 
 function removeSplit(k) {
   const used = WEEKDAYS.filter((d) => S.planDraft.schedule[d] === k);
-  if (used.length) { toast(`Used on ${used.map((d) => WEEKDAY_LABEL[d]).join(", ")}. Change those days first.`); return; }
+  if (used.length) { toast(`Used on ${used.map((d) => WEEKDAY_SHORT[d]).join(", ")}. Change those days first.`, "error"); return; }
   delete S.planDraft.splits[k];
+  render();
+}
+
+function addHabit() {
+  const name = prompt("New daily habit (e.g. Drink 2 l water)");
+  if (!name || !name.trim()) return;
+  const base = name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 16) || "habit";
+  let id = base, n = 2;
+  while (S.planDraft.tasks.some((t) => t.id === id)) id = `${base}_${n++}`;
+  S.planDraft.tasks.push({ id, label: name.trim().slice(0, 40), icon: "check" });
   render();
 }
 
 async function savePlan(err) {
   err.textContent = "";
+  const { schedule, days, splits, tasks, goals } = S.planDraft;
   try {
-    S.config = await api("PUT", "/api/config", S.planDraft);
+    S.config = await api("PUT", "/api/config", { schedule, days, splits, tasks, goals });
     S.planDraft = null;
     await loadToday();
     render();
-    toast("Plan saved", true);
+    toast("Plan saved");
   } catch (e) {
     if (e.status !== 401) err.textContent = e.message;
   }
@@ -607,12 +809,11 @@ async function savePlan(err) {
 
 // ---------------------------------------------------------------- render + navigation
 
-const TABS = [["today", "Today", "today"], ["bp", "BP", "heart"], ["plan", "Plan", "plan"], ["history", "History", "history"]];
+const TABS = [["today", "Today", "home"], ["bp", "BP", "monitor_heart"], ["plan", "Plan", "calendar_month"], ["history", "History", "history"]];
 
 function nav() {
   return h("nav", { class: "nav" }, TABS.map(([id, label, ic]) =>
-    h("button", { class: S.tab === id ? "on" : "", "aria-current": S.tab === id ? "page" : null, onclick: () => goTab(id),
-      html: icon(ic) }, label)));
+    h("button", { class: S.tab === id ? "on" : "", "aria-current": S.tab === id ? "page" : null, onclick: () => goTab(id) }, icon(ic), label)));
 }
 
 async function goTab(id) {
@@ -624,7 +825,7 @@ async function goTab(id) {
     if ((id === "bp" || id === "history") && !S.history) { await loadHistory(); render(); }
     if (id === "plan" && !S.config) { await loadConfig(); render(); }
   } catch (e) {
-    if (e.status !== 401) toast(e.message);
+    if (e.status !== 401) toast(e.message, "error");
   }
 }
 
@@ -632,13 +833,10 @@ function render() {
   const root = document.getElementById("app");
   const y = window.scrollY;
   if (!S.token) { root.replaceChildren(viewLogin()); return; }
-  if (!S.today) { root.replaceChildren(h("div", { class: "boot" }, "Loading…")); return; }
+  if (!S.today || !S.config) { root.replaceChildren(h("div", { class: "boot" }, "Loading…")); return; }
   const views = { today: viewToday, bp: viewBp, plan: viewPlan, history: viewHistory };
-  root.replaceChildren(
-    h("main", { class: "shell" }, hud(S.today.dashboard), (views[S.tab] || viewToday)()),
-    nav(),
-    ...(S.sheet ? viewSheet() : []),
-  );
+  const sheet = S.sheet?.type === "session" ? sessionSheet() : S.sheet?.type === "day" ? daySheet(S.sheet.day) : [];
+  root.replaceChildren(h("main", { class: "shell" }, (views[S.tab] || viewToday)()), nav(), ...sheet);
   window.scrollTo(0, y);
 }
 
@@ -658,7 +856,7 @@ async function boot() {
   } catch (e) {
     if (e.status !== 401) {
       document.getElementById("app").replaceChildren(h("div", { class: "shell stack" },
-        h("h1", {}, "Gym Log"), h("p", { class: "err" }, e.message),
+        h("h1", { class: "t-title" }, "Gym Log"), h("p", { class: "err" }, e.message),
         h("button", { class: "btn primary", onclick: () => location.reload() }, "Retry")));
       return;
     }

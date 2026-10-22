@@ -21,7 +21,9 @@ the owner (phone, Cloudflare or GitHub clicks); write exact click-by-click instr
 - **Free tiers only:** Cloudflare Workers + KV + Static Assets, GitHub Actions, iOS Shortcuts, LVGL.
 - **Health data is private.** Every data endpoint requires a bearer token; HTTPS only; data stays in the
   owner's Cloudflare account.
-- **Original artwork only.** Body map, icons and mascot are drawn from scratch; nothing copied from the web.
+- **Original or openly licensed assets only** (MIT / Apache-2.0 / CC BY, OFL for fonts). Every third-party asset is
+  recorded in `CREDITS.md` with source, licence and attribution. The body map comes from react-native-body-highlighter
+  (MIT) via `tools/body_map/muscle_map.json`; icons are Material Symbols (Apache-2.0) via `tools/icons/`.
 
 ## Where things live
 
@@ -34,7 +36,8 @@ the owner (phone, Cloudflare or GitHub clicks); write exact click-by-click instr
 | Muscle IDs (shared by backend, app, SVG, firmware) | `PLAN.md` §4.5 |
 | Desk screen design ("Training HUD") | `PLAN.md` §5.1 |
 | Phone app design | `PLAN.md` §5.2 |
-| Sample `/api/dashboard` responses | `mock/*.json` — check with `python3 mock/validate.py` |
+| Sample `/api/dashboard` responses | `mock/*.json` (from `mock/make_mocks.py`) — check with `python3 mock/validate.py` |
+| Asset generators | `tools/` (`npm run assets`, `make_hud_assets.py`, `svg_to_lvgl.py`, `make_fonts.sh`); credits in `CREDITS.md` |
 
 If the contract changes, update `PLAN.md`, the mocks and `mock/validate.py` together.
 

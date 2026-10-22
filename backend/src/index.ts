@@ -2,12 +2,13 @@
 // Only functions may be exported from this entry module (the Workers runtime rejects other exports).
 import { buildDashboard, type State } from "./logic/dashboard";
 import { addReading, latest } from "./logic/bp";
-import { gymStatus, plannedSplit, splitInfo } from "./logic/gym";
+import { dayStyle, gymStatus, plannedSplit, splitInfo } from "./logic/gym";
+import { dayScore } from "./logic/dashboard";
 import { firstTrackedDay } from "./logic/motivation";
 import { computeSleep } from "./logic/sleep";
 import { addDays, localDate, toLocalIso, weekdayOf } from "./logic/time";
 import { Store, type KVLike } from "./store";
-import { HttpError, parseBp, parseConfig, parseGym, parseIngest } from "./validate";
+import { HttpError, parseBp, parseConfig, parseGym, parseIngest, parseTask } from "./validate";
 
 export interface Env {
   DASH: KVLike;
@@ -91,7 +92,7 @@ async function todayView(store: Store, now: Date) {
   const planKey = plannedSplit(s.config, date);
   return {
     date,
-    plan: { split: planKey, ...splitInfo(s.config, planKey) },
+    plan: { ...splitInfo(s.config, planKey), ...dayStyle(s.config, date) },
     entry: s.day?.gym ?? null,
     bp_latest: latest(s.bp),
     dashboard: buildDashboard(s),
@@ -116,8 +117,12 @@ async function historyView(store: Store, now: Date, days: number) {
         date,
         weekday: weekdayOf(date),
         plan: planKey,
-        plan_label: splitInfo(config, planKey).label,
+        plan_label: dayStyle(config, date).label,
         split: gym.day_type,
+        label: gym.label,
+        color: gym.color,
+        icon: gym.icon,
+        score: dayScore(day, date, config, gym).value,
         status: gym.status === "pending" && date < today ? pastStatus(date) : gym.status,
         source: gym.source,
         muscles: gym.status === "done" ? gym.muscles : [],
@@ -189,6 +194,22 @@ export async function handle(req: Request, env: Env, now: Date): Promise<Respons
       return json(await todayView(store, now));
     }
 
+    case "POST /api/tasks": {
+      await app();
+      const config = await store.config();
+      const t = parseTask(await readJson(req), config);
+      const today = localDate(now, config.timezone);
+      const date = t.date ?? today;
+      if (date > today || date < addDays(today, -GYM_BACKFILL_DAYS)) {
+        throw new HttpError(400, `date must be within the last ${GYM_BACKFILL_DAYS} days`);
+      }
+      const day = await store.day(date);
+      day.tasks = { ...day.tasks, [t.id]: t.done };
+      await store.putDay(date, day);
+      await store.recompute(date, now);
+      return json(await todayView(store, now));
+    }
+
     case "GET /api/config":
       await app();
       return json(await store.config());
@@ -241,7 +262,7 @@ export async function handle(req: Request, env: Env, now: Date): Promise<Respons
     }
   }
 
-  const known = ["/api/health", "/api/dashboard", "/api/ingest", "/api/gym", "/api/bp", "/api/config", "/api/today",
+  const known = ["/api/health", "/api/dashboard", "/api/ingest", "/api/gym", "/api/bp", "/api/tasks", "/api/config", "/api/today",
     "/api/history", "/api/debug/last-ingest"];
   if (known.includes(path)) throw new HttpError(405, `${method} is not allowed on ${path}`);
   throw new HttpError(404, `no route for ${path}`);

@@ -67,6 +67,8 @@
   "gym": {
     "day_type": "push",
     "label": "PUSH",
+    "color": "#FF6A1A",
+    "icon": "fitness_center",
     "muscles": [
       "chest",
       "front_delts",
@@ -79,13 +81,75 @@
     "week_target": 4
   },
   "score": {
-    "value": 88,
-    "parts": {
-      "sleep": 24,
-      "move": 20,
-      "food": 19,
-      "gym": 25
-    }
+    "value": 89,
+    "done": 8,
+    "total": 9,
+    "perfect": false,
+    "tasks": [
+      {
+        "id": "gym",
+        "label": "Train or rest as planned",
+        "icon": "fitness_center",
+        "done": true,
+        "auto": true
+      },
+      {
+        "id": "apple",
+        "label": "Eat one apple",
+        "icon": "nutrition",
+        "done": true,
+        "auto": false
+      },
+      {
+        "id": "no_sweets",
+        "label": "No sweets",
+        "icon": "no_food",
+        "done": true,
+        "auto": false
+      },
+      {
+        "id": "focus",
+        "label": "4h focus session",
+        "icon": "timer",
+        "done": true,
+        "auto": false
+      },
+      {
+        "id": "steps",
+        "label": "Steps goal",
+        "icon": "directions_walk",
+        "done": false,
+        "auto": true
+      },
+      {
+        "id": "morning",
+        "label": "Morning routine",
+        "icon": "wb_sunny",
+        "done": true,
+        "auto": false
+      },
+      {
+        "id": "night",
+        "label": "Night routine",
+        "icon": "dark_mode",
+        "done": true,
+        "auto": false
+      },
+      {
+        "id": "sleep_early",
+        "label": "Asleep by 23:00",
+        "icon": "bedtime",
+        "done": true,
+        "auto": true
+      },
+      {
+        "id": "read",
+        "label": "Read something",
+        "icon": "menu_book",
+        "done": true,
+        "auto": false
+      }
+    ]
   },
   "progress": {
     "level": 9,
@@ -97,31 +161,45 @@
   "week": [
     {
       "d": "M",
-      "state": "done"
+      "state": "done",
+      "color": "#FF6A1A",
+      "icon": "fitness_center"
     },
     {
       "d": "T",
-      "state": "done"
+      "state": "done",
+      "color": "#22D3EE",
+      "icon": "rowing"
     },
     {
       "d": "W",
-      "state": "rest"
+      "state": "rest",
+      "color": "#2DD4BF",
+      "icon": "bedtime"
     },
     {
       "d": "T",
-      "state": "done"
+      "state": "done",
+      "color": "#FF6A1A",
+      "icon": "fitness_center"
     },
     {
       "d": "F",
-      "state": "planned"
+      "state": "planned",
+      "color": "#22D3EE",
+      "icon": "rowing"
     },
     {
       "d": "S",
-      "state": "rest"
+      "state": "rest",
+      "color": "#2DD4BF",
+      "icon": "bedtime"
     },
     {
       "d": "S",
-      "state": "rest"
+      "state": "rest",
+      "color": "#2DD4BF",
+      "icon": "hot_tub"
     }
   ],
   "coach": {

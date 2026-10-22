@@ -1,0 +1,198 @@
+{
+  "now": "2026-10-25T11:00:00+01:00",
+  "updated": "2026-10-25T10:40:00+01:00",
+  "stale": false,
+  "mode": "day",
+  "sleep": {
+    "asleep_min": 480,
+    "avg7_min": 440,
+    "goal_min": 450,
+    "stages": {
+      "deep": 90,
+      "core": 280,
+      "rem": 100,
+      "awake": 10
+    }
+  },
+  "steps": {
+    "value": 4200,
+    "goal": 10000
+  },
+  "active": {
+    "kcal": 210,
+    "goal": 600
+  },
+  "food": {
+    "kcal": 1400,
+    "kcal_goal": 2600,
+    "protein_g": 90,
+    "protein_goal": 160
+  },
+  "bp": {
+    "sys": 124,
+    "dia": 79,
+    "pulse": 60,
+    "ts": "2026-10-25T09:00:00+01:00",
+    "trend7": [
+      [
+        124,
+        79
+      ],
+      [
+        128,
+        82
+      ],
+      [
+        127,
+        81
+      ],
+      [
+        131,
+        83
+      ],
+      [
+        128,
+        82
+      ]
+    ]
+  },
+  "gym": {
+    "day_type": "rest",
+    "label": "SPA DAY",
+    "color": "#2DD4BF",
+    "icon": "hot_tub",
+    "muscles": [],
+    "status": "rest",
+    "done_min": null,
+    "week_done": 3,
+    "week_target": 4
+  },
+  "score": {
+    "value": 56,
+    "done": 5,
+    "total": 9,
+    "perfect": false,
+    "tasks": [
+      {
+        "id": "gym",
+        "label": "Train or rest as planned",
+        "icon": "fitness_center",
+        "done": true,
+        "auto": true
+      },
+      {
+        "id": "apple",
+        "label": "Eat one apple",
+        "icon": "nutrition",
+        "done": true,
+        "auto": false
+      },
+      {
+        "id": "no_sweets",
+        "label": "No sweets",
+        "icon": "no_food",
+        "done": false,
+        "auto": false
+      },
+      {
+        "id": "focus",
+        "label": "4h focus session",
+        "icon": "timer",
+        "done": false,
+        "auto": false
+      },
+      {
+        "id": "steps",
+        "label": "Steps goal",
+        "icon": "directions_walk",
+        "done": false,
+        "auto": true
+      },
+      {
+        "id": "morning",
+        "label": "Morning routine",
+        "icon": "wb_sunny",
+        "done": true,
+        "auto": false
+      },
+      {
+        "id": "night",
+        "label": "Night routine",
+        "icon": "dark_mode",
+        "done": false,
+        "auto": false
+      },
+      {
+        "id": "sleep_early",
+        "label": "Asleep by 23:00",
+        "icon": "bedtime",
+        "done": true,
+        "auto": true
+      },
+      {
+        "id": "read",
+        "label": "Read something",
+        "icon": "menu_book",
+        "done": true,
+        "auto": false
+      }
+    ]
+  },
+  "progress": {
+    "level": 8,
+    "xp": 190,
+    "xp_next": 500,
+    "streak_days": 16,
+    "best_streak": 21
+  },
+  "week": [
+    {
+      "d": "M",
+      "state": "done",
+      "color": "#FF6A1A",
+      "icon": "fitness_center"
+    },
+    {
+      "d": "T",
+      "state": "done",
+      "color": "#22D3EE",
+      "icon": "rowing"
+    },
+    {
+      "d": "W",
+      "state": "rest",
+      "color": "#2DD4BF",
+      "icon": "bedtime"
+    },
+    {
+      "d": "T",
+      "state": "done",
+      "color": "#FF6A1A",
+      "icon": "fitness_center"
+    },
+    {
+      "d": "F",
+      "state": "done",
+      "color": "#22D3EE",
+      "icon": "rowing"
+    },
+    {
+      "d": "S",
+      "state": "rest",
+      "color": "#2DD4BF",
+      "icon": "bedtime"
+    },
+    {
+      "d": "S",
+      "state": "today",
+      "color": "#2DD4BF",
+      "icon": "hot_tub"
+    }
+  ],
+  "coach": {
+    "text": "Rest day. Muscles grow now.",
+    "tone": "calm"
+  },
+  "mascot": "chill",
+  "celebrate": null
+}

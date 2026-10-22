@@ -15,11 +15,11 @@
     }
   },
   "steps": {
-    "value": 9200,
+    "value": 10450,
     "goal": 10000
   },
   "active": {
-    "kcal": 520,
+    "kcal": 560,
     "goal": 600
   },
   "food": {
@@ -67,6 +67,8 @@
   "gym": {
     "day_type": "push",
     "label": "PUSH",
+    "color": "#FF6A1A",
+    "icon": "fitness_center",
     "muscles": [
       "chest",
       "front_delts",
@@ -79,17 +81,79 @@
     "week_target": 4
   },
   "score": {
-    "value": 92,
-    "parts": {
-      "sleep": 25,
-      "move": 22,
-      "food": 20,
-      "gym": 25
-    }
+    "value": 100,
+    "done": 9,
+    "total": 9,
+    "perfect": true,
+    "tasks": [
+      {
+        "id": "gym",
+        "label": "Train or rest as planned",
+        "icon": "fitness_center",
+        "done": true,
+        "auto": true
+      },
+      {
+        "id": "apple",
+        "label": "Eat one apple",
+        "icon": "nutrition",
+        "done": true,
+        "auto": false
+      },
+      {
+        "id": "no_sweets",
+        "label": "No sweets",
+        "icon": "no_food",
+        "done": true,
+        "auto": false
+      },
+      {
+        "id": "focus",
+        "label": "4h focus session",
+        "icon": "timer",
+        "done": true,
+        "auto": false
+      },
+      {
+        "id": "steps",
+        "label": "Steps goal",
+        "icon": "directions_walk",
+        "done": true,
+        "auto": true
+      },
+      {
+        "id": "morning",
+        "label": "Morning routine",
+        "icon": "wb_sunny",
+        "done": true,
+        "auto": false
+      },
+      {
+        "id": "night",
+        "label": "Night routine",
+        "icon": "dark_mode",
+        "done": true,
+        "auto": false
+      },
+      {
+        "id": "sleep_early",
+        "label": "Asleep by 23:00",
+        "icon": "bedtime",
+        "done": true,
+        "auto": true
+      },
+      {
+        "id": "read",
+        "label": "Read something",
+        "icon": "menu_book",
+        "done": true,
+        "auto": false
+      }
+    ]
   },
   "progress": {
     "level": 8,
-    "xp": 30,
+    "xp": 80,
     "xp_next": 500,
     "streak_days": 13,
     "best_streak": 21
@@ -97,37 +161,55 @@
   "week": [
     {
       "d": "M",
-      "state": "done"
+      "state": "done",
+      "color": "#FF6A1A",
+      "icon": "fitness_center"
     },
     {
       "d": "T",
-      "state": "done"
+      "state": "done",
+      "color": "#22D3EE",
+      "icon": "rowing"
     },
     {
       "d": "W",
-      "state": "rest"
+      "state": "rest",
+      "color": "#2DD4BF",
+      "icon": "bedtime"
     },
     {
       "d": "T",
-      "state": "done"
+      "state": "done",
+      "color": "#FF6A1A",
+      "icon": "fitness_center"
     },
     {
       "d": "F",
-      "state": "planned"
+      "state": "planned",
+      "color": "#22D3EE",
+      "icon": "rowing"
     },
     {
       "d": "S",
-      "state": "rest"
+      "state": "rest",
+      "color": "#2DD4BF",
+      "icon": "bedtime"
     },
     {
       "d": "S",
-      "state": "rest"
+      "state": "rest",
+      "color": "#2DD4BF",
+      "icon": "hot_tub"
     }
   ],
   "coach": {
-    "text": "Push day crushed. Recover well.",
+    "text": "Perfect day. Every box ticked.",
     "tone": "proud"
   },
   "mascot": "proud",
-  "celebrate": null
+  "celebrate": {
+    "id": "perfect_2026-10-22",
+    "title": "PERFECT DAY",
+    "sub": "+30 XP · every habit done"
+  }
 }

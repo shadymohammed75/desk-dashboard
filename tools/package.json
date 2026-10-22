@@ -1,0 +1,18 @@
+{
+  "name": "desk-dashboard-tools",
+  "private": true,
+  "type": "module",
+  "description": "Asset generators. Third-party assets are recorded in CREDITS.md.",
+  "scripts": {
+    "body": "node body_map/make_body.mjs",
+    "icons": "node icons/make_icons.mjs",
+    "assets": "npm run body && npm run icons && npm run app-font",
+    "app-font": "node fonts/copy_app_font.mjs"
+  },
+  "devDependencies": {
+    "@fontsource-variable/inter": "^5.3.0",
+    "@fontsource/inter": "^5.3.0",
+    "@material-symbols/svg-400": "0.47.5",
+    "react-native-body-highlighter": "3.2.0"
+  }
+}

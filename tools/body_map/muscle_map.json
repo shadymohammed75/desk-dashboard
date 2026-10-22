@@ -1,0 +1,104 @@
+{
+  "$comment": "react-native-body-highlighter slug -> our muscle ids (PLAN.md \u00a74.5). One shared mapping for body.svg, the phone app and svg_to_lvgl.py. A list maps every polygon of the slug; an object maps polygon indexes per side ({left:{i:ids}, right:{i:ids}}) \u2014 the library orders left and right polygons differently. [] = drawn but never lit. Slugs under 'parts' are body, not muscle.",
+  "front": {
+    "chest": [
+      "chest"
+    ],
+    "deltoids": [
+      "front_delts",
+      "side_delts"
+    ],
+    "biceps": [
+      "biceps"
+    ],
+    "triceps": [
+      "triceps"
+    ],
+    "forearm": [
+      "forearms"
+    ],
+    "abs": [
+      "abs"
+    ],
+    "obliques": [
+      "obliques"
+    ],
+    "trapezius": [
+      "traps"
+    ],
+    "quadriceps": [
+      "quads"
+    ],
+    "adductors": [
+      "quads"
+    ],
+    "tibialis": [
+      "calves_front"
+    ],
+    "calves": [
+      "calves_front"
+    ]
+  },
+  "back": {
+    "trapezius": [
+      "traps"
+    ],
+    "deltoids": [
+      "rear_delts"
+    ],
+    "upper-back": {
+      "left": {
+        "0": [
+          "upper_back"
+        ],
+        "1": [
+          "lats"
+        ],
+        "2": [
+          "upper_back"
+        ]
+      },
+      "right": {
+        "0": [
+          "upper_back"
+        ],
+        "1": [
+          "upper_back"
+        ],
+        "2": [
+          "lats"
+        ]
+      }
+    },
+    "triceps": [
+      "triceps"
+    ],
+    "lower-back": [
+      "lower_back"
+    ],
+    "forearm": [
+      "forearms"
+    ],
+    "gluteal": [
+      "glutes"
+    ],
+    "adductors": [
+      "hamstrings"
+    ],
+    "hamstring": [
+      "hamstrings"
+    ],
+    "calves": [
+      "calves"
+    ]
+  },
+  "parts": [
+    "head",
+    "hair",
+    "neck",
+    "hands",
+    "knees",
+    "ankles",
+    "feet"
+  ]
+}

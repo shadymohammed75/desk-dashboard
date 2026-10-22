@@ -1,5 +1,8 @@
 // Input validation for every write. Hand-rolled to stay dependency-free; errors become 400s with a clear message.
-import { MUSCLES, WEEKDAYS, type BpReading, type Config, type GymEntry, type Ingest, type SleepSample, type Workout } from "./types";
+import {
+  MUSCLES, WEEKDAYS, type BpReading, type Config, type GymEntry, type Ingest, type SleepSample, type Task, type Weekday,
+  type Workout,
+} from "./types";
 import { isDate } from "./logic/time";
 
 export class HttpError extends Error {
@@ -147,7 +150,23 @@ export function parseBp(body: unknown, now: Date): BpReading {
   return { sys, dia, pulse: num(b.pulse, "pulse", 25, 250, { int: true }), ts: new Date(ts).toISOString() };
 }
 
+// ---------------------------------------------------------------- POST /api/tasks
+
+export function parseTask(body: unknown, config: Config): { id: string; done: boolean; date: string | null } {
+  const b = obj(body, "body");
+  const id = str(b.id, "id", 20) ?? bad("id is required");
+  if (!config.tasks.some((t) => t.id === id)) bad(`id must be one of: ${config.tasks.map((t) => t.id).join(", ")}`);
+  if (typeof b.done !== "boolean") bad("done must be true or false");
+  const date = b.date === undefined || b.date === null ? null : isDate(b.date) ? (b.date as string) : bad("date must be YYYY-MM-DD");
+  return { id, done: b.done as boolean, date };
+}
+
 // ---------------------------------------------------------------- PUT /api/config
+
+const COLOR = /^#[0-9A-Fa-f]{6}$/;
+const ICON = /^[a-z0-9_]{2,40}$/;
+const KEY = /^[a-z0-9_]{1,20}$/;
+const TASK_AUTO = new Set(["gym", "steps", "sleep_early"]);
 
 function validTimezone(tz: string): boolean {
   try {
@@ -158,10 +177,35 @@ function validTimezone(tz: string): boolean {
   }
 }
 
-/** Any of timezone/schedule/splits/goals may be sent; each one sent replaces the current one. */
+function color(v: unknown, path: string): string {
+  return typeof v === "string" && COLOR.test(v) ? v.toUpperCase() : bad(`${path} must be a colour like #FF6A1A`);
+}
+
+function icon(v: unknown, path: string): string {
+  return typeof v === "string" && ICON.test(v) ? v : bad(`${path} must be a Material Symbols name like fitness_center`);
+}
+
+/** Fill fields that older stored configs don't have yet (colours, icons, day overrides, habits, sleep_by). */
+export function normalizeConfig(stored: Partial<Config>, defaults: Config): Config {
+  const splits: Config["splits"] = {};
+  for (const [k, sp] of Object.entries(stored.splits ?? defaults.splits)) {
+    const d = defaults.splits[k];
+    splits[k] = { ...sp, color: sp.color ?? d?.color ?? "#FF6A1A", icon: sp.icon ?? d?.icon ?? "fitness_center" };
+  }
+  return {
+    timezone: stored.timezone ?? defaults.timezone,
+    schedule: stored.schedule ?? defaults.schedule,
+    days: stored.days ?? defaults.days,
+    splits,
+    tasks: stored.tasks ?? defaults.tasks,
+    goals: { ...defaults.goals, ...stored.goals },
+  };
+}
+
+/** Any of timezone/schedule/days/splits/tasks/goals may be sent; each one sent replaces the current one. */
 export function parseConfig(body: unknown, current: Config): Config {
   const b = obj(body, "body");
-  const known = ["timezone", "schedule", "splits", "goals"];
+  const known = ["timezone", "schedule", "days", "splits", "tasks", "goals"];
   const unknown = Object.keys(b).filter((k) => !known.includes(k));
   if (unknown.length) bad(`unknown config field(s): ${unknown.join(", ")}`);
   if (Object.keys(b).length === 0) bad(`send at least one of: ${known.join(", ")}`);
@@ -175,11 +219,16 @@ export function parseConfig(body: unknown, current: Config): Config {
     if (Object.keys(s).length === 0 || Object.keys(s).length > 12) bad("splits must have 1 to 12 entries");
     splits = {};
     for (const [key, v] of Object.entries(s)) {
-      if (!/^[a-z0-9_]{1,20}$/.test(key)) bad(`split key "${key}" must be lowercase letters, digits or _`);
+      if (!KEY.test(key)) bad(`split key "${key}" must be lowercase letters, digits or _`);
       const sp = obj(v, `splits.${key}`);
       const label = str(sp.label, `splits.${key}.label`, 12) ?? bad(`splits.${key}.label is required`);
       if (!label.trim()) bad(`splits.${key}.label is empty`);
-      splits[key] = { label: label.trim(), muscles: muscles(sp.muscles, `splits.${key}.muscles`) };
+      splits[key] = {
+        label: label.trim(),
+        color: sp.color === undefined ? current.splits[key]?.color ?? "#FF6A1A" : color(sp.color, `splits.${key}.color`),
+        icon: sp.icon === undefined ? current.splits[key]?.icon ?? "fitness_center" : icon(sp.icon, `splits.${key}.icon`),
+        muscles: muscles(sp.muscles, `splits.${key}.muscles`),
+      };
     }
   }
 
@@ -196,9 +245,45 @@ export function parseConfig(body: unknown, current: Config): Config {
     if (!(schedule[d] in splits)) bad(`schedule.${d} = "${schedule[d]}" is not a defined split`);
   }
 
+  let days = current.days;
+  if (b.days !== undefined) {
+    const s = obj(b.days, "days");
+    days = {};
+    for (const [d, v] of Object.entries(s)) {
+      if (!(WEEKDAYS as string[]).includes(d)) bad(`days.${d} is not a weekday (mon…sun)`);
+      const o = obj(v, `days.${d}`);
+      const label = o.label === undefined || o.label === null ? undefined : str(o.label, `days.${d}.label`, 12)?.trim();
+      days[d as Weekday] = {
+        ...(o.icon === undefined || o.icon === null ? {} : { icon: icon(o.icon, `days.${d}.icon`) }),
+        ...(label ? { label } : {}),
+      };
+    }
+  }
+
+  let tasks = current.tasks;
+  if (b.tasks !== undefined) {
+    const list = arr(b.tasks, "tasks", 15);
+    if (list.length === 0) bad("tasks must have at least one habit");
+    const seen = new Set<string>();
+    tasks = list.map((x, i) => {
+      const t = obj(x, `tasks[${i}]`);
+      const id = str(t.id, `tasks[${i}].id`, 20) ?? bad(`tasks[${i}].id is required`);
+      if (!KEY.test(id)) bad(`tasks[${i}].id must be lowercase letters, digits or _`);
+      if (seen.has(id)) bad(`tasks[${i}].id "${id}" is used twice`);
+      seen.add(id);
+      const label = (str(t.label, `tasks[${i}].label`, 40) ?? bad(`tasks[${i}].label is required`)).trim();
+      if (!label) bad(`tasks[${i}].label is empty`);
+      const auto = t.auto === undefined || t.auto === null ? undefined : String(t.auto);
+      if (auto !== undefined && !TASK_AUTO.has(auto)) bad(`tasks[${i}].auto must be gym, steps or sleep_early`);
+      return { id, label, icon: icon(t.icon, `tasks[${i}].icon`), ...(auto ? { auto: auto as Task["auto"] } : {}) };
+    });
+  }
+
   let goals = current.goals;
   if (b.goals !== undefined) {
     const g = obj(b.goals, "goals");
+    const sleepBy = g.sleep_by === undefined ? current.goals.sleep_by : str(g.sleep_by, "goals.sleep_by", 5);
+    if (!sleepBy || !/^([01]\d|2[0-3]):[0-5]\d$/.test(sleepBy)) bad("goals.sleep_by must be a time like 23:00");
     goals = {
       steps: reqNum(g.steps, "goals.steps", 1, 100000, { int: true }),
       active_kcal: reqNum(g.active_kcal, "goals.active_kcal", 1, 10000, { int: true }),
@@ -206,7 +291,8 @@ export function parseConfig(body: unknown, current: Config): Config {
       protein_g: reqNum(g.protein_g, "goals.protein_g", 1, 1000, { int: true }),
       sleep_min: reqNum(g.sleep_min, "goals.sleep_min", 60, 960, { int: true }),
       gym_per_week: reqNum(g.gym_per_week, "goals.gym_per_week", 0, 14, { int: true }),
+      sleep_by: sleepBy as string,
     };
   }
-  return { timezone, schedule, splits, goals };
+  return { timezone, schedule, days, splits, tasks, goals };
 }

@@ -1,0 +1,1421 @@
+{
+  "now": "2026-10-25T10:00:00.000Z",
+  "today": {
+    "date": "2026-10-25",
+    "plan": {
+      "label": "SPA DAY",
+      "color": "#2DD4BF",
+      "icon": "hot_tub",
+      "muscles": [],
+      "split": "rest"
+    },
+    "entry": null,
+    "bp_latest": {
+      "sys": 122,
+      "dia": 78,
+      "pulse": 59,
+      "ts": "2026-10-24T06:00:00.000Z"
+    },
+    "dashboard": {
+      "now": "2026-10-25T11:00:00+01:00",
+      "updated": "2026-10-25T07:30:00+01:00",
+      "stale": true,
+      "mode": "day",
+      "sleep": {
+        "asleep_min": 550,
+        "avg7_min": 483,
+        "goal_min": 450,
+        "stages": {
+          "deep": 0,
+          "core": 550,
+          "rem": 0,
+          "awake": 0
+        }
+      },
+      "steps": {
+        "value": 3900,
+        "goal": 10000
+      },
+      "active": {
+        "kcal": 217,
+        "goal": 600
+      },
+      "food": {
+        "kcal": 1733,
+        "kcal_goal": 2600,
+        "protein_g": 162,
+        "protein_goal": 160
+      },
+      "bp": {
+        "sys": 122,
+        "dia": 78,
+        "pulse": 59,
+        "ts": "2026-10-24T08:00:00+02:00",
+        "trend7": [
+          [
+            128,
+            77
+          ],
+          [
+            128,
+            82
+          ],
+          [
+            130,
+            80
+          ],
+          [
+            131,
+            81
+          ],
+          [
+            122,
+            78
+          ]
+        ]
+      },
+      "gym": {
+        "day_type": "rest",
+        "label": "SPA DAY",
+        "color": "#2DD4BF",
+        "icon": "hot_tub",
+        "muscles": [],
+        "status": "rest",
+        "done_min": null,
+        "week_done": 4,
+        "week_target": 4
+      },
+      "score": {
+        "value": 56,
+        "done": 5,
+        "total": 9,
+        "perfect": false,
+        "tasks": [
+          {
+            "id": "gym",
+            "label": "Train or rest as planned",
+            "icon": "fitness_center",
+            "done": true,
+            "auto": true
+          },
+          {
+            "id": "apple",
+            "label": "Eat one apple",
+            "icon": "nutrition",
+            "done": true,
+            "auto": false
+          },
+          {
+            "id": "no_sweets",
+            "label": "No sweets",
+            "icon": "no_food",
+            "done": false,
+            "auto": false
+          },
+          {
+            "id": "focus",
+            "label": "4h focus session",
+            "icon": "timer",
+            "done": false,
+            "auto": false
+          },
+          {
+            "id": "steps",
+            "label": "Steps goal",
+            "icon": "directions_walk",
+            "done": false,
+            "auto": true
+          },
+          {
+            "id": "morning",
+            "label": "Morning routine",
+            "icon": "wb_sunny",
+            "done": true,
+            "auto": false
+          },
+          {
+            "id": "night",
+            "label": "Night routine",
+            "icon": "dark_mode",
+            "done": false,
+            "auto": false
+          },
+          {
+            "id": "sleep_early",
+            "label": "Asleep by 23:00",
+            "icon": "bedtime",
+            "done": true,
+            "auto": true
+          },
+          {
+            "id": "read",
+            "label": "Read something",
+            "icon": "menu_book",
+            "done": true,
+            "auto": false
+          }
+        ]
+      },
+      "progress": {
+        "level": 9,
+        "xp": 410,
+        "xp_next": 550,
+        "streak_days": 12,
+        "best_streak": 14
+      },
+      "week": [
+        {
+          "d": "M",
+          "state": "done",
+          "color": "#FF6A1A",
+          "icon": "fitness_center"
+        },
+        {
+          "d": "T",
+          "state": "done",
+          "color": "#22D3EE",
+          "icon": "rowing"
+        },
+        {
+          "d": "W",
+          "state": "rest",
+          "color": "#2DD4BF",
+          "icon": "bedtime"
+        },
+        {
+          "d": "T",
+          "state": "done",
+          "color": "#FF6A1A",
+          "icon": "fitness_center"
+        },
+        {
+          "d": "F",
+          "state": "done",
+          "color": "#22D3EE",
+          "icon": "rowing"
+        },
+        {
+          "d": "S",
+          "state": "rest",
+          "color": "#2DD4BF",
+          "icon": "bedtime"
+        },
+        {
+          "d": "S",
+          "state": "today",
+          "color": "#2DD4BF",
+          "icon": "hot_tub"
+        }
+      ],
+      "coach": {
+        "text": "Rest day. Muscles grow now.",
+        "tone": "calm"
+      },
+      "mascot": "chill",
+      "celebrate": null
+    }
+  },
+  "config": {
+    "timezone": "Europe/Berlin",
+    "schedule": {
+      "mon": "push",
+      "tue": "pull",
+      "wed": "rest",
+      "thu": "push",
+      "fri": "pull",
+      "sat": "rest",
+      "sun": "rest"
+    },
+    "days": {
+      "wed": {
+        "icon": "bedtime"
+      },
+      "sat": {
+        "icon": "bedtime"
+      },
+      "sun": {
+        "icon": "hot_tub",
+        "label": "SPA DAY"
+      }
+    },
+    "splits": {
+      "push": {
+        "label": "PUSH",
+        "color": "#FF6A1A",
+        "icon": "fitness_center",
+        "muscles": [
+          "chest",
+          "front_delts",
+          "side_delts",
+          "triceps"
+        ]
+      },
+      "pull": {
+        "label": "PULL",
+        "color": "#22D3EE",
+        "icon": "rowing",
+        "muscles": [
+          "lats",
+          "upper_back",
+          "traps",
+          "rear_delts",
+          "biceps",
+          "forearms"
+        ]
+      },
+      "legs": {
+        "label": "LEGS",
+        "color": "#8B7CFF",
+        "icon": "directions_run",
+        "muscles": [
+          "quads",
+          "hamstrings",
+          "glutes",
+          "calves"
+        ]
+      },
+      "rest": {
+        "label": "REST DAY",
+        "color": "#2DD4BF",
+        "icon": "hot_tub",
+        "muscles": []
+      }
+    },
+    "tasks": [
+      {
+        "id": "gym",
+        "label": "Train or rest as planned",
+        "icon": "fitness_center",
+        "auto": "gym"
+      },
+      {
+        "id": "apple",
+        "label": "Eat one apple",
+        "icon": "nutrition"
+      },
+      {
+        "id": "no_sweets",
+        "label": "No sweets",
+        "icon": "no_food"
+      },
+      {
+        "id": "focus",
+        "label": "4h focus session",
+        "icon": "timer"
+      },
+      {
+        "id": "steps",
+        "label": "Steps goal",
+        "icon": "directions_walk",
+        "auto": "steps"
+      },
+      {
+        "id": "morning",
+        "label": "Morning routine",
+        "icon": "wb_sunny"
+      },
+      {
+        "id": "night",
+        "label": "Night routine",
+        "icon": "dark_mode"
+      },
+      {
+        "id": "sleep_early",
+        "label": "Asleep by 23:00",
+        "icon": "bedtime",
+        "auto": "sleep_early"
+      },
+      {
+        "id": "read",
+        "label": "Read something",
+        "icon": "menu_book"
+      }
+    ],
+    "goals": {
+      "steps": 10000,
+      "active_kcal": 600,
+      "kcal": 2600,
+      "protein_g": 160,
+      "sleep_min": 450,
+      "gym_per_week": 4,
+      "sleep_by": "23:00"
+    }
+  },
+  "history": {
+    "days": [
+      {
+        "date": "2026-10-25",
+        "weekday": "sun",
+        "plan": "rest",
+        "plan_label": "SPA DAY",
+        "split": "rest",
+        "label": "SPA DAY",
+        "color": "#2DD4BF",
+        "icon": "hot_tub",
+        "score": 56,
+        "status": "rest",
+        "source": "plan",
+        "muscles": [],
+        "duration_min": null,
+        "note": null,
+        "bp": []
+      },
+      {
+        "date": "2026-10-24",
+        "weekday": "sat",
+        "plan": "rest",
+        "plan_label": "REST DAY",
+        "split": "rest",
+        "label": "REST DAY",
+        "color": "#2DD4BF",
+        "icon": "bedtime",
+        "score": 56,
+        "status": "rest",
+        "source": "plan",
+        "muscles": [],
+        "duration_min": null,
+        "note": null,
+        "bp": [
+          {
+            "sys": 122,
+            "dia": 78,
+            "pulse": 59,
+            "ts": "2026-10-24T08:00:00+02:00"
+          }
+        ]
+      },
+      {
+        "date": "2026-10-23",
+        "weekday": "fri",
+        "plan": "pull",
+        "plan_label": "PULL",
+        "split": "pull",
+        "label": "PULL",
+        "color": "#22D3EE",
+        "icon": "rowing",
+        "score": 44,
+        "status": "done",
+        "source": "app",
+        "muscles": [
+          "lats",
+          "upper_back",
+          "traps",
+          "rear_delts",
+          "biceps",
+          "forearms"
+        ],
+        "duration_min": 47,
+        "note": "Felt strong",
+        "bp": [
+          {
+            "sys": 131,
+            "dia": 81,
+            "pulse": 65,
+            "ts": "2026-10-23T08:00:00+02:00"
+          }
+        ]
+      },
+      {
+        "date": "2026-10-22",
+        "weekday": "thu",
+        "plan": "push",
+        "plan_label": "PUSH",
+        "split": "push",
+        "label": "PUSH",
+        "color": "#FF6A1A",
+        "icon": "fitness_center",
+        "score": 78,
+        "status": "done",
+        "source": "app",
+        "muscles": [
+          "chest",
+          "front_delts",
+          "triceps"
+        ],
+        "duration_min": 55,
+        "note": "PR bench 80kg",
+        "bp": []
+      },
+      {
+        "date": "2026-10-21",
+        "weekday": "wed",
+        "plan": "rest",
+        "plan_label": "REST DAY",
+        "split": "rest",
+        "label": "REST DAY",
+        "color": "#2DD4BF",
+        "icon": "bedtime",
+        "score": 67,
+        "status": "rest",
+        "source": "plan",
+        "muscles": [],
+        "duration_min": null,
+        "note": null,
+        "bp": [
+          {
+            "sys": 130,
+            "dia": 80,
+            "pulse": 66,
+            "ts": "2026-10-21T08:00:00+02:00"
+          }
+        ]
+      },
+      {
+        "date": "2026-10-20",
+        "weekday": "tue",
+        "plan": "pull",
+        "plan_label": "PULL",
+        "split": "pull",
+        "label": "PULL",
+        "color": "#22D3EE",
+        "icon": "rowing",
+        "score": 67,
+        "status": "done",
+        "source": "app",
+        "muscles": [
+          "lats",
+          "upper_back",
+          "traps",
+          "rear_delts",
+          "biceps",
+          "forearms"
+        ],
+        "duration_min": 62,
+        "note": "New grip on rows",
+        "bp": [
+          {
+            "sys": 128,
+            "dia": 82,
+            "pulse": 59,
+            "ts": "2026-10-20T08:00:00+02:00"
+          }
+        ]
+      },
+      {
+        "date": "2026-10-19",
+        "weekday": "mon",
+        "plan": "push",
+        "plan_label": "PUSH",
+        "split": "push",
+        "label": "PUSH",
+        "color": "#FF6A1A",
+        "icon": "fitness_center",
+        "score": 67,
+        "status": "done",
+        "source": "app",
+        "muscles": [
+          "chest",
+          "front_delts",
+          "side_delts",
+          "triceps"
+        ],
+        "duration_min": 53,
+        "note": null,
+        "bp": [
+          {
+            "sys": 128,
+            "dia": 77,
+            "pulse": 65,
+            "ts": "2026-10-19T08:00:00+02:00"
+          }
+        ]
+      },
+      {
+        "date": "2026-10-18",
+        "weekday": "sun",
+        "plan": "rest",
+        "plan_label": "SPA DAY",
+        "split": "rest",
+        "label": "SPA DAY",
+        "color": "#2DD4BF",
+        "icon": "hot_tub",
+        "score": 67,
+        "status": "rest",
+        "source": "plan",
+        "muscles": [],
+        "duration_min": null,
+        "note": null,
+        "bp": [
+          {
+            "sys": 128,
+            "dia": 81,
+            "pulse": 64,
+            "ts": "2026-10-18T08:00:00+02:00"
+          }
+        ]
+      },
+      {
+        "date": "2026-10-17",
+        "weekday": "sat",
+        "plan": "rest",
+        "plan_label": "REST DAY",
+        "split": "rest",
+        "label": "REST DAY",
+        "color": "#2DD4BF",
+        "icon": "bedtime",
+        "score": 56,
+        "status": "rest",
+        "source": "plan",
+        "muscles": [],
+        "duration_min": null,
+        "note": null,
+        "bp": [
+          {
+            "sys": 129,
+            "dia": 83,
+            "pulse": 59,
+            "ts": "2026-10-17T08:00:00+02:00"
+          }
+        ]
+      },
+      {
+        "date": "2026-10-16",
+        "weekday": "fri",
+        "plan": "pull",
+        "plan_label": "PULL",
+        "split": "pull",
+        "label": "PULL",
+        "color": "#22D3EE",
+        "icon": "rowing",
+        "score": 56,
+        "status": "done",
+        "source": "app",
+        "muscles": [
+          "lats",
+          "upper_back",
+          "traps",
+          "rear_delts",
+          "biceps",
+          "forearms"
+        ],
+        "duration_min": 66,
+        "note": "Felt strong",
+        "bp": [
+          {
+            "sys": 120,
+            "dia": 78,
+            "pulse": 65,
+            "ts": "2026-10-16T08:00:00+02:00"
+          }
+        ]
+      },
+      {
+        "date": "2026-10-15",
+        "weekday": "thu",
+        "plan": "push",
+        "plan_label": "PUSH",
+        "split": "push",
+        "label": "PUSH",
+        "color": "#FF6A1A",
+        "icon": "fitness_center",
+        "score": 100,
+        "status": "done",
+        "source": "app",
+        "muscles": [
+          "chest",
+          "front_delts",
+          "side_delts",
+          "triceps"
+        ],
+        "duration_min": 68,
+        "note": "PR bench 80kg",
+        "bp": [
+          {
+            "sys": 128,
+            "dia": 76,
+            "pulse": 60,
+            "ts": "2026-10-15T08:00:00+02:00"
+          }
+        ]
+      },
+      {
+        "date": "2026-10-14",
+        "weekday": "wed",
+        "plan": "rest",
+        "plan_label": "REST DAY",
+        "split": "rest",
+        "label": "REST DAY",
+        "color": "#2DD4BF",
+        "icon": "bedtime",
+        "score": 56,
+        "status": "rest",
+        "source": "plan",
+        "muscles": [],
+        "duration_min": null,
+        "note": null,
+        "bp": [
+          {
+            "sys": 126,
+            "dia": 81,
+            "pulse": 67,
+            "ts": "2026-10-14T08:00:00+02:00"
+          }
+        ]
+      },
+      {
+        "date": "2026-10-13",
+        "weekday": "tue",
+        "plan": "pull",
+        "plan_label": "PULL",
+        "split": "pull",
+        "label": "PULL",
+        "color": "#22D3EE",
+        "icon": "rowing",
+        "score": 44,
+        "status": "skipped",
+        "source": "app",
+        "muscles": [],
+        "duration_min": null,
+        "note": null,
+        "bp": [
+          {
+            "sys": 127,
+            "dia": 80,
+            "pulse": 59,
+            "ts": "2026-10-13T08:00:00+02:00"
+          }
+        ]
+      },
+      {
+        "date": "2026-10-12",
+        "weekday": "mon",
+        "plan": "push",
+        "plan_label": "PUSH",
+        "split": "push",
+        "label": "PUSH",
+        "color": "#FF6A1A",
+        "icon": "fitness_center",
+        "score": 56,
+        "status": "done",
+        "source": "app",
+        "muscles": [
+          "chest",
+          "front_delts",
+          "side_delts",
+          "triceps"
+        ],
+        "duration_min": 48,
+        "note": "Short on time, still did it",
+        "bp": [
+          {
+            "sys": 130,
+            "dia": 76,
+            "pulse": 62,
+            "ts": "2026-10-12T08:00:00+02:00"
+          }
+        ]
+      },
+      {
+        "date": "2026-10-11",
+        "weekday": "sun",
+        "plan": "rest",
+        "plan_label": "SPA DAY",
+        "split": "rest",
+        "label": "SPA DAY",
+        "color": "#2DD4BF",
+        "icon": "hot_tub",
+        "score": 67,
+        "status": "rest",
+        "source": "plan",
+        "muscles": [],
+        "duration_min": null,
+        "note": null,
+        "bp": [
+          {
+            "sys": 131,
+            "dia": 84,
+            "pulse": 67,
+            "ts": "2026-10-11T08:00:00+02:00"
+          }
+        ]
+      },
+      {
+        "date": "2026-10-10",
+        "weekday": "sat",
+        "plan": "rest",
+        "plan_label": "REST DAY",
+        "split": "legs",
+        "label": "LEGS",
+        "color": "#8B7CFF",
+        "icon": "directions_run",
+        "score": 100,
+        "status": "done",
+        "source": "app",
+        "muscles": [
+          "quads",
+          "hamstrings",
+          "glutes",
+          "calves"
+        ],
+        "duration_min": 40,
+        "note": "Bonus legs",
+        "bp": [
+          {
+            "sys": 126,
+            "dia": 77,
+            "pulse": 64,
+            "ts": "2026-10-10T08:00:00+02:00"
+          }
+        ]
+      },
+      {
+        "date": "2026-10-09",
+        "weekday": "fri",
+        "plan": "pull",
+        "plan_label": "PULL",
+        "split": "pull",
+        "label": "PULL",
+        "color": "#22D3EE",
+        "icon": "rowing",
+        "score": 22,
+        "status": "missed",
+        "source": "plan",
+        "muscles": [],
+        "duration_min": null,
+        "note": null,
+        "bp": [
+          {
+            "sys": 121,
+            "dia": 82,
+            "pulse": 65,
+            "ts": "2026-10-09T08:00:00+02:00"
+          }
+        ]
+      },
+      {
+        "date": "2026-10-08",
+        "weekday": "thu",
+        "plan": "push",
+        "plan_label": "PUSH",
+        "split": "push",
+        "label": "PUSH",
+        "color": "#FF6A1A",
+        "icon": "fitness_center",
+        "score": 67,
+        "status": "done",
+        "source": "app",
+        "muscles": [
+          "chest",
+          "front_delts",
+          "side_delts",
+          "triceps"
+        ],
+        "duration_min": 55,
+        "note": "New grip on rows",
+        "bp": [
+          {
+            "sys": 124,
+            "dia": 77,
+            "pulse": 60,
+            "ts": "2026-10-08T08:00:00+02:00"
+          }
+        ]
+      },
+      {
+        "date": "2026-10-07",
+        "weekday": "wed",
+        "plan": "rest",
+        "plan_label": "REST DAY",
+        "split": "rest",
+        "label": "REST DAY",
+        "color": "#2DD4BF",
+        "icon": "bedtime",
+        "score": 56,
+        "status": "rest",
+        "source": "plan",
+        "muscles": [],
+        "duration_min": null,
+        "note": null,
+        "bp": [
+          {
+            "sys": 122,
+            "dia": 78,
+            "pulse": 59,
+            "ts": "2026-10-07T08:00:00+02:00"
+          }
+        ]
+      },
+      {
+        "date": "2026-10-06",
+        "weekday": "tue",
+        "plan": "pull",
+        "plan_label": "PULL",
+        "split": "pull",
+        "label": "PULL",
+        "color": "#22D3EE",
+        "icon": "rowing",
+        "score": 100,
+        "status": "done",
+        "source": "app",
+        "muscles": [
+          "lats",
+          "upper_back",
+          "traps",
+          "rear_delts",
+          "biceps",
+          "forearms"
+        ],
+        "duration_min": 65,
+        "note": "Short on time, still did it",
+        "bp": [
+          {
+            "sys": 127,
+            "dia": 81,
+            "pulse": 61,
+            "ts": "2026-10-06T08:00:00+02:00"
+          }
+        ]
+      },
+      {
+        "date": "2026-10-05",
+        "weekday": "mon",
+        "plan": "push",
+        "plan_label": "PUSH",
+        "split": "push",
+        "label": "PUSH",
+        "color": "#FF6A1A",
+        "icon": "fitness_center",
+        "score": 67,
+        "status": "done",
+        "source": "app",
+        "muscles": [
+          "chest",
+          "front_delts",
+          "side_delts",
+          "triceps"
+        ],
+        "duration_min": 68,
+        "note": null,
+        "bp": [
+          {
+            "sys": 123,
+            "dia": 77,
+            "pulse": 66,
+            "ts": "2026-10-05T08:00:00+02:00"
+          }
+        ]
+      },
+      {
+        "date": "2026-10-04",
+        "weekday": "sun",
+        "plan": "rest",
+        "plan_label": "SPA DAY",
+        "split": "rest",
+        "label": "SPA DAY",
+        "color": "#2DD4BF",
+        "icon": "hot_tub",
+        "score": 67,
+        "status": "rest",
+        "source": "plan",
+        "muscles": [],
+        "duration_min": null,
+        "note": null,
+        "bp": [
+          {
+            "sys": 127,
+            "dia": 82,
+            "pulse": 64,
+            "ts": "2026-10-04T08:00:00+02:00"
+          }
+        ]
+      },
+      {
+        "date": "2026-10-03",
+        "weekday": "sat",
+        "plan": "rest",
+        "plan_label": "REST DAY",
+        "split": "rest",
+        "label": "REST DAY",
+        "color": "#2DD4BF",
+        "icon": "bedtime",
+        "score": 78,
+        "status": "rest",
+        "source": "plan",
+        "muscles": [],
+        "duration_min": null,
+        "note": null,
+        "bp": [
+          {
+            "sys": 130,
+            "dia": 79,
+            "pulse": 61,
+            "ts": "2026-10-03T08:00:00+02:00"
+          }
+        ]
+      },
+      {
+        "date": "2026-10-02",
+        "weekday": "fri",
+        "plan": "pull",
+        "plan_label": "PULL",
+        "split": "pull",
+        "label": "PULL",
+        "color": "#22D3EE",
+        "icon": "rowing",
+        "score": 78,
+        "status": "done",
+        "source": "app",
+        "muscles": [
+          "lats",
+          "upper_back",
+          "traps",
+          "rear_delts",
+          "biceps",
+          "forearms"
+        ],
+        "duration_min": 64,
+        "note": "New grip on rows",
+        "bp": [
+          {
+            "sys": 123,
+            "dia": 77,
+            "pulse": 64,
+            "ts": "2026-10-02T08:00:00+02:00"
+          }
+        ]
+      },
+      {
+        "date": "2026-10-01",
+        "weekday": "thu",
+        "plan": "push",
+        "plan_label": "PUSH",
+        "split": "push",
+        "label": "PUSH",
+        "color": "#FF6A1A",
+        "icon": "fitness_center",
+        "score": 33,
+        "status": "done",
+        "source": "app",
+        "muscles": [
+          "chest",
+          "front_delts",
+          "side_delts",
+          "triceps"
+        ],
+        "duration_min": 72,
+        "note": null,
+        "bp": [
+          {
+            "sys": 126,
+            "dia": 79,
+            "pulse": 65,
+            "ts": "2026-10-01T08:00:00+02:00"
+          }
+        ]
+      },
+      {
+        "date": "2026-09-30",
+        "weekday": "wed",
+        "plan": "rest",
+        "plan_label": "REST DAY",
+        "split": "rest",
+        "label": "REST DAY",
+        "color": "#2DD4BF",
+        "icon": "bedtime",
+        "score": 100,
+        "status": "rest",
+        "source": "plan",
+        "muscles": [],
+        "duration_min": null,
+        "note": null,
+        "bp": [
+          {
+            "sys": 123,
+            "dia": 78,
+            "pulse": 63,
+            "ts": "2026-09-30T08:00:00+02:00"
+          }
+        ]
+      },
+      {
+        "date": "2026-09-29",
+        "weekday": "tue",
+        "plan": "pull",
+        "plan_label": "PULL",
+        "split": "pull",
+        "label": "PULL",
+        "color": "#22D3EE",
+        "icon": "rowing",
+        "score": 56,
+        "status": "done",
+        "source": "app",
+        "muscles": [
+          "lats",
+          "upper_back",
+          "traps",
+          "rear_delts",
+          "biceps",
+          "forearms"
+        ],
+        "duration_min": 56,
+        "note": null,
+        "bp": [
+          {
+            "sys": 123,
+            "dia": 80,
+            "pulse": 66,
+            "ts": "2026-09-29T08:00:00+02:00"
+          }
+        ]
+      },
+      {
+        "date": "2026-09-28",
+        "weekday": "mon",
+        "plan": "push",
+        "plan_label": "PUSH",
+        "split": "push",
+        "label": "PUSH",
+        "color": "#FF6A1A",
+        "icon": "fitness_center",
+        "score": 67,
+        "status": "done",
+        "source": "app",
+        "muscles": [
+          "chest",
+          "front_delts",
+          "side_delts",
+          "triceps"
+        ],
+        "duration_min": 54,
+        "note": "Felt strong",
+        "bp": [
+          {
+            "sys": 124,
+            "dia": 80,
+            "pulse": 61,
+            "ts": "2026-09-28T08:00:00+02:00"
+          }
+        ]
+      },
+      {
+        "date": "2026-09-27",
+        "weekday": "sun",
+        "plan": "rest",
+        "plan_label": "SPA DAY",
+        "split": "rest",
+        "label": "SPA DAY",
+        "color": "#2DD4BF",
+        "icon": "hot_tub",
+        "score": 56,
+        "status": "rest",
+        "source": "plan",
+        "muscles": [],
+        "duration_min": null,
+        "note": null,
+        "bp": [
+          {
+            "sys": 123,
+            "dia": 80,
+            "pulse": 62,
+            "ts": "2026-09-27T08:00:00+02:00"
+          }
+        ]
+      },
+      {
+        "date": "2026-09-26",
+        "weekday": "sat",
+        "plan": "rest",
+        "plan_label": "REST DAY",
+        "split": "rest",
+        "label": "REST DAY",
+        "color": "#2DD4BF",
+        "icon": "bedtime",
+        "score": 33,
+        "status": "rest",
+        "source": "plan",
+        "muscles": [],
+        "duration_min": null,
+        "note": null,
+        "bp": []
+      },
+      {
+        "date": "2026-09-25",
+        "weekday": "fri",
+        "plan": "pull",
+        "plan_label": "PULL",
+        "split": "pull",
+        "label": "PULL",
+        "color": "#22D3EE",
+        "icon": "rowing",
+        "score": 78,
+        "status": "done",
+        "source": "app",
+        "muscles": [
+          "lats",
+          "upper_back",
+          "traps",
+          "rear_delts",
+          "biceps",
+          "forearms"
+        ],
+        "duration_min": 63,
+        "note": null,
+        "bp": []
+      },
+      {
+        "date": "2026-09-24",
+        "weekday": "thu",
+        "plan": "push",
+        "plan_label": "PUSH",
+        "split": "push",
+        "label": "PUSH",
+        "color": "#FF6A1A",
+        "icon": "fitness_center",
+        "score": 56,
+        "status": "missed",
+        "source": "plan",
+        "muscles": [],
+        "duration_min": null,
+        "note": null,
+        "bp": [
+          {
+            "sys": 128,
+            "dia": 79,
+            "pulse": 61,
+            "ts": "2026-09-24T08:00:00+02:00"
+          }
+        ]
+      },
+      {
+        "date": "2026-09-23",
+        "weekday": "wed",
+        "plan": "rest",
+        "plan_label": "REST DAY",
+        "split": "rest",
+        "label": "REST DAY",
+        "color": "#2DD4BF",
+        "icon": "bedtime",
+        "score": 78,
+        "status": "rest",
+        "source": "plan",
+        "muscles": [],
+        "duration_min": null,
+        "note": null,
+        "bp": []
+      },
+      {
+        "date": "2026-09-22",
+        "weekday": "tue",
+        "plan": "pull",
+        "plan_label": "PULL",
+        "split": "pull",
+        "label": "PULL",
+        "color": "#22D3EE",
+        "icon": "rowing",
+        "score": 56,
+        "status": "done",
+        "source": "app",
+        "muscles": [
+          "lats",
+          "upper_back",
+          "traps",
+          "rear_delts",
+          "biceps",
+          "forearms"
+        ],
+        "duration_min": 73,
+        "note": "Felt strong",
+        "bp": []
+      },
+      {
+        "date": "2026-09-21",
+        "weekday": "mon",
+        "plan": "push",
+        "plan_label": "PUSH",
+        "split": "push",
+        "label": "PUSH",
+        "color": "#FF6A1A",
+        "icon": "fitness_center",
+        "score": 44,
+        "status": "done",
+        "source": "app",
+        "muscles": [
+          "chest",
+          "front_delts",
+          "side_delts",
+          "triceps"
+        ],
+        "duration_min": 72,
+        "note": "PR bench 80kg",
+        "bp": [
+          {
+            "sys": 128,
+            "dia": 80,
+            "pulse": 67,
+            "ts": "2026-09-21T08:00:00+02:00"
+          }
+        ]
+      },
+      {
+        "date": "2026-09-20",
+        "weekday": "sun",
+        "plan": "rest",
+        "plan_label": "SPA DAY",
+        "split": "rest",
+        "label": "SPA DAY",
+        "color": "#2DD4BF",
+        "icon": "hot_tub",
+        "score": 11,
+        "status": "rest",
+        "source": "plan",
+        "muscles": [],
+        "duration_min": null,
+        "note": null,
+        "bp": []
+      },
+      {
+        "date": "2026-09-19",
+        "weekday": "sat",
+        "plan": "rest",
+        "plan_label": "REST DAY",
+        "split": "rest",
+        "label": "REST DAY",
+        "color": "#2DD4BF",
+        "icon": "bedtime",
+        "score": 11,
+        "status": "rest",
+        "source": "plan",
+        "muscles": [],
+        "duration_min": null,
+        "note": null,
+        "bp": []
+      },
+      {
+        "date": "2026-09-18",
+        "weekday": "fri",
+        "plan": "pull",
+        "plan_label": "PULL",
+        "split": "pull",
+        "label": "PULL",
+        "color": "#22D3EE",
+        "icon": "rowing",
+        "score": 0,
+        "status": "no_data",
+        "source": "plan",
+        "muscles": [],
+        "duration_min": null,
+        "note": null,
+        "bp": []
+      },
+      {
+        "date": "2026-09-17",
+        "weekday": "thu",
+        "plan": "push",
+        "plan_label": "PUSH",
+        "split": "push",
+        "label": "PUSH",
+        "color": "#FF6A1A",
+        "icon": "fitness_center",
+        "score": 0,
+        "status": "no_data",
+        "source": "plan",
+        "muscles": [],
+        "duration_min": null,
+        "note": null,
+        "bp": []
+      },
+      {
+        "date": "2026-09-16",
+        "weekday": "wed",
+        "plan": "rest",
+        "plan_label": "REST DAY",
+        "split": "rest",
+        "label": "REST DAY",
+        "color": "#2DD4BF",
+        "icon": "bedtime",
+        "score": 11,
+        "status": "rest",
+        "source": "plan",
+        "muscles": [],
+        "duration_min": null,
+        "note": null,
+        "bp": []
+      },
+      {
+        "date": "2026-09-15",
+        "weekday": "tue",
+        "plan": "pull",
+        "plan_label": "PULL",
+        "split": "pull",
+        "label": "PULL",
+        "color": "#22D3EE",
+        "icon": "rowing",
+        "score": 0,
+        "status": "no_data",
+        "source": "plan",
+        "muscles": [],
+        "duration_min": null,
+        "note": null,
+        "bp": []
+      },
+      {
+        "date": "2026-09-14",
+        "weekday": "mon",
+        "plan": "push",
+        "plan_label": "PUSH",
+        "split": "push",
+        "label": "PUSH",
+        "color": "#FF6A1A",
+        "icon": "fitness_center",
+        "score": 0,
+        "status": "no_data",
+        "source": "plan",
+        "muscles": [],
+        "duration_min": null,
+        "note": null,
+        "bp": []
+      },
+      {
+        "date": "2026-09-13",
+        "weekday": "sun",
+        "plan": "rest",
+        "plan_label": "SPA DAY",
+        "split": "rest",
+        "label": "SPA DAY",
+        "color": "#2DD4BF",
+        "icon": "hot_tub",
+        "score": 11,
+        "status": "rest",
+        "source": "plan",
+        "muscles": [],
+        "duration_min": null,
+        "note": null,
+        "bp": []
+      },
+      {
+        "date": "2026-09-12",
+        "weekday": "sat",
+        "plan": "rest",
+        "plan_label": "REST DAY",
+        "split": "rest",
+        "label": "REST DAY",
+        "color": "#2DD4BF",
+        "icon": "bedtime",
+        "score": 11,
+        "status": "rest",
+        "source": "plan",
+        "muscles": [],
+        "duration_min": null,
+        "note": null,
+        "bp": []
+      },
+      {
+        "date": "2026-09-11",
+        "weekday": "fri",
+        "plan": "pull",
+        "plan_label": "PULL",
+        "split": "pull",
+        "label": "PULL",
+        "color": "#22D3EE",
+        "icon": "rowing",
+        "score": 0,
+        "status": "no_data",
+        "source": "plan",
+        "muscles": [],
+        "duration_min": null,
+        "note": null,
+        "bp": []
+      }
+    ]
+  }
+}

@@ -12,6 +12,7 @@ import { summarizeDay } from "./logic/dashboard";
 import { gymStatus } from "./logic/gym";
 import { levelFor, longestStreak, newCelebrations, streak, totalXp, type ProgressSnapshot } from "./logic/motivation";
 import { addDays, localDate, toLocalIso } from "./logic/time";
+import { normalizeConfig } from "./validate";
 
 export interface KVLike {
   get(key: string, type: "json"): Promise<unknown>;
@@ -32,7 +33,8 @@ export class Store {
     return this.kv.put(key, JSON.stringify(value));
   }
 
-  config = () => this.json<Config>("config", structuredClone(defaultConfig) as Config);
+  config = async () =>
+    normalizeConfig(await this.json<Partial<Config>>("config", {}), structuredClone(defaultConfig) as Config);
   putConfig = (c: Config) => this.put("config", c);
   day = (date: string) => this.json<DayRecord>(`day:${date}`, {});
   putDay = (date: string, d: DayRecord) => this.put(`day:${date}`, d);
