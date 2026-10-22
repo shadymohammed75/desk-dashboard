@@ -9,12 +9,14 @@ extern "C" {
 
 #define BODY_FIG_W 90
 #define BODY_FIG_H 243
+#define BODY_GLOW_PAD 7   /* glow image = muscle image grown by this on every side */
 
 typedef enum { BODY_VIEW_FRONT = 0, BODY_VIEW_BACK = 1 } body_view_t;
 
 typedef struct {
     const char *id;              /* muscle id from PLAN.md §4.5 */
     const lv_image_dsc_t *img;   /* A8 mask, tint with image_recolor */
+    const lv_image_dsc_t *glow;  /* A8 soft glow, drawn at (x, y) - BODY_GLOW_PAD */
     int16_t x, y;                /* offset inside the figure */
     body_view_t view;
 } body_part_t;

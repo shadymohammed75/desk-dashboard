@@ -1,5 +1,5 @@
 # Desk Health Dashboard — Architecture Notes
-Last updated: 2026-10-22 (Phase 3)
+Last updated: 2026-10-22 (Phase 4)
 
 ## Architecture
 - Monorepo: backend/ (Cloudflare Worker, TS), app/ (PWA source), firmware/ (ESP32-S3 + LVGL), tools/ (body map, snapshot renderer), mock/ (contract fixtures)
@@ -27,6 +27,17 @@ Last updated: 2026-10-22 (Phase 3)
 - tools/lvgl_c.py: shared emitter for lv_image_dsc_t (LVGL 9 header: magic/cf/flags/w/h/stride; ARGB8888 bytes are B,G,R,A)
 - firmware/include/lv_conf.h: one LVGL config shared by firmware and the snapshot tool (RGB565, clib malloc)
 - LVGL pinned to v9.3.0
+- Desk UI (firmware/ui): ui.c (layout + updates), ui_bg.c (background), ui_celebrate.c (overlay), dashboard_parse.c (cJSON)
+  * absolute layout on 800×480, no default theme (every widget styled explicitly), state diffed against last DashboardData
+  * one parser for both targets: cJSON (bundled in Arduino-ESP32/ESP-IDF) instead of ArduinoJson — the cloud-tested parse IS the device parse
+  * custom Montserrat fonts (tools/fonts/make_fonts.sh, lv_font_conv) because built-ins lack "—" and "·"
+  * background (dot grid + glow) rendered once into an RGB565 canvas with 4×4 ordered dither (avoids banding)
+  * glows are pre-blurred A8 masks (ring, banner, one per muscle), never live shadows
+  * animation budget: ≤ 2 loops (breathing muscles + today dot, or + evening pill); rest only on data change
+  * done sweep = clipping "reveal" box growing upward with inverse-offset content
+  * celebration ids remembered in RAM (8) with hooks for NVS; lv_anim replaces same var+cb, so fade-in/out use two callbacks
+- Snapshot tool (tools/snapshot): CMake + FetchContent (LVGL, cJSON, stb pinned), simulated tick → deterministic PNGs;
+  --celebrate peak frame, --frames NAME for 6-frame animation strips; CI uploads PNGs (ui.yml); copies in docs/snapshots
 - App icons generated from an SVG (score-ring motif + bolt) by tools/app_icons/make_icons.py
 
 ## Pipelines
@@ -67,3 +78,4 @@ Last updated: 2026-10-22 (Phase 3)
 - 2026-10-22: Phase 2 — phone PWA (Today/BP/Plan/History), body.svg drawn early (needed by the app), app icons, Playwright E2E
 - 2026-10-22: Fix — history shows "no_data" (not "missed") for days before tracking started
 - 2026-10-22: Phase 3 — svg_to_lvgl.py (A8 masks, compiles against LVGL 9.3), preview.html, mascot Pip (5 moods) in app + C
+- 2026-10-22: Phase 4 — LVGL Training HUD, fonts, HUD/glow assets, snapshot tool, 11 reviewed PNGs (docs/snapshots/REVIEW.md)

@@ -3,11 +3,12 @@
 
 For each figure (front, back) it renders:
   - the silhouette fill and the silhouette outline as two A8 masks (full figure size),
-  - every muscle as an A8 alpha mask cropped to its bounding box, with its x/y offset in the figure.
+  - every muscle as an A8 alpha mask cropped to its bounding box, with its x/y offset in the figure,
+  - a soft pre-blurred glow mask per muscle (live LVGL shadows are too slow on the ESP32-S3).
 A8 masks are tinted at runtime with the style's image_recolor, so one mask serves every state
 (orange pending, lime done, grey skipped, cyan rest).
 
-Emits firmware/ui/assets/body_assets.c/.h with a table {id, img, x, y, view}.
+Emits firmware/ui/assets/body_assets.c/.h with a table {id, img, glow, x, y, view}.
 
     pip install cairosvg pillow
     python3 tools/body_map/svg_to_lvgl.py [--scale 0.64]
@@ -22,7 +23,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import cairosvg
-from PIL import Image
+from PIL import Image, ImageFilter
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
@@ -33,6 +34,8 @@ SVG_NS = "{http://www.w3.org/2000/svg}"
 FIG_W, FIG_H = 140, 380
 VIEWS = {"front": 0, "back": 160}
 OUTLINE_WIDTH = 2.0  # SVG units; ~1.3 px at the default scale
+GLOW_PAD = 7         # px of soft glow around each muscle
+GLOW_BLUR = 3.5
 
 
 def render_alpha(path_d: str, view_x: int, scale: float, *, stroke: bool = False) -> Image.Image:
@@ -76,8 +79,12 @@ def main() -> None:
             crop = alpha.crop(box)
             name = f"body_img_{pid}"
             c_parts.append(image_c(name, crop.width, crop.height, "A8", crop.tobytes()))
-            table.append(f'    {{ "{pid}", &{name}, {box[0]}, {box[1]}, BODY_VIEW_{view.upper()} }},')
-            total += crop.width * crop.height
+            padded = Image.new("L", (crop.width + 2 * GLOW_PAD, crop.height + 2 * GLOW_PAD), 0)
+            padded.paste(crop, (GLOW_PAD, GLOW_PAD))
+            glow = padded.filter(ImageFilter.GaussianBlur(GLOW_BLUR))
+            c_parts.append(image_c(f"body_glow_{pid}", glow.width, glow.height, "A8", glow.tobytes()))
+            table.append(f'    {{ "{pid}", &{name}, &body_glow_{pid}, {box[0]}, {box[1]}, BODY_VIEW_{view.upper()} }},')
+            total += crop.width * crop.height + glow.width * glow.height
 
     args.out.mkdir(parents=True, exist_ok=True)
     header = f"""{GENERATED.format(tool="tools/body_map/svg_to_lvgl.py")}#pragma once
@@ -90,12 +97,14 @@ extern "C" {{
 
 #define BODY_FIG_W {fig_w}
 #define BODY_FIG_H {fig_h}
+#define BODY_GLOW_PAD {GLOW_PAD}   /* glow image = muscle image grown by this on every side */
 
 typedef enum {{ BODY_VIEW_FRONT = 0, BODY_VIEW_BACK = 1 }} body_view_t;
 
 typedef struct {{
     const char *id;              /* muscle id from PLAN.md §4.5 */
     const lv_image_dsc_t *img;   /* A8 mask, tint with image_recolor */
+    const lv_image_dsc_t *glow;  /* A8 soft glow, drawn at (x, y) - BODY_GLOW_PAD */
     int16_t x, y;                /* offset inside the figure */
     body_view_t view;
 }} body_part_t;
