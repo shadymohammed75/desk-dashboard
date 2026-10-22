@@ -200,6 +200,7 @@ function hud(d) {
   const milestone = [7, 14, 30, 50, 100].includes(p.streak_days);
   return h("header", { class: "hud" },
     scoreRing(d.score),
+    h("img", { class: "mascot", src: `mascot/${d.mascot}.png`, alt: `Pip is ${d.mascot}`, width: 40, height: 40 }),
     h("div", { class: "hud-mid" },
       h("div", { class: "lv" }, h("span", {}, `LV ${p.level}`), h("small", { class: "num" }, `${p.xp}/${p.xp_next} XP`)),
       h("div", { class: "xpbar" }, Object.assign(h("i"), { style: `width:${pct(p.xp, p.xp_next)}%` })),

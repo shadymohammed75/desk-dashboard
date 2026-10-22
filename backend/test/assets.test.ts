@@ -19,3 +19,12 @@ describe("body map", () => {
     }
   });
 });
+
+describe("mascot", () => {
+  it("has an app sprite for every mood the API can return", () => {
+    for (const mood of ["sleepy", "chill", "pumped", "proud", "tired"]) {
+      const png = readFileSync(resolve(root, `backend/public/app/mascot/${mood}.png`));
+      expect(png.subarray(1, 4).toString(), mood).toBe("PNG");
+    }
+  });
+});

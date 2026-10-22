@@ -1,0 +1,105 @@
+<!doctype html>
+<!--
+  Body map preview. Colours body.svg from a mock dashboard JSON or a quick state button.
+  Serve the repo root so the mocks are reachable:
+      python3 -m http.server 8000      then open http://localhost:8000/tools/body_map/preview.html
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Body map preview</title>
+  <style>
+    :root { --bg: #07080C; --panel: #11131A; --border: #1E2230; --primary: #FF6A1A; --lime: #3DFF8F; --cyan: #22D3EE;
+            --text: #F4F5F8; --dim: #8A90A2; --faint: #4A5063; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.4 system-ui, sans-serif; padding: 16px; }
+    .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 16px; }
+    button, select { background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: 10px;
+                     padding: 8px 12px; font: inherit; cursor: pointer; }
+    button.on { border-color: var(--primary); color: var(--primary); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 12px; }
+    .card h3 { margin: 0 0 4px; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
+    .names { text-align: center; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); min-height: 1.4em; }
+    svg { width: 100%; height: auto; display: block; }
+    svg .silhouette { fill: #171A23; stroke: var(--faint); stroke-width: 1.2; }
+    svg path.muscle { fill: #1E2230; stroke: #2A3042; stroke-width: .8; }
+    svg.pending path.on { fill: var(--primary); animation: breathe 2.4s ease-in-out infinite; }
+    svg.done path.on { fill: var(--lime); animation: sweep .5s ease-out both; }
+    svg.skipped path.on { fill: var(--faint); }
+    svg.rest .silhouette { stroke: var(--cyan); stroke-opacity: .4; fill: var(--panel); }
+    svg.rest path.muscle { fill: transparent; stroke: var(--cyan); stroke-opacity: .25; }
+    @keyframes breathe { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+    @keyframes sweep { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0); } }
+  </style>
+</head>
+<body>
+  <div class="bar">
+    <strong>Body map preview</strong>
+    <select id="mock" aria-label="Mock dashboard"></select>
+    <button data-all>All states</button>
+  </div>
+  <div class="grid" id="grid"></div>
+
+<script>
+const MOCKS = ["morning_short_sleep", "push_pending_day", "push_pending_evening", "push_done_celebrate", "rest_day",
+               "perfect_day", "streak_milestone", "no_data", "stale"];
+const SPLITS = {
+  push: ["chest", "front_delts", "side_delts", "triceps"],
+  pull: ["lats", "upper_back", "traps", "rear_delts", "biceps", "forearms"],
+  legs: ["quads", "hamstrings", "glutes", "calves"],
+};
+const STATES = [
+  ["Push", { status: "pending", muscles: SPLITS.push }],
+  ["Pull", { status: "pending", muscles: SPLITS.pull }],
+  ["Legs", { status: "pending", muscles: SPLITS.legs }],
+  ["Push", { status: "done", muscles: ["chest", "front_delts", "triceps"] }],
+  ["Pull", { status: "skipped", muscles: SPLITS.pull }],
+  ["Rest day", { status: "rest", muscles: [] }],
+];
+let svgText = "";
+
+function figure(title, gym) {
+  const card = document.createElement("div");
+  card.className = "card";
+  const h = document.createElement("h3");
+  h.textContent = `${title} — ${gym.status}`;
+  const holder = document.createElement("div");
+  holder.innerHTML = svgText; // our own static file
+  const svg = holder.querySelector("svg");
+  svg.removeAttribute("width");
+  svg.removeAttribute("height");
+  svg.querySelector("style")?.remove();
+  svg.classList.add(gym.status);
+  const on = new Set(gym.muscles);
+  if (on.has("calves")) on.add("calves_front");
+  on.forEach((id) => svg.querySelector(`#${id}`)?.classList.add("on"));
+  const names = document.createElement("div");
+  names.className = "names";
+  names.textContent = gym.status === "rest" ? "Recovery day" : gym.muscles.join(" · ").replaceAll("_", " ");
+  card.append(h, svg, names);
+  return card;
+}
+
+function showAll() {
+  const grid = document.getElementById("grid");
+  grid.replaceChildren(...STATES.map(([t, g]) => figure(t, g)));
+}
+
+async function showMock(name) {
+  const d = await (await fetch(`../../mock/${name}.json`)).json();
+  document.getElementById("grid").replaceChildren(figure(`${name} (${d.gym.label})`, d.gym));
+}
+
+(async () => {
+  svgText = await (await fetch("body.svg")).text();
+  const sel = document.getElementById("mock");
+  sel.append(new Option("Pick a mock…", ""), ...MOCKS.map((m) => new Option(m, m)));
+  sel.addEventListener("change", () => (sel.value ? showMock(sel.value) : showAll()));
+  document.querySelector("[data-all]").addEventListener("click", () => { sel.value = ""; showAll(); });
+  const fromHash = location.hash.slice(1);
+  if (MOCKS.includes(fromHash)) { sel.value = fromHash; showMock(fromHash); } else showAll();
+})();
+</script>
+</body>
+</html>

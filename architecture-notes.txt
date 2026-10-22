@@ -1,5 +1,5 @@
 # Desk Health Dashboard — Architecture Notes
-Last updated: 2026-10-22 (Phase 2)
+Last updated: 2026-10-22 (Phase 3)
 
 ## Architecture
 - Monorepo: backend/ (Cloudflare Worker, TS), app/ (PWA source), firmware/ (ESP32-S3 + LVGL), tools/ (body map, snapshot renderer), mock/ (contract fixtures)
@@ -20,6 +20,13 @@ Last updated: 2026-10-22 (Phase 2)
 - Optimistic UI — apply locally, POST, replace with server's /api/today payload; on failure restore snapshot + toast
 - Body map: tools/body_map/make_body.py generates body.svg (rounded, mirrored geometric shapes; one <path id> per muscle);
   writes the app's copy too; a vitest test asserts both copies are identical and every muscle id exists exactly once
+- Asset pipeline (Python, run by hand, outputs committed): body.svg -> svg_to_lvgl.py -> A8 masks (firmware/ui/assets/body_assets.c)
+  * one A8 alpha mask per muscle + silhouette fill/line per figure; tinted at runtime via image_recolor, so one mask serves all states
+  * figure scaled to 0.64 (90×243 px) to fit the 480 px screen's right column (PLAN said ~140×380 — too tall); ~102 KiB pixels
+- Mascot "Pip": original 32×32 pixel art drawn in code (tools/mascot/make_mascot.py), 5 moods -> PNGs for the app + ARGB8888 C
+- tools/lvgl_c.py: shared emitter for lv_image_dsc_t (LVGL 9 header: magic/cf/flags/w/h/stride; ARGB8888 bytes are B,G,R,A)
+- firmware/include/lv_conf.h: one LVGL config shared by firmware and the snapshot tool (RGB565, clib malloc)
+- LVGL pinned to v9.3.0
 - App icons generated from an SVG (score-ring motif + bolt) by tools/app_icons/make_icons.py
 
 ## Pipelines
@@ -59,3 +66,4 @@ Last updated: 2026-10-22 (Phase 2)
 - 2026-10-22: Fix — workerd rejects non-function exports from the entry module (caught only by wrangler dev, not vitest)
 - 2026-10-22: Phase 2 — phone PWA (Today/BP/Plan/History), body.svg drawn early (needed by the app), app icons, Playwright E2E
 - 2026-10-22: Fix — history shows "no_data" (not "missed") for days before tracking started
+- 2026-10-22: Phase 3 — svg_to_lvgl.py (A8 masks, compiles against LVGL 9.3), preview.html, mascot Pip (5 moods) in app + C
