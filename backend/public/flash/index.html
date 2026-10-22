@@ -1,4 +1,48 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Flasher</title><style>body{background:#07080C;color:#F4F5F8;font-family:system-ui;padding:24px}</style></head>
-<body><h1>Desk screen flasher</h1><p>Arrives in Phase 5.</p></body></html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07080C">
+  <title>Desk Screen Flasher</title>
+  <link rel="stylesheet" href="flash.css">
+  <script type="module" src="https://unpkg.com/esp-web-tools@10.4.0/dist/web/install-button.js?module"></script>
+  <script type="module" src="flash.js"></script>
+</head>
+<body>
+  <main>
+    <h1>Desk screen flasher</h1>
+    <p class="dim">Flashes the Waveshare ESP32-S3-LCD-4.3 from Chrome or Edge on a computer, over USB. Nothing to install.</p>
+
+    <ol class="steps">
+      <li>
+        <h2>Get the firmware</h2>
+        <p>GitHub → your <b>desk-dashboard</b> repo → <b>Actions</b> → newest green <b>firmware</b> run →
+           <b>Artifacts</b> → download <b>firmware</b> and unzip it. It contains <code>firmware-merged.bin</code>.</p>
+        <p class="dim small">The file has your Wi-Fi password and device token built in, so it is never put on this website.
+           It stays in your private GitHub repo and on your computer.</p>
+      </li>
+      <li>
+        <h2>Choose the file</h2>
+        <label class="file">
+          <input type="file" id="bin" accept=".bin,application/octet-stream">
+          <span id="file-label">Choose firmware-merged.bin…</span>
+        </label>
+        <p id="file-status" class="small" role="status"></p>
+      </li>
+      <li>
+        <h2>Connect and install</h2>
+        <p>Plug the board into this computer with a USB-C <b>data</b> cable (the port marked <b>UART</b>).
+           The first time, you may need to hold <b>BOOT</b> while plugging it in.</p>
+        <esp-web-install-button id="install">
+          <button slot="activate" class="btn" disabled id="install-btn">Connect &amp; install</button>
+          <span slot="unsupported" class="warn">This browser can't talk to USB devices. Use Chrome or Edge on Windows, macOS or Linux.</span>
+          <span slot="not-allowed" class="warn">USB access needs HTTPS. Open this page via its https:// address.</span>
+        </esp-web-install-button>
+        <p class="dim small">After installing, choose <b>Logs &amp; console</b> in the same dialog to watch Wi-Fi, time, fetch and render messages.</p>
+      </li>
+    </ol>
+    <p class="dim small">Also works for Waveshare's own demo image (<code>lvgl_Porting_No_Touch.bin</code>) to check the board first.</p>
+  </main>
+</body>
+</html>

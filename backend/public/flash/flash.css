@@ -1,0 +1,21 @@
+:root { --bg: #07080C; --panel: #11131A; --border: #1E2230; --primary: #FF6A1A; --lime: #3DFF8F; --amber: #FFB020;
+        --text: #F4F5F8; --dim: #8A90A2; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.5 -apple-system, "Segoe UI", Roboto, sans-serif; }
+main { max-width: 680px; margin: 0 auto; padding: 32px 16px 64px; }
+h1 { font-size: 28px; margin: 0 0 8px; }
+h2 { font-size: 15px; margin: 0 0 6px; text-transform: uppercase; letter-spacing: .1em; color: var(--dim); }
+.dim { color: var(--dim); }
+.small { font-size: 14px; }
+.warn { color: var(--amber); }
+.ok { color: var(--lime); }
+code { background: var(--panel); padding: 1px 6px; border-radius: 6px; }
+.steps { list-style: none; padding: 0; counter-reset: s; display: grid; gap: 14px; margin: 24px 0; }
+.steps li { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; }
+.file { display: inline-flex; align-items: center; min-height: 48px; padding: 0 16px; border: 1px dashed var(--dim);
+        border-radius: 12px; cursor: pointer; }
+.file input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.file:focus-within { outline: 2px solid var(--primary); outline-offset: 2px; }
+.btn { min-height: 48px; padding: 0 20px; border-radius: 12px; border: 0; background: var(--primary); color: #160800;
+       font: inherit; font-weight: 700; cursor: pointer; }
+.btn[disabled] { opacity: .45; cursor: not-allowed; }

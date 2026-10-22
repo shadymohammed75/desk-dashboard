@@ -1,0 +1,55 @@
+name: firmware
+
+on:
+  push:
+    paths: ["firmware/**", ".github/workflows/firmware.yml"]
+  pull_request:
+    paths: ["firmware/**", ".github/workflows/firmware.yml"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.platformio
+            firmware/.pio/libdeps
+          key: pio-${{ hashFiles('firmware/platformio.ini') }}
+
+      - run: pip install platformio==6.2.0
+
+      - name: Write secrets.h from GitHub Actions secrets
+        id: secrets
+        env:
+          WIFI_SSID: ${{ secrets.WIFI_SSID }}
+          WIFI_PASS: ${{ secrets.WIFI_PASS }}
+          API_URL: ${{ secrets.API_URL }}
+          DEVICE_TOKEN: ${{ secrets.DEVICE_TOKEN }}
+        run: python3 firmware/scripts/write_secrets.py
+
+      - name: Build
+        run: pio run -d firmware -e esp32s3
+
+      - name: Collect merged image
+        run: |
+          mkdir -p dist
+          # pioarduino emits a merged image (bootloader + partitions + boot_app0 + app) for offset 0x0
+          cp firmware/.pio/build/esp32s3/firmware.factory.bin dist/firmware-merged.bin
+          cp firmware/.pio/build/esp32s3/firmware.bin dist/firmware-app.bin
+          echo "commit ${GITHUB_SHA::7} · placeholder secrets: ${{ steps.secrets.outputs.placeholder }}" > dist/BUILD.txt
+          rm -f firmware/include/secrets.h
+
+      # Private artifact: the image contains Wi-Fi credentials and the device token. Never publish it.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.secrets.outputs.placeholder == 'true' && 'firmware-PLACEHOLDER-not-flashable' || 'firmware' }}
+          path: dist/
+          retention-days: 30

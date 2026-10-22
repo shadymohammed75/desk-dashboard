@@ -1,0 +1,12 @@
+{
+  "name": "desk_ui",
+  "version": "1.0.0",
+  "description": "Desk screen UI (pure LVGL 9), shared with tools/snapshot",
+  "frameworks": "*",
+  "platforms": "*",
+  "build": {
+    "srcDir": ".",
+    "includeDir": ".",
+    "srcFilter": ["+<*.c>", "+<assets/*.c>", "+<fonts/*.c>"]
+  }
+}

@@ -7,3 +7,6 @@
 
 /app/*
   Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'
+
+/flash/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://unpkg.com; style-src 'self' 'unsafe-inline'; connect-src 'self' blob: https://unpkg.com; img-src 'self' data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
