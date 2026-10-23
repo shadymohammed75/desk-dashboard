@@ -73,6 +73,10 @@
         "heart_rate": 65,
         "spo2": 96
       },
+      "night": {
+        "from": "00:00",
+        "to": "08:00"
+      },
       "gym": {
         "day_type": "push",
         "label": "PUSH",
@@ -346,6 +350,10 @@
       "sleep_min": 450,
       "gym_per_week": 4,
       "sleep_by": "23:00"
+    },
+    "night": {
+      "from": "00:00",
+      "to": "08:00"
     }
   },
   "history": {

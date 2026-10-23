@@ -29,6 +29,10 @@
     "heart_rate": null,
     "spo2": null
   },
+  "night": {
+    "from": "00:00",
+    "to": "08:00"
+  },
   "gym": {
     "day_type": "push",
     "label": "PUSH",

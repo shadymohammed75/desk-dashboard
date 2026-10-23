@@ -63,7 +63,8 @@ def dash(now, updated, mode, *, sleep, stages, avg7, steps, active, kcal, protei
         "steps": {"value": steps, "goal": GOALS["steps"]},
         "active": {"kcal": active, "goal": GOALS["active_kcal"]},
         "food": {"kcal": kcal, "kcal_goal": GOALS["kcal"], "protein_g": protein, "protein_goal": GOALS["protein_g"]},
-        "bp": bp, "vitals": dict(zip(("resting_hr", "heart_rate", "spo2"), vitals)), "gym": gym, "score": score(done), "progress": progress, "week": week,
+        "bp": bp, "vitals": dict(zip(("resting_hr", "heart_rate", "spo2"), vitals)),
+        "night": {"from": "00:00", "to": "08:00"}, "gym": gym, "score": score(done), "progress": progress, "week": week,
         "coach": coach, "mascot": mascot, "celebrate": celebrate,
     }
 
@@ -76,7 +77,7 @@ PROG = {"level": 7, "xp": 340, "xp_next": 450, "streak_days": 12, "best_streak":
 
 m = {}
 m["morning_short_sleep"] = dash(
-    "2026-10-22T07:15:00+02:00", "2026-10-22T07:05:00+02:00", "morning",
+    "2026-10-22T08:20:00+02:00", "2026-10-22T08:10:00+02:00", "morning",
     sleep=340, stages={"deep": 41, "core": 214, "rem": 58, "awake": 27}, avg7=405, steps=900, active=40,
     kcal=None, protein=None, bp=BP, gym=gym("pending"), done={"morning"}, progress=PROG, week=week(THU),
     coach={"text": "Short night. Train smart, not heavy.", "tone": "calm"}, mascot="sleepy", vitals=(63, 66, None))
@@ -143,6 +144,14 @@ m["stale"] = dash(
     sleep=432, stages=STAGES, avg7=410, steps=3100, active=150, kcal=900, protein=55, bp=BP, gym=gym("pending"),
     done={"apple", "morning"}, progress={**PROG, "xp": 360}, week=week(THU),
     coach={"text": "PUSH day loaded. You know the drill.", "tone": "nudge"}, mascot="pumped", stale=True)
+
+# 02:40, inside the night window: the desk screen shows the sleep scene
+m["night_sleep"] = dash(
+    "2026-10-23T02:40:00+02:00", "2026-10-22T23:10:00+02:00", "night",
+    sleep=None, stages=None, avg7=410, steps=None, active=None, kcal=None, protein=None, bp=BP, gym=gym("pending", "pull"),
+    done=set(), progress={"level": 8, "xp": 80, "xp_next": 500, "streak_days": 13, "best_streak": 21},
+    week=week(["done", "done", "rest", "done", "today", "rest", "rest"]),
+    coach={"text": "Sleep is training too.", "tone": "calm"}, mascot="sleepy", stale=True, vitals=(None, None, None))
 
 # Sunday spa day (also the day the clocks go back: +01:00 from 03:00)
 m["spa_day"] = dash(

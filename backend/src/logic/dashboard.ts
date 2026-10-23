@@ -113,6 +113,8 @@ export function buildDashboard(s: State): Dashboard {
     bp: last && { sys: last.sys, dia: last.dia, pulse: last.pulse, ts: toLocalIso(new Date(last.ts), tz) },
     // older stored ingests have no vitals
     vitals: s.day?.ingest?.vitals ?? { resting_hr: null, heart_rate: null, spo2: null },
+    // the desk screen compares these with its own clock, so the scene switches on the minute even offline
+    night: config.night,
     gym: {
       day_type: gym.day_type, label: gym.label, color: gym.color, icon: gym.icon, muscles: gym.muscles,
       status: gym.status, done_min: gym.done_min,

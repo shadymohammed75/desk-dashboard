@@ -3,7 +3,7 @@
  *   snapshot <mock.json> <out.png>                    final frame (animations settled, no celebration)
  *   snapshot <mock.json> <out.png> --celebrate        the celebration overlay at its peak
  *   snapshot <mock.json> <out-prefix> --frames NAME   6 frames of one animation: <out-prefix>_<NAME>_<i>.png
- *        NAME: score | breathe | done | dot | coach | celebrate | pill
+ *        NAME: score | breathe | done | dot | coach | celebrate | pill | night
  *
  * Time is simulated (custom tick), so output is deterministic and fast. */
 #include <stdio.h>
@@ -93,6 +93,7 @@ static int frames(DashboardData *d, const char *prefix, const char *name)
     else if(!strcmp(name, "breathe")) { d->gym = DD_GYM_PENDING; dur = 2400; need_before = false; }
     else if(!strcmp(name, "dot")) { d->mode = DD_MODE_DAY; dur = 1600; need_before = false; }
     else if(!strcmp(name, "pill")) { d->gym = DD_GYM_PENDING; d->mode = DD_MODE_EVENING; dur = 1000; need_before = false; }
+    else if(!strcmp(name, "night")) { dur = 6600; need_before = false; }
     else if(!strcmp(name, "celebrate")) {
         if(!d->has_celebrate) { fprintf(stderr, "mock has no celebrate event\n"); return 1; }
         dur = 2900;
@@ -109,6 +110,7 @@ static int frames(DashboardData *d, const char *prefix, const char *name)
     ui_set_static(false);
     if(strcmp(name, "celebrate") != 0) d->has_celebrate = false;
     ui_update(d);
+    if(!strcmp(name, "night")) ui_set_night(true, "02:40");
     for(int i = 0; i < 6; i++) {
         char path[512];
         snprintf(path, sizeof path, "%s_%s_%d.png", prefix, name, i);
@@ -146,6 +148,11 @@ int main(int argc, char **argv)
     if(!celebrate) d.has_celebrate = false;   /* final frame = after the celebration has played */
     ui_set_static(true);
     ui_update(&d);
+    /* the device decides from its clock; here the mock's "now" stands in for it */
+    char hhmm[6];
+    snprintf(hhmm, sizeof hhmm, "%.5s", d.now + 11);
+    int minute = (hhmm[0] - '0') * 600 + (hhmm[1] - '0') * 60 + (hhmm[3] - '0') * 10 + (hhmm[4] - '0');
+    ui_set_night(dd_in_window(minute, d.night_from, d.night_to), hhmm);
     advance(100);
     return write_png(argv[2]);
 }

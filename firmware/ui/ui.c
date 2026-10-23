@@ -35,7 +35,7 @@ typedef struct {
 } figure_t;
 
 static struct {
-    lv_obj_t *scr, *main, *night;
+    lv_obj_t *scr, *main;
     /* hud */
     lv_obj_t *clock, *mascot, *lv, *xp_text, *xp_bar, *xp_fill, *flame, *streak, *live_dot, *live_text;
     /* score */
@@ -54,11 +54,9 @@ static struct {
     /* coach */
     lv_obj_t *coach_accent, *coach_text, *coach_week;
     char coach_shown[72];
-    /* night */
-    lv_obj_t *night_clock, *night_score;
 
     DashboardData last;
-    bool have_last, statik, offline, clock_overridden;
+    bool have_last, statik, offline, clock_overridden, night;
     ui_seen_fn seen;
     ui_mark_fn mark;
 } U;
@@ -824,18 +822,6 @@ static void update_coach(const DashboardData *d)
     lv_label_set_text_fmt(U.coach_week, "%d/%d this wk", (int)d->week_done, (int)d->week_target);
 }
 
-/* ------------------------------------------------------------------ night screen */
-
-static void build_night(void)
-{
-    U.night = ui_rect(U.scr, 0, 0, SCREEN_W, SCREEN_H, lv_color_hex(0x000000), 0);
-    U.night_clock = ui_label(U.night, &font_48, C_TEXT_FAINT, 0, 0, "");
-    lv_obj_align(U.night_clock, LV_ALIGN_CENTER, 0, -16);
-    U.night_score = ui_label(U.night, &font_14, C_TEXT_FAINT, 0, 0, "");
-    lv_obj_align(U.night_score, LV_ALIGN_CENTER, 0, 30);
-    show(U.night, false);
-}
-
 /* ------------------------------------------------------------------ public API */
 
 void ui_init(lv_display_t *disp)
@@ -857,21 +843,13 @@ void ui_init(lv_display_t *disp)
     build_week(U.main);
     build_body(U.main);
     build_coach(U.main);
-    build_night();
+    ui_night_build(U.scr);
 }
 
 void ui_update(const DashboardData *d)
 {
     const DashboardData *prev = U.have_last ? &U.last : NULL;
     bool loops = !U.statik;
-
-    bool night = d->mode == DD_MODE_NIGHT;
-    show(U.night, night);
-    show(U.main, !night);
-    if(night) {
-        lv_label_set_text_fmt(U.night_clock, "%.5s", d->now + 11);
-        lv_label_set_text_fmt(U.night_score, "SCORE %d", (int)d->score);
-    }
 
     /* while a celebration plays, the HUD updates underneath and the XP bar fills after it */
     update_hud(d, prev);
@@ -884,7 +862,8 @@ void ui_update(const DashboardData *d)
     update_body(d, prev, loops);
     update_coach(d);
 
-    if(d->has_celebrate && !night) {
+    /* not during the sleep scene: an unseen celebration plays at the first update after it */
+    if(d->has_celebrate && !U.night) {
         bool seen = U.seen ? U.seen(d->cel_id) : ui_celebration_seen(d->cel_id);
         if(!seen) {
             if(U.mark) U.mark(d->cel_id);
@@ -907,6 +886,18 @@ void ui_set_offline(bool offline)
 {
     U.offline = offline;
     if(U.have_last) update_hud(&U.last, &U.last);
+}
+
+void ui_set_night(bool on, const char *hhmm)
+{
+    char until[12];
+    int to = U.have_last ? U.last.night_to : 8 * 60;
+    snprintf(until, sizeof until, "%02d:%02d", to / 60, to % 60);
+    ui_night_set_time(hhmm, until);
+    if(on && ui_celebrating()) return;   /* let a celebration that's already playing finish */
+    U.night = on;
+    show(U.main, !on);
+    ui_night_show(on, U.statik);
 }
 
 void ui_set_static(bool on) { U.statik = on; }

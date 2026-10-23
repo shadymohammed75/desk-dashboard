@@ -1,6 +1,6 @@
 {
-  "now": "2026-10-22T07:15:00+02:00",
-  "updated": "2026-10-22T07:05:00+02:00",
+  "now": "2026-10-22T08:20:00+02:00",
+  "updated": "2026-10-22T08:10:00+02:00",
   "stale": false,
   "mode": "morning",
   "sleep": {
@@ -38,6 +38,10 @@
     "resting_hr": 63,
     "heart_rate": 66,
     "spo2": null
+  },
+  "night": {
+    "from": "00:00",
+    "to": "08:00"
   },
   "gym": {
     "day_type": "push",

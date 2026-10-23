@@ -19,6 +19,10 @@ void ui_update(const DashboardData *d);
 void ui_set_clock(const char *text);
 void ui_set_offline(bool offline);
 
+/** Sleep scene (dim, animated) instead of the dashboard. The caller decides from its clock and the
+ * dashboard's night window (dd_in_window); `hhmm` is the local time, e.g. "02:40". */
+void ui_set_night(bool on, const char *hhmm);
+
 /** Snapshot mode: no looping animations (breathing, pulsing); everything rests at full strength. */
 void ui_set_static(bool on);
 

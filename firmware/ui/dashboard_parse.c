@@ -43,6 +43,21 @@ static bool is(const cJSON *o, const char *k, const char *val)
     return cJSON_IsString(v) && strcmp(v->valuestring, val) == 0;
 }
 
+/* "HH:MM" → minutes after midnight; `fallback` when missing or malformed. */
+static int16_t hhmm(const cJSON *o, const char *k, int16_t fallback)
+{
+    const cJSON *v = get(o, k);
+    const char *s = cJSON_IsString(v) ? v->valuestring : NULL;
+    if(!s || strlen(s) != 5 || s[2] != ':') return fallback;
+    int h = (s[0] - '0') * 10 + (s[1] - '0'), m = (s[3] - '0') * 10 + (s[4] - '0');
+    return (h >= 0 && h < 24 && m >= 0 && m < 60) ? (int16_t)(h * 60 + m) : fallback;
+}
+
+bool dd_in_window(int minute, int from, int to)
+{
+    return from <= to ? (minute >= from && minute < to) : (minute >= from || minute < to);
+}
+
 bool dashboard_parse(const char *json, DashboardData *d)
 {
     memset(d, 0, sizeof(*d));
@@ -150,6 +165,10 @@ bool dashboard_parse(const char *json, DashboardData *d)
     str(cel, "id", d->cel_id, sizeof d->cel_id);
     str(cel, "title", d->cel_title, sizeof d->cel_title);
     str(cel, "sub", d->cel_sub, sizeof d->cel_sub);
+
+    const cJSON *night = get(root, "night");
+    d->night_from = hhmm(night, "from", 0);
+    d->night_to = hhmm(night, "to", 8 * 60);
 
     cJSON_Delete(root);
     return true;

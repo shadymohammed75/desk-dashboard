@@ -215,13 +215,16 @@ export function normalizeConfig(stored: Partial<Config>, defaults: Config): Conf
     splits,
     tasks: stored.tasks ?? defaults.tasks,
     goals: { ...defaults.goals, ...stored.goals },
+    night: stored.night ?? defaults.night,
   };
 }
 
-/** Any of timezone/schedule/days/splits/tasks/goals may be sent; each one sent replaces the current one. */
+const HHMM = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+/** Any of timezone/schedule/days/splits/tasks/goals/night may be sent; each one sent replaces the current one. */
 export function parseConfig(body: unknown, current: Config): Config {
   const b = obj(body, "body");
-  const known = ["timezone", "schedule", "days", "splits", "tasks", "goals"];
+  const known = ["timezone", "schedule", "days", "splits", "tasks", "goals", "night"];
   const unknown = Object.keys(b).filter((k) => !known.includes(k));
   if (unknown.length) bad(`unknown config field(s): ${unknown.join(", ")}`);
   if (Object.keys(b).length === 0) bad(`send at least one of: ${known.join(", ")}`);
@@ -299,7 +302,7 @@ export function parseConfig(body: unknown, current: Config): Config {
   if (b.goals !== undefined) {
     const g = obj(b.goals, "goals");
     const sleepBy = g.sleep_by === undefined ? current.goals.sleep_by : str(g.sleep_by, "goals.sleep_by", 5);
-    if (!sleepBy || !/^([01]\d|2[0-3]):[0-5]\d$/.test(sleepBy)) bad("goals.sleep_by must be a time like 23:00");
+    if (!sleepBy || !HHMM.test(sleepBy)) bad("goals.sleep_by must be a time like 23:00");
     goals = {
       steps: reqNum(g.steps, "goals.steps", 1, 100000, { int: true }),
       active_kcal: reqNum(g.active_kcal, "goals.active_kcal", 1, 10000, { int: true }),
@@ -310,5 +313,15 @@ export function parseConfig(body: unknown, current: Config): Config {
       sleep_by: sleepBy as string,
     };
   }
-  return { timezone, schedule, days, splits, tasks, goals };
+  let night = current.night;
+  if (b.night !== undefined) {
+    const n = obj(b.night, "night");
+    const time = (k: "from" | "to") => {
+      const v = str(n[k], `night.${k}`, 5);
+      return v && HHMM.test(v) ? v : bad(`night.${k} must be a time like 00:00`);
+    };
+    night = { from: time("from"), to: time("to") };
+    if (night.from === night.to) bad("night.from and night.to must differ");
+  }
+  return { timezone, schedule, days, splits, tasks, goals, night };
 }

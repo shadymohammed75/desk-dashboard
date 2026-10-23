@@ -31,7 +31,7 @@ Last updated: 2026-10-22 (redesign)
 - tools/lvgl_c.py: shared emitter for lv_image_dsc_t (LVGL 9 header: magic/cf/flags/w/h/stride; ARGB8888 bytes are B,G,R,A)
 - firmware/include/lv_conf.h: one LVGL config shared by firmware and the snapshot tool (RGB565, clib malloc)
 - LVGL pinned to v9.3.0
-- Desk UI (firmware/ui): ui.c (layout + updates), ui_bg.c (background), ui_celebrate.c (overlay), dashboard_parse.c (cJSON)
+- Desk UI (firmware/ui): ui.c (layout + updates), ui_bg.c (background), ui_celebrate.c (overlay), ui_night.c (sleep scene), dashboard_parse.c (cJSON)
   * absolute layout on 800×480, no default theme (every widget styled explicitly), state diffed against last DashboardData
   * one parser for both targets: cJSON (bundled in Arduino-ESP32/ESP-IDF) instead of ArduinoJson — the cloud-tested parse IS the device parse
   * custom Montserrat fonts (tools/fonts/make_fonts.sh, lv_font_conv) because built-ins lack "—" and "·"
@@ -119,3 +119,5 @@ Last updated: 2026-10-22 (redesign)
 - 2026-10-22: Vitals — BP card became a compact VITALS card (BP + resting HR, HR, SpO2 from Apple Health); app tab "Vitals";
   Shortcut steps, contract/mocks/validator, tests
 - 2026-10-22: Dropped BP trend (bp.trend7, desk sparkline, app chart): trends live in Apple Health; vitals card is a 2x2 glance grid
+- 2026-10-23: Night sleep scene — config.night window (default 00:00–08:00) in /api/dashboard; device checks its clock each minute
+  (dd_in_window), so the switch is on time offline; near-black LVGL scene (ui_night.c), pixel-shift; backlight-off window disabled

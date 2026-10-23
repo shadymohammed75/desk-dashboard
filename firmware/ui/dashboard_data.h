@@ -68,10 +68,16 @@ typedef struct {
 
     bool has_celebrate;
     char cel_id[48], cel_title[40], cel_sub[48];
+
+    /* sleep scene window, minutes after local midnight (may cross midnight); 00:00–08:00 if missing */
+    int16_t night_from, night_to;
 } DashboardData;
 
 /** Parse an /api/dashboard response. Returns false (and leaves *out zeroed) on malformed JSON. */
 bool dashboard_parse(const char *json, DashboardData *out);
+
+/** True when `minute` (after local midnight) falls inside [from, to), which may cross midnight. */
+bool dd_in_window(int minute, int from, int to);
 
 #ifdef __cplusplus
 }

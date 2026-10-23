@@ -25,5 +25,6 @@
     { "id": "read", "label": "Read something", "icon": "menu_book" }
   ],
   "goals": { "steps": 10000, "active_kcal": 600, "kcal": 2600, "protein_g": 160, "sleep_min": 450, "gym_per_week": 4,
-             "sleep_by": "23:00" }
+             "sleep_by": "23:00" },
+  "night": { "from": "00:00", "to": "08:00" }
 }

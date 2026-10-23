@@ -57,6 +57,10 @@
         "heart_rate": 77,
         "spo2": 95
       },
+      "night": {
+        "from": "00:00",
+        "to": "08:00"
+      },
       "gym": {
         "day_type": "rest",
         "label": "SPA DAY",
@@ -322,6 +326,10 @@
       "sleep_min": 450,
       "gym_per_week": 4,
       "sleep_by": "23:00"
+    },
+    "night": {
+      "from": "00:00",
+      "to": "08:00"
     }
   },
   "history": {

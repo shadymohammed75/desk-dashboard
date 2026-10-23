@@ -16,3 +16,8 @@ void ui_background(lv_obj_t *scr);
 void ui_celebrate(const char *title, const char *sub, bool statik);
 bool ui_celebration_seen(const char *id);
 void ui_celebration_mark(const char *id);
+
+/* ui_night.c */
+void ui_night_build(lv_obj_t *scr);
+void ui_night_show(bool on, bool statik);
+void ui_night_set_time(const char *hhmm, const char *until);

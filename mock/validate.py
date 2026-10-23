@@ -20,7 +20,7 @@ MUSCLES = {
 }
 COLOR = re.compile(r"^#[0-9A-Fa-f]{6}$")
 ICON = re.compile(r"^[a-z0-9_]{2,40}$")
-TOP_KEYS = {"now", "updated", "stale", "mode", "sleep", "steps", "active", "food", "bp", "vitals", "gym",
+TOP_KEYS = {"now", "updated", "stale", "mode", "sleep", "steps", "active", "food", "bp", "vitals", "night", "gym",
             "score", "progress", "week", "coach", "mascot", "celebrate"}
 
 
@@ -61,6 +61,9 @@ def check(d):
     need(set(v) == {"resting_hr", "heart_rate", "spo2"}, "vitals keys")
     need(all(is_num_or_null(v.get(k)) for k in v), "vitals values must be numbers or null")
     need(v.get("spo2") is None or 50 <= v["spo2"] <= 100, "vitals.spo2 must be a percentage")
+    n = d.get("night") or {}
+    need(set(n) == {"from", "to"} and all(isinstance(n[k], str) and re.fullmatch(r"([01]\d|2[0-3]):[0-5]\d", n[k])
+                                          for k in n), "night must be {from, to} as HH:MM")
 
     g = d.get("gym") or {}
     need(g.get("status") in GYM_STATUS, f"bad gym.status {g.get('status')}")

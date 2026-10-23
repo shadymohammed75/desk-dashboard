@@ -55,6 +55,13 @@ export interface Config {
   splits: Record<string, Split>;
   tasks: Task[];
   goals: Goals;
+  night: NightWindow;
+}
+
+/** Local "HH:MM" window when the desk screen shows the dim sleep scene (may cross midnight). */
+export interface NightWindow {
+  from: string;
+  to: string;
 }
 
 export interface SleepSample {
@@ -180,6 +187,7 @@ export interface Dashboard {
   food: { kcal: number | null; kcal_goal: number; protein_g: number | null; protein_goal: number };
   bp: { sys: number; dia: number; pulse: number | null; ts: string } | null;
   vitals: Vitals;
+  night: NightWindow;
   gym: { day_type: string; label: string; color: string; icon: string; muscles: string[]; status: GymStatus;
          done_min: number | null; week_done: number; week_target: number };
   score: Score;

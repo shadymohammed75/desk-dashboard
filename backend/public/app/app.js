@@ -484,6 +484,14 @@ function viewPlan() {
         h("input", { class: "input num", type: "time", value: c.goals.sleep_by, oninput: (e) => { c.goals.sleep_by = e.target.value; } }))));
   goals.lastChild.style.marginTop = "16px";
 
+  const night = c.night || (c.night = { from: "00:00", to: "08:00" });
+  const nightField = (k, label) => h("label", { class: "field" }, h("span", { class: "t-label" }, label),
+    h("input", { class: "input num", type: "time", value: night[k], oninput: (e) => { night[k] = e.target.value; } }));
+  const desk = h("section", { class: "card" },
+    h("div", { class: "card-head" }, h("h2", { class: "t-h2" }, "Desk screen at night"),
+      h("span", { class: "t-caption" }, "Dim sleep scene")),
+    h("div", { class: "goal-grid" }, nightField("from", "From"), nightField("to", "Until")));
+
   return h("div", { class: "stack" },
     titlebar("Plan", streakChip(S.today.dashboard.progress)),
     h("section", { class: "card" }, h("div", { class: "card-head" }, h("h2", { class: "t-h2" }, "Your week"),
@@ -491,7 +499,7 @@ function viewPlan() {
     h("div", { class: "t-label" }, "Splits"),
     ...splitCards,
     h("button", { class: "btn block", type: "button", onclick: addSplit }, icon("add"), "Add split"),
-    habits, goals, err,
+    habits, goals, desk, err,
     h("button", { class: "btn primary", c: "#FF6A1A", onclick: () => savePlan(err) }, "Save plan"),
     h("div", { class: "btn-row" },
       h("button", { class: "btn ghost", onclick: () => { S.planDraft = null; render(); } }, "Discard changes"),
@@ -795,9 +803,9 @@ function addHabit() {
 
 async function savePlan(err) {
   err.textContent = "";
-  const { schedule, days, splits, tasks, goals } = S.planDraft;
+  const { schedule, days, splits, tasks, goals, night } = S.planDraft;
   try {
-    S.config = await api("PUT", "/api/config", { schedule, days, splits, tasks, goals });
+    S.config = await api("PUT", "/api/config", { schedule, days, splits, tasks, goals, night });
     S.planDraft = null;
     await loadToday();
     render();

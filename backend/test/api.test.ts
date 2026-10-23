@@ -96,6 +96,8 @@ describe("validation", () => {
       /schedule.mon = "arms" is not a defined split/],
     ["PUT", "/api/config", { goals: { steps: -1 } }, /goals.steps/],
     ["PUT", "/api/config", { colour: "red" }, /unknown config field/],
+    ["PUT", "/api/config", { night: { from: "24:00", to: "08:00" } }, /night.from must be a time/],
+    ["PUT", "/api/config", { night: { from: "07:00", to: "07:00" } }, /must differ/],
   ];
   it.each(cases)("%s %s %j → 400", async (method, path, body, msg) => {
     const { call } = makeApi();
@@ -152,6 +154,18 @@ describe("validation", () => {
     const d = (await call("GET", "/api/dashboard", { now })).body;
     expect(d.steps.value).toBe(8432);
     expect(d.food.kcal).toBe(1851);
+  });
+});
+
+describe("night screen window", () => {
+  const now = berlin("2026-10-22T09:00");
+  it("defaults to 00:00–08:00 and follows the config", async () => {
+    const { call } = makeApi();
+    let d = (await call("GET", "/api/dashboard", { now })).body;
+    expect(d.night).toEqual({ from: "00:00", to: "08:00" });
+    expect((await call("PUT", "/api/config", { body: { night: { from: "23:30", to: "07:00" } }, now })).status).toBe(200);
+    d = (await call("GET", "/api/dashboard", { now })).body;
+    expect(d.night).toEqual({ from: "23:30", to: "07:00" });
   });
 });
 

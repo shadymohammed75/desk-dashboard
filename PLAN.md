@@ -144,6 +144,7 @@ All writes send the header `Authorization: Bearer <INGEST_TOKEN>`.
   "food":   { "kcal": 1850, "kcal_goal": 2600, "protein_g": 120, "protein_goal": 160 },
   "bp":     { "sys": 128, "dia": 82, "pulse": 64, "ts": "…" },
   "vitals": { "resting_hr": 58, "heart_rate": 72, "spo2": 97 },
+  "night":  { "from": "00:00", "to": "08:00" },
   "gym":    { "day_type": "push", "label": "PUSH", "color": "#FF6A1A", "icon": "fitness_center",
               "muscles": ["chest","front_delts","side_delts","triceps"],
               "status": "pending", "done_min": null,
@@ -162,6 +163,8 @@ All writes send the header `Authorization: Bearer <INGEST_TOKEN>`.
 ```
 Notes on the new fields:
 - `mode` is one of `morning` (05:00–10:00), `day`, `evening` (18:00–23:00) or `night`.
+- `night` is copied from the config. The device compares it with its own clock every minute, so the sleep scene
+  starts and ends on time even between fetches or offline.
 - `week[].state` is one of `done`, `rest`, `missed`, `skipped`, `today` or `planned`.
 - `coach.tone` is one of `hype`, `nudge`, `calm` or `proud`.
 - `mascot` is one of `sleepy`, `chill`, `pumped`, `proud` or `tired`.
@@ -271,9 +274,11 @@ Each event has a unique id, and the server keeps it active for 30 min.
     { "id": "read", "label": "Read something", "icon": "menu_book" }
   ],
   "goals": { "steps": 10000, "active_kcal": 600, "kcal": 2600, "protein_g": 160, "sleep_min": 450, "gym_per_week": 4,
-             "sleep_by": "23:00" }
+             "sleep_by": "23:00" },
+  "night": { "from": "00:00", "to": "08:00" }
 }
 ```
+- **Night window:** `night` is when the desk screen shows the sleep scene (local times, may cross midnight). Edited in the app's Plan tab.
 - **Day overrides:** `days.<weekday>` can override the icon and label shown for that day. Sunday is the "SPA DAY" with a hot tub.
 - **Icons:** names of [Material Symbols](https://fonts.google.com/icons) from the set in `tools/icons/make_icons.mjs`.
 - **Split colours** are used everywhere for that split: titles, buttons, week dots, the heat-map and the pending body map.
@@ -393,7 +398,15 @@ It feels like a game HUD or a sci-fi cockpit that is *about me*. It's dark and n
 - **morning:** the Sleep row is enlarged and highlighted, the coach line talks about recovery, and the mascot wakes up.
 - **day:** the default layout.
 - **evening:** if gym is pending, the pill pulses faster and the coach line nudges. If it's done, everything is calm.
-- **night (23:00–06:30):** the backlight goes off. If the board can't dim, show a minimal black screen with a dim clock and the day's score for 5 min after midnight, then turn off.
+- **Sleep scene (inside the `night` window, 00:00–08:00 by default):** the dashboard is replaced by a near-black, cozy
+  scene. The board's backlight can't dim, so light is kept down with pixels: pure black background, every element in a
+  dark tone (nothing above ~25% brightness).
+  - Pip asleep on a cushion under a dim, warm crescent moon, breathing slowly (3 px, 2.6 s).
+  - Three Z's drift up from Pip and fade (6.6 s loop); a few faint stars twinkle slowly.
+  - A dim clock and "SLEEP WELL · UNTIL 08:00".
+  - The scene shifts a few pixels every 10 minutes against image retention.
+  - Celebrations wait until the scene ends. The optional backlight-off window in `firmware/include/config.h` is
+    disabled by default.
 
 **Celebrations** (when `celebrate` has an id the device hasn't shown yet)
 
@@ -460,6 +473,7 @@ It feels like a game HUD or a sci-fi cockpit that is *about me*. It's dark and n
 - Edit the weekly schedule (each weekday → split).
 - Edit which muscles belong to each split.
 - Edit goals.
+- Set the desk screen's night window (sleep scene from/until).
 - Saving updates `/api/config`.
 
 **History tab**

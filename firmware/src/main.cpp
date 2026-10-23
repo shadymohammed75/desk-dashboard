@@ -139,12 +139,17 @@ static bool time_valid(struct tm *t)
     return t->tm_year >= (2024 - 1900);
 }
 
+// Sleep scene window from the last dashboard (server config); 00:00–08:00 until the first fetch.
+static int night_from = 0, night_to = 8 * 60;
+static bool night_dirty = false;
+
 static void update_clock_and_backlight(void)
 {
     static int last_min = -1;
     static int backlight = -1;
     struct tm t;
-    if(!time_valid(&t) || t.tm_min == last_min) return;
+    if(!time_valid(&t) || (t.tm_min == last_min && !night_dirty)) return;
+    night_dirty = false;
     last_min = t.tm_min;
 
     static const char *wd[] = {"SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};
@@ -154,6 +159,10 @@ static void update_clock_and_backlight(void)
     ui_set_clock(text);
 
     int m = t.tm_hour * 60 + t.tm_min;
+    char hhmm[6];
+    snprintf(hhmm, sizeof hhmm, "%02d:%02d", t.tm_hour, t.tm_min);
+    ui_set_night(dd_in_window(m, night_from, night_to), hhmm);
+
     bool off = BACKLIGHT_OFF_FROM_MIN > BACKLIGHT_ON_FROM_MIN
                    ? (m >= BACKLIGHT_OFF_FROM_MIN || m < BACKLIGHT_ON_FROM_MIN)
                    : (m >= BACKLIGHT_OFF_FROM_MIN && m < BACKLIGHT_ON_FROM_MIN);
@@ -215,6 +224,9 @@ void loop()
         xSemaphoreGive(json_lock);
         if(ok) {
             ui_update(&d);
+            night_from = d.night_from;
+            night_to = d.night_to;
+            night_dirty = true;   // re-check the window now, not at the next minute
             Serial.printf("[ui] score %d, gym %d, mode %d\n", (int)d.score, (int)d.gym, (int)d.mode);
         }
         else Serial.println("[ui] could not parse dashboard JSON");

@@ -11,7 +11,10 @@
 #define NTP_1                   "pool.ntp.org"
 #define NTP_2                   "time.cloudflare.com"
 
-/* Backlight off at night (minutes after midnight, local). This board's backlight is on/off only
- * (CH422G expander switch, per Waveshare's board config) — it can't dim. */
-#define BACKLIGHT_OFF_FROM_MIN  (23 * 60)
-#define BACKLIGHT_ON_FROM_MIN   (6 * 60 + 30)
+/* Optional backlight-off window (minutes after midnight, local); equal values = never off.
+ * This board's backlight is on/off only (CH422G expander switch, per Waveshare's board config) — it
+ * can't dim. So at night the screen stays lit and shows the near-black sleep scene instead (window
+ * from the server config, 00:00–08:00 by default). Set e.g. (3 * 60) and (7 * 60) to go fully dark
+ * for part of the night. */
+#define BACKLIGHT_OFF_FROM_MIN  0
+#define BACKLIGHT_ON_FROM_MIN   0

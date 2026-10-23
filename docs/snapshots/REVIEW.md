@@ -10,12 +10,14 @@
 | `perfect_day.png`, `perfect_day_celebrate.png` | All 9 habit segments gold with ring glow, "100%", PERFECT DAY tag; perfect-day card | ✓ |
 | `spa_day.png` | Sunday: "SPA DAY" in teal, big hot tub with rising steam instead of the body, "RECOVERY DAY" pill, Sunday dot | ✓ |
 | `rest_day.png` | Wednesday: "REST DAY" with a big moon | ✓ |
-| `morning_short_sleep.png` | Sleep row highlighted, FUEL "—", sleepy Pip, calm coach | ✓ |
+| `morning_short_sleep.png` | 08:20 (after the night window): Sleep row highlighted, FUEL "—", sleepy Pip, calm coach | ✓ |
 | `streak_milestone*.png` | Lime flame "14", hype coach, STREAK 14 card | ✓ |
 | all main states | VITALS card as a 2×2 grid: BP (with time), resting HR, heart rate, SpO₂, each with an icon and a big value; no trend chart; "—" when there's no reading | ✓ |
+| `night_sleep.png` | 02:40, inside the night window: near-black sleep scene with Pip on a cushion, dim moon, rising Z's, faint stars, dim clock "SLEEP WELL · UNTIL 08:00" | ✓ |
 | `no_data.png`, `stale.png` | "—" everywhere and "no sync yet"; amber "data 4h old" | ✓ |
 
 **Fixed during review**
+- Sleep scene: Pip was drawn offset inside its box (now stretched into an exact 96 px box on the cushion); the sprite's own zz and the animated Z's looked like two trails (the Z's now start from the sprite's zz in the same teal); moon and Pip dimmed further.
 - Ring segments ran together: the rounded ends filled the 6° gaps, so the gaps are now 14°.
 - "100%" touched the ring: three-digit scores now use 36 px.
 - Steam wisps floated above the tub: they now start at the tub.
